@@ -1,7 +1,7 @@
 # CLARIA: CUSTOMER COMMUNICATIONS REDESIGN — MASTER PROJECT MEMORY
 **Author:** Antigravity AI Engineering Team  
 **Agent:** CLARIA (Agent #1 in the 10 Content Intelligence Agents Library)  
-**Parent Directory:** `c:\Users\ELCOT\OneDrive\Desktop\Agent\claria\`  
+**Parent Directory:** `c:\Users\ELCOT\OneDrive\Desktop\Agent\claria-customer-clarity-agent\`  
 **AWS Account:** `984625844016` (us-east-1)  
 **CloudFront URL:** `https://d3a54sx4bbzktn.cloudfront.net`  
 **API Gateway URL:** `https://d71pirbml8.execute-api.us-east-1.amazonaws.com`  
@@ -81,7 +81,7 @@ Every customer communication submitted to CLARIA (via pasted text, PDF, DOCX, or
 
 ---
 
-## 5. CODEBASE STRUCTURE (`c:\Users\ELCOT\OneDrive\Desktop\Agent\claria\`)
+## 5. CODEBASE STRUCTURE (`c:\Users\ELCOT\OneDrive\Desktop\Agent\claria-customer-clarity-agent\`)
 ```
 Agent/
 ├── taxora/   (Document & Taxonomy Intelligence Agent)

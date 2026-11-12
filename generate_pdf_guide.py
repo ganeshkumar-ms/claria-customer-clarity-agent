@@ -279,7 +279,7 @@ def build_pdf(filename="CLARIA_BEGINNER_STUDY_GUIDE.pdf"):
     story.append(Paragraph("<b>Step 1: Dedicated Standalone Directory Structure</b>", h2_style))
     story.append(Paragraph(
         "Instead of mixing files with TAXORA, we created a brand-new directory: "
-        "<code>c:\\Users\\ELCOT\\OneDrive\\Desktop\\Agent\\claria\\</code>. "
+        "<code>c:\\Users\\ELCOT\\OneDrive\\Desktop\\Agent\\claria-customer-clarity-agent\\</code>. "
         "This keeps TAXORA (Document Taxonomy) and CLARIA (Communications Redesign) completely independent and modular.",
         body_style
     ))
@@ -394,6 +394,6 @@ def build_pdf(filename="CLARIA_BEGINNER_STUDY_GUIDE.pdf"):
 
 
 if __name__ == '__main__':
-    out = "c:/Users/ELCOT/OneDrive/Desktop/Agent/claria/CLARIA_BEGINNER_STUDY_GUIDE.pdf"
+    out = "c:/Users/ELCOT/OneDrive/Desktop/Agent/claria-customer-clarity-agent/CLARIA_BEGINNER_STUDY_GUIDE.pdf"
     build_pdf(out)
 
