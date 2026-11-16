@@ -349,8 +349,9 @@ def redesign_communication(text: str, conversation_history: list = None) -> dict
             parsed['what_you_need_to_do'] = action_data
 
         parsed['trace_id'] = f"CLR-{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+        is_redacted = guardrail_result.get("has_redactions", False)
         parsed['guardrails'] = {
-            "status": "PASSED",
+            "status": "REDACTED" if is_redacted else "PASSED",
             "framework": "Enterprise BFSI Customer Communications Standard",
             "action_precision": "Verified (No Action Fabricated)",
             "sensitive_data_redacted": guardrail_result.get("has_redactions", False),

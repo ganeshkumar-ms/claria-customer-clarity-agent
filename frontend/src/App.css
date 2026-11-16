@@ -797,7 +797,7 @@ header {
   justify-content: space-between;
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(18px);
-  background: rgba(22, 7, 4, 0.7);
+  background: rgba(2, 12, 22, 0.55);
   flex-shrink: 0;
   gap: 12px;
 }
@@ -873,20 +873,23 @@ header {
 }
 
 .user {
-  align-self: flex-end;
-  background: #051a2c;
-  border: 1px solid rgba(7, 140, 255, 0.25);
-  color: #f0f7ff;
-  border-radius: 18px 18px 5px 18px;
+  align-self: flex-end !important;
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  background: #051a2c !important;
+  border: 1px solid rgba(7, 140, 255, 0.25) !important;
+  color: #f0f7ff !important;
+  border-radius: 18px 18px 5px 18px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  max-width: min(88%, 680px);
 }
 
 .user.userBubbleWithFile {
-  align-self: center !important;
+  align-self: flex-end !important;
   margin-left: auto !important;
-  margin-right: auto !important;
-  width: 100%;
-  max-width: 580px;
+  margin-right: 0 !important;
+  width: auto;
+  max-width: min(88%, 560px);
   background: #051a2c !important;
   border: 1px solid rgba(7, 140, 255, 0.28) !important;
   border-radius: 16px !important;
@@ -954,7 +957,7 @@ header {
 
 .composerArea {
   padding: 12px clamp(18px, 6vw, 72px) 24px;
-  background: linear-gradient(180deg, transparent, rgba(22, 7, 4, 0.85) 40%);
+  background: linear-gradient(180deg, transparent, rgba(2, 12, 22, 0.95) 40%);
   flex-shrink: 0;
 }
 
@@ -1719,7 +1722,7 @@ header {
   padding: 3px !important;
   gap: 4px !important;
   border-radius: 9px !important;
-  background: rgba(28, 11, 7, 0.82) !important;
+  background: rgba(5, 26, 44, 0.88) !important;
   backdrop-filter: blur(12px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
   border: 1px solid rgba(7, 140, 255, 0.36) !important;

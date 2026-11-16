@@ -8,7 +8,44 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
 
   const isRedesign = data.type === 'redesign'
   if (!isRedesign) {
-    return <div className="plain-chat">{data.message || JSON.stringify(data)}</div>
+    const isBlocked = Boolean(
+      data.guardrail_status === 'BLOCKED' ||
+      data.guardrail_details?.guardrails?.status === 'BLOCKED' ||
+      data.rejected ||
+      (typeof data.message === 'string' && data.message.includes('🛡️'))
+    )
+    return (
+      <div className="plain-chat">
+        {isBlocked && (
+          <div style={{ marginBottom: '10px' }}>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 12px',
+                borderRadius: '999px',
+                fontSize: '11.5px',
+                fontWeight: 700,
+                background: 'rgba(239, 68, 68, 0.22)',
+                color: '#f87171',
+                border: '1px solid rgba(239, 68, 68, 0.65)'
+              }}
+            >
+              <span>🛡️</span>
+              <span>
+                Guardrails: Blocked (
+                {data.guardrail_details?.guardrails?.triggered_rule ||
+                  data.rejection_details?.reason ||
+                  'Security & Privacy Violation'}
+                )
+              </span>
+            </span>
+          </div>
+        )}
+        <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{data.message || JSON.stringify(data)}</div>
+      </div>
+    )
   }
 
   const {
@@ -72,13 +109,31 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
             borderRadius: '999px',
             fontSize: '11.5px',
             fontWeight: 700,
-            background: 'rgba(52, 211, 153, 0.16)',
-            color: '#34d399',
-            border: '1px solid rgba(52, 211, 153, 0.45)'
+            background: guardrails.status === 'BLOCKED'
+              ? 'rgba(239, 68, 68, 0.22)'
+              : guardrails.status === 'REDACTED'
+              ? 'rgba(251, 191, 36, 0.16)'
+              : 'rgba(52, 211, 153, 0.16)',
+            color: guardrails.status === 'BLOCKED'
+              ? '#f87171'
+              : guardrails.status === 'REDACTED'
+              ? '#fbbf24'
+              : '#34d399',
+            border: guardrails.status === 'BLOCKED'
+              ? '1px solid rgba(239, 68, 68, 0.65)'
+              : guardrails.status === 'REDACTED'
+              ? '1px solid rgba(251, 191, 36, 0.5)'
+              : '1px solid rgba(52, 211, 153, 0.45)'
           }}
         >
           <span>🛡️</span>
-          <span>Guardrails: Passed · Verified Safe</span>
+          <span>
+            {guardrails.status === 'BLOCKED'
+              ? `Guardrails: Blocked (${guardrails.triggered_rule || 'Policy Violation'})`
+              : guardrails.status === 'REDACTED'
+              ? `Guardrails: ${guardrails.redaction_count || 1} Secret(s) Sanitized`
+              : 'Guardrails: Passed · Verified Safe'}
+          </span>
         </span>
 
         {trace_id && (
