@@ -298,20 +298,21 @@ header {
   width: 48px;
   height: 48px;
   flex: 0 0 48px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(7, 140, 255, 0.28);
   border-radius: 15px;
-  background: linear-gradient(145deg, #32160f, #220d08);
-  color: #bfaea7;
+  background: rgba(7, 140, 255, 0.08);
+  color: #38bdf8;
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: 0.3s;
+  transition: 0.25s;
 }
 
 .startAttach:hover {
   color: #fff;
   transform: translateY(-2px);
-  border-color: rgba(7, 140, 255, 0.5);
+  background: rgba(7, 140, 255, 0.18);
+  border-color: #078cff;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 18px rgba(7, 140, 255, 0.2);
 }
 
@@ -327,15 +328,18 @@ header {
   font-size: 12.5px;
   text-align: center;
   padding: 6px 16px;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  background: rgba(7, 140, 255, 0.08);
+  border: 1px solid rgba(7, 140, 255, 0.25);
   border-radius: 999px;
 }
 
 .filePill.show {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  margin-left: auto;
+  margin-right: auto;
   animation: rise 0.3s both;
 }
 
@@ -518,7 +522,7 @@ header {
 .new {
   border: 1px solid rgba(7, 140, 255, 0.33);
   background: rgba(7, 140, 255, 0.1);
-  color: #ff886e;
+  color: #38bdf8;
   border-radius: 14px;
   padding: 13px 14px;
   text-align: left;
@@ -870,10 +874,22 @@ header {
 
 .user {
   align-self: flex-end;
-  background: linear-gradient(135deg, #078cff, #d9401f);
-  color: #fff;
+  background: #051a2c;
+  border: 1px solid rgba(7, 140, 255, 0.25);
+  color: #f0f7ff;
   border-radius: 18px 18px 5px 18px;
-  box-shadow: 0 8px 24px rgba(7, 140, 255, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.user.userBubbleWithFile {
+  align-self: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100%;
+  max-width: 580px;
+  background: #051a2c !important;
+  border: 1px solid rgba(7, 140, 255, 0.28) !important;
+  border-radius: 16px !important;
 }
 
 .ai {
@@ -968,12 +984,12 @@ header {
 .plus {
   width: 44px;
   height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(7, 140, 255, 0.28);
   border-radius: 13px;
-  background: linear-gradient(145deg, #32160f, #220d08);
-  color: #bfaea7;
+  background: rgba(7, 140, 255, 0.08);
+  color: #38bdf8;
   cursor: pointer;
-  transition: 0.3s;
+  transition: 0.25s;
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -982,7 +998,8 @@ header {
 .plus:hover {
   color: #fff;
   transform: translateY(-2px);
-  border-color: rgba(7, 140, 255, 0.5);
+  background: rgba(7, 140, 255, 0.18);
+  border-color: #078cff;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 18px rgba(7, 140, 255, 0.2);
 }
 
@@ -1205,8 +1222,8 @@ header {
 
 /* 5. Simplified Communication */
 .simplified-card {
-  background: linear-gradient(180deg, #1f0c07, #240e09);
-  border: 1px solid rgba(7, 140, 255, 0.35);
+  background: var(--panel, #051a2c);
+  border: 1px solid rgba(7, 140, 255, 0.25);
   border-radius: 16px;
   padding: 20px 22px;
   position: relative;
@@ -1224,7 +1241,7 @@ header {
 .copy-btn {
   border: 1px solid var(--line);
   background: rgba(7, 140, 255, 0.12);
-  color: #ff9d87;
+  color: #38bdf8;
   border-radius: 8px;
   padding: 6px 13px;
   font-size: 11.5px;
@@ -1627,7 +1644,7 @@ header {
   gap: 6px;
   background: rgba(7, 140, 255, 0.12);
   border: 1px solid rgba(7, 140, 255, 0.35);
-  color: #ff917a;
+  color: #38bdf8;
   border-radius: 9px;
   padding: 7px 13px;
   font-size: 12.5px;
@@ -1732,7 +1749,7 @@ header {
 }
 .histIcon.edit,
 .histActionBtn:not(.danger) {
-  color: #ffd178 !important;
+  color: #38bdf8 !important;
   background: rgba(56, 189, 248, 0.20) !important;
   border: 1px solid rgba(56, 189, 248, 0.45) !important;
 }

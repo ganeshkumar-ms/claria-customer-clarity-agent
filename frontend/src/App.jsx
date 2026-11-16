@@ -494,15 +494,17 @@ export default function App() {
             </div>
 
             {attachedFile && (
-              <div className="filePill show">
-                <span>📎 Attached · {attachedFile.name}</span>
-                <button
-                  type="button"
-                  onClick={() => setAttachedFile(null)}
-                  style={{ background: 'none', border: 0, color: '#ff5a36', cursor: 'pointer', fontWeight: 800, fontSize: '14px' }}
-                >
-                  ✕
-                </button>
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '12px' }}>
+                <div className="filePill show">
+                  <span>📎 Attached · {attachedFile.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachedFile(null)}
+                    style={{ background: 'none', border: 0, color: '#f87171', cursor: 'pointer', fontWeight: 800, fontSize: '14px' }}
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
             )}
 
@@ -621,7 +623,7 @@ export default function App() {
                 {messages.map((m) => (
                   <div
                     key={m.id}
-                    className={`bubble ${m.role === 'user' ? 'user' : 'ai'}`}
+                    className={`bubble ${m.role === 'user' ? `user${m.file ? ' userBubbleWithFile' : ''}` : 'ai'}`}
                   >
                     {m.role === 'user' ? (
                       <div>
@@ -718,7 +720,7 @@ export default function App() {
                       <button
                         type="button"
                         onClick={() => setAttachedFile(null)}
-                        style={{ background: 'none', border: 0, color: '#ff5a36', cursor: 'pointer', fontWeight: 800, fontSize: '14px' }}
+                        style={{ background: 'none', border: 0, color: '#f87171', cursor: 'pointer', fontWeight: 800, fontSize: '14px' }}
                       >
                         ✕
                       </button>

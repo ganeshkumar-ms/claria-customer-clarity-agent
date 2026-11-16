@@ -221,7 +221,7 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
       {simplified_communication && (
         <div className="simplified-card">
           <div className="simplified-header">
-            <div className="section-label" style={{ color: '#ffbd4a', marginBottom: 0 }}>
+            <div className="section-label" style={{ color: '#38bdf8', marginBottom: 0 }}>
               Simplified Customer Communication
             </div>
             <button className="copy-btn" onClick={handleCopy} type="button">
