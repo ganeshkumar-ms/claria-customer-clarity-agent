@@ -1,17 +1,32 @@
+/* Hide scrollbars while preserving scrolling */
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 :root {
-  --bg: #160704;
-  --panel: #26100a;
-  --panel-alt: #1c0b07;
-  --line: rgba(255, 90, 54, 0.16);
-  --line-strong: rgba(255, 90, 54, 0.32);
-  --text: #fdf6f3;
-  --muted: #bfaea7;
-  --muted-dim: #8c7972;
-  --a1: #ff5a36;
-  --a2: #ffbd4a;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
+  --bg: #020c16;
+  --panel: #051a2c;
+  --panel-strong: #0a253e;
+  --panel-elevated: #0a253e;
+  --panel-alt: #081e33;
+  --line: rgba(7, 140, 255, 0.18);
+  --line-strong: rgba(7, 140, 255, 0.4);
+  --text: #f0f7ff;
+  --muted: #849bb4;
+  --a1: #078cff;
+  --a1-bright: #38bdf8;
+  --a2: #0a3154;
+  --cyan: #38bdf8;
+  --success: #34d399;
+  --card-bg: rgba(5, 26, 44, 0.85);
+  --v: #078cff;
+  --c: #38bdf8;
 }
 
 * {
@@ -42,7 +57,7 @@ button, input, textarea {
 /* Dark thin scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 90, 54, 0.25) transparent;
+  scrollbar-color: rgba(7, 140, 255, 0.25) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -56,18 +71,18 @@ button, input, textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 90, 54, 0.45);
+  background: rgba(7, 140, 255, 0.45);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 90, 54, 0.75);
+  background: rgba(7, 140, 255, 0.75);
 }
 
 .app {
   min-height: 100dvh;
   position: relative;
-  background: radial-gradient(circle at 50% -10%, rgba(255, 90, 54, 0.18), transparent 38%),
+  background: radial-gradient(circle at 50% -10%, rgba(7, 140, 255, 0.18), transparent 38%),
               radial-gradient(circle at 95% 90%, rgba(255, 189, 74, 0.12), transparent 30%),
               var(--bg);
   overflow-x: clip;
@@ -92,7 +107,7 @@ button, input, textarea {
   position: fixed;
   inset: -35%;
   pointer-events: none;
-  background: radial-gradient(circle at 24% 25%, rgba(255, 90, 54, 0.28), transparent 24%),
+  background: radial-gradient(circle at 24% 25%, rgba(7, 140, 255, 0.28), transparent 24%),
               radial-gradient(circle at 78% 70%, rgba(255, 189, 74, 0.22), transparent 26%);
   animation: drift 16s ease-in-out infinite alternate;
   z-index: 0;
@@ -154,8 +169,8 @@ header {
 .enter:hover, .ghost:hover {
   transform: translateY(-2px);
   color: #fff;
-  border-color: rgba(255, 90, 54, 0.6);
-  box-shadow: 0 8px 30px rgba(255, 90, 54, 0.25);
+  border-color: rgba(7, 140, 255, 0.6);
+  box-shadow: 0 8px 30px rgba(7, 140, 255, 0.25);
 }
 
 /* ==========================================================================
@@ -268,7 +283,7 @@ header {
   background: #ff5a36;
   cursor: pointer;
   transition: all 0.25s;
-  box-shadow: 0 8px 28px rgba(255, 90, 54, 0.38);
+  box-shadow: 0 8px 28px rgba(7, 140, 255, 0.38);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -276,7 +291,7 @@ header {
 
 .send:hover {
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 12px 32px rgba(255, 90, 54, 0.5);
+  box-shadow: 0 12px 32px rgba(7, 140, 255, 0.5);
 }
 
 .startAttach {
@@ -296,8 +311,8 @@ header {
 .startAttach:hover {
   color: #fff;
   transform: translateY(-2px);
-  border-color: rgba(255, 90, 54, 0.5);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 90, 54, 0.2);
+  border-color: rgba(7, 140, 255, 0.5);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 18px rgba(7, 140, 255, 0.2);
 }
 
 .fileInput {
@@ -380,8 +395,8 @@ header {
   flex-direction: column;
   justify-content: center;
   padding: 18px 22px !important;
-  background: rgba(255, 90, 54, 0.04) !important;
-  border: 1px dashed rgba(255, 90, 54, 0.25) !important;
+  background: rgba(7, 140, 255, 0.04) !important;
+  border: 1px dashed rgba(7, 140, 255, 0.25) !important;
   border-radius: 16px;
 }
 
@@ -421,9 +436,9 @@ header {
   align-items: center;
   gap: 7px;
   padding: 8px 16px;
-  border: 1px solid rgba(255, 90, 54, 0.35);
+  border: 1px solid rgba(7, 140, 255, 0.35);
   border-radius: 999px;
-  background: rgba(255, 90, 54, 0.08);
+  background: rgba(7, 140, 255, 0.08);
   color: #f0e6e1;
   font-size: 12px;
   letter-spacing: 1.15px;
@@ -432,14 +447,14 @@ header {
 }
 
 .seeMoreOnly:hover {
-  background: rgba(255, 90, 54, 0.2);
+  background: rgba(7, 140, 255, 0.2);
   color: #fff;
   transform: translateY(-1px);
 }
 
 .card:hover {
   transform: translateY(-5px);
-  border-color: rgba(255, 90, 54, 0.45);
+  border-color: rgba(7, 140, 255, 0.45);
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
 }
 
@@ -501,8 +516,8 @@ header {
 }
 
 .new {
-  border: 1px solid rgba(255, 90, 54, 0.33);
-  background: rgba(255, 90, 54, 0.1);
+  border: 1px solid rgba(7, 140, 255, 0.33);
+  background: rgba(7, 140, 255, 0.1);
   color: #ff886e;
   border-radius: 14px;
   padding: 13px 14px;
@@ -518,7 +533,7 @@ header {
 }
 
 .new:hover {
-  background: rgba(255, 90, 54, 0.18);
+  background: rgba(7, 140, 255, 0.18);
   border-color: #ff5a36;
   color: #fff;
   transform: translateY(-1px);
@@ -566,7 +581,7 @@ header {
 }
 
 .histRow:hover, .histRow.on {
-  background: rgba(255, 90, 54, 0.12);
+  background: rgba(7, 140, 255, 0.12);
 }
 
 .histRow .hist {
@@ -647,15 +662,15 @@ header {
   display: grid;
   place-items: center;
   border-radius: 7px;
-  border: 1px solid rgba(255, 90, 54, 0.25);
-  background: rgba(255, 90, 54, 0.12);
+  border: 1px solid rgba(7, 140, 255, 0.25);
+  background: rgba(7, 140, 255, 0.12);
   color: #f0e6e1;
   cursor: pointer;
   transition: 0.2s;
 }
 
 .histIcon:hover {
-  background: rgba(255, 90, 54, 0.28);
+  background: rgba(7, 140, 255, 0.28);
   color: #fff;
 }
 
@@ -688,7 +703,7 @@ header {
   width: 100%;
   margin: 2px 0;
   padding: 9px 12px;
-  border: 1px solid rgba(255, 90, 54, 0.6);
+  border: 1px solid rgba(7, 140, 255, 0.6);
   border-radius: 10px;
   background: #1c0b07;
   color: #fff;
@@ -810,13 +825,13 @@ header {
 }
 
 .titleEditable:hover {
-  background: rgba(255, 90, 54, 0.14);
+  background: rgba(7, 140, 255, 0.14);
 }
 
 .titleInput {
   width: min(420px, 60vw);
   padding: 6px 12px;
-  border: 1px solid rgba(255, 90, 54, 0.6);
+  border: 1px solid rgba(7, 140, 255, 0.6);
   border-radius: 8px;
   background: #1c0b07;
   color: #fff;
@@ -858,7 +873,7 @@ header {
   background: linear-gradient(135deg, #ff5a36, #d9401f);
   color: #fff;
   border-radius: 18px 18px 5px 18px;
-  box-shadow: 0 8px 24px rgba(255, 90, 54, 0.25);
+  box-shadow: 0 8px 24px rgba(7, 140, 255, 0.25);
 }
 
 .ai {
@@ -940,8 +955,8 @@ header {
 
 .composer:focus-within {
   transform: translateY(-2px);
-  border-color: rgba(255, 90, 54, 0.5);
-  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.85), 0 0 32px rgba(255, 90, 54, 0.15);
+  border-color: rgba(7, 140, 255, 0.5);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.85), 0 0 32px rgba(7, 140, 255, 0.15);
 }
 
 .composer form {
@@ -967,8 +982,8 @@ header {
 .plus:hover {
   color: #fff;
   transform: translateY(-2px);
-  border-color: rgba(255, 90, 54, 0.5);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 18px rgba(255, 90, 54, 0.2);
+  border-color: rgba(7, 140, 255, 0.5);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5), 0 0 18px rgba(7, 140, 255, 0.2);
 }
 
 .chatSend {
@@ -982,13 +997,13 @@ header {
   display: grid;
   place-items: center;
   transition: 0.25s;
-  box-shadow: 0 7px 22px rgba(255, 90, 54, 0.38);
+  box-shadow: 0 7px 22px rgba(7, 140, 255, 0.38);
   flex-shrink: 0;
 }
 
 .chatSend:hover {
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 10px 30px rgba(255, 90, 54, 0.55);
+  box-shadow: 0 10px 30px rgba(7, 140, 255, 0.55);
 }
 
 .composer input {
@@ -1030,8 +1045,8 @@ header {
 }
 
 .action-banner.required {
-  background: linear-gradient(135deg, rgba(255, 90, 54, 0.2) 0%, rgba(255, 189, 74, 0.12) 100%);
-  border: 1px solid rgba(255, 90, 54, 0.45);
+  background: linear-gradient(135deg, rgba(7, 140, 255, 0.2) 0%, rgba(255, 189, 74, 0.12) 100%);
+  border: 1px solid rgba(7, 140, 255, 0.45);
 }
 
 .action-banner.no-action {
@@ -1140,7 +1155,7 @@ header {
 
 .detail-block {
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 90, 54, 0.12);
+  border: 1px solid rgba(7, 140, 255, 0.12);
   border-radius: 12px;
   padding: 14px 16px;
 }
@@ -1191,7 +1206,7 @@ header {
 /* 5. Simplified Communication */
 .simplified-card {
   background: linear-gradient(180deg, #1f0c07, #240e09);
-  border: 1px solid rgba(255, 90, 54, 0.35);
+  border: 1px solid rgba(7, 140, 255, 0.35);
   border-radius: 16px;
   padding: 20px 22px;
   position: relative;
@@ -1202,13 +1217,13 @@ header {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 90, 54, 0.15);
+  border-bottom: 1px solid rgba(7, 140, 255, 0.15);
   padding-bottom: 10px;
 }
 
 .copy-btn {
   border: 1px solid var(--line);
-  background: rgba(255, 90, 54, 0.12);
+  background: rgba(7, 140, 255, 0.12);
   color: #ff9d87;
   border-radius: 8px;
   padding: 6px 13px;
@@ -1246,7 +1261,7 @@ header {
   padding: 12px 16px;
   background: rgba(0, 0, 0, 0.25);
   border-radius: 10px;
-  border: 1px dashed rgba(255, 90, 54, 0.2);
+  border: 1px dashed rgba(7, 140, 255, 0.2);
 }
 
 .guardrail-tag {
@@ -1403,7 +1418,7 @@ header {
     inset: auto !important;
     z-index: 10 !important;
     border-left: 0 !important;
-    border-top: 1.5px solid rgba(255, 90, 54, 0.4) !important;
+    border-top: 1.5px solid rgba(7, 140, 255, 0.4) !important;
     box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.5) !important;
   }
   .layout.withViewer .docViewerHead {
@@ -1478,8 +1493,8 @@ header {
 }
 
 .docViewerBtn:hover {
-  background: rgba(255, 90, 54, 0.2);
-  border-color: rgba(255, 90, 54, 0.5);
+  background: rgba(7, 140, 255, 0.2);
+  border-color: rgba(7, 140, 255, 0.5);
   color: #fff;
 }
 
@@ -1610,8 +1625,8 @@ header {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(255, 90, 54, 0.12);
-  border: 1px solid rgba(255, 90, 54, 0.35);
+  background: rgba(7, 140, 255, 0.12);
+  border: 1px solid rgba(7, 140, 255, 0.35);
   color: #ff917a;
   border-radius: 9px;
   padding: 7px 13px;
@@ -1622,7 +1637,7 @@ header {
 }
 
 .openDocBtn:hover {
-  background: rgba(255, 90, 54, 0.25);
+  background: rgba(7, 140, 255, 0.25);
   border-color: #ff5a36;
   color: #fff;
   transform: translateY(-1px);
@@ -1690,7 +1705,7 @@ header {
   background: rgba(28, 11, 7, 0.82) !important;
   backdrop-filter: blur(12px) saturate(150%) !important;
   -webkit-backdrop-filter: blur(12px) saturate(150%) !important;
-  border: 1px solid rgba(255, 90, 54, 0.36) !important;
+  border: 1px solid rgba(7, 140, 255, 0.36) !important;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.48) !important;
 }
 .histIcon,
@@ -2076,3 +2091,163 @@ html, body {
     padding: 7px 10px !important;
   }
 }
+
+/* ==========================================================================
+   CLARIA HIGHLIGHTED VERBATIM ORIGINAL DOCUMENT (Output File & Reader)
+   ========================================================================== */
+.highlighted-doc-card {
+  margin-top: 18px;
+  background: var(--card-bg, #051a2c);
+  border: 1px solid var(--line-strong, rgba(7, 140, 255, 0.4));
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+.highlighted-doc-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+
+.highlighted-doc-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.highlighted-doc-title .doc-icon {
+  font-size: 26px;
+}
+
+.highlighted-doc-title strong {
+  font-size: 15px;
+  color: #fff;
+  display: block;
+}
+
+.highlighted-doc-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.highlighted-doc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.doc-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  transition: all 0.16s ease;
+}
+
+.doc-action-btn:hover {
+  border-color: #078cff;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.doc-action-btn.primary {
+  background: linear-gradient(135deg, #078cff, #0a4f8a);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(7, 140, 255, 0.35);
+}
+
+.highlight-legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(2, 12, 22, 0.6);
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  margin-bottom: 14px;
+  font-size: 11.5px;
+}
+
+.legend-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #94a3b8;
+  margin-right: 4px;
+}
+
+.highlighted-verbatim-body {
+  background: #020c16;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 15px;
+  line-height: 1.8;
+  color: #e2e8f0;
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+/* BIG, DISTINCT HIGHLIGHT TYPOGRAPHY */
+.claria-hl-action {
+  font-size: 1.25em !important;
+  font-weight: 800 !important;
+  background: rgba(52, 211, 153, 0.22) !important;
+  color: #bbf7d0 !important;
+  border-bottom: 3px solid #34d399 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+
+.claria-hl-deadline {
+  font-size: 1.25em !important;
+  font-weight: 800 !important;
+  background: rgba(251, 191, 36, 0.24) !important;
+  color: #fef08a !important;
+  border-bottom: 3px solid #fbbf24 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+
+.claria-hl-amount {
+  font-size: 1.28em !important;
+  font-weight: 800 !important;
+  background: rgba(248, 113, 113, 0.26) !important;
+  color: #fecaca !important;
+  border-bottom: 3px solid #f87171 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+
+.claria-hl-reference {
+  font-size: 1.20em !important;
+  font-weight: 800 !important;
+  background: rgba(56, 189, 248, 0.22) !important;
+  color: #bae6fd !important;
+  border-bottom: 3px solid #38bdf8 !important;
+  padding: 1px 6px !important;
+  border-radius: 4px !important;
+  display: inline-block !important;
+}
+

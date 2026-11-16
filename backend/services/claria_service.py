@@ -355,5 +355,175 @@ def redesign_communication(text: str, conversation_history: list = None) -> dict
             "redacted_categories": guardrail_result.get("redacted_types", [])
         }
 
+        # Generate 100% Verbatim Highlighted Document (Not a single word changed from input)
+        raw_source = sanitized_text
+        if 'FULL DOCUMENT CONTENT & PROFILE ====================\n' in raw_source:
+            try:
+                raw_source = raw_source.split('FULL DOCUMENT CONTENT & PROFILE ====================\n', 1)[1].split('=========================================================================', 1)[0].strip()
+            except Exception:
+                pass
+
+        hl_snippet, hl_html = highlight_verbatim_text(raw_source, parsed)
+        parsed['highlighted_document'] = {
+            'snippet_html': hl_snippet,
+            'full_html': hl_html,
+            'verbatim_preserved': True,
+            'summary': '100% original text preserved word-for-word with critical actions, deadlines, amounts, and reference details highlighted in big distinct colors.'
+        }
+
     parsed = _sanitize_ai_output(parsed)
     return parsed
+
+
+def highlight_verbatim_text(raw_text: str, parsed: dict) -> tuple:
+    """
+    Preserves 100% of raw_text verbatim (not a single word changed).
+    Wraps key deadlines, actions, amounts, and reference info in BIG, distinctive color-coded spans.
+    Returns (highlighted_snippet, full_standalone_html).
+    """
+    import html as html_lib
+    if not raw_text or not raw_text.strip():
+        return "", ""
+
+    important_details = parsed.get("important_details") or {}
+    what_you_need_to_do = parsed.get("what_you_need_to_do") or {}
+
+    deadlines = list(important_details.get("deadlines") or [])
+    if what_you_need_to_do.get("deadline") and what_you_need_to_do.get("deadline") != "None":
+        deadlines.append(what_you_need_to_do.get("deadline"))
+
+    amounts = list(important_details.get("amounts_or_fees") or [])
+    penalties = list(important_details.get("consequences_or_penalties") or [])
+    amounts.extend(penalties)
+
+    actions = list(what_you_need_to_do.get("action_items") or [])
+    docs_needed = list(important_details.get("required_documents") or [])
+    actions.extend(docs_needed)
+
+    contacts = list(important_details.get("contact_info") or [])
+
+    date_patterns = [
+        r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{4}\b',
+        r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b',
+        r'\b\d+\s+(?:calendar\s+|business\s+)?days?\b'
+    ]
+    amount_patterns = [
+        r'\$\s*\d+(?:,\d{3})*(?:\.\d{2})?',
+        r'€\s*\d+(?:,\d{3})*(?:\.\d{2})?',
+        r'£\s*\d+(?:,\d{3})*(?:\.\d{2})?',
+        r'₹\s*\d+(?:,\d{3})*(?:\.\d{2})?',
+        r'\b\d+(?:,\d{3})*(?:\.\d{2})?\s*(?:USD|EUR|GBP|INR|dollars?|cents?)\b',
+        r'\b\d+(?:\.\d+)?%\b'
+    ]
+    ref_patterns = [
+        r'\b(?:Section|Sec\.|Clause|Article|Policy|Account|Ref|Reference|Notice|Invoice|Claim|Case|ID)\s*#?\s*[A-Za-z0-9\-\(\)\.]{3,}\b',
+        r'\bhttps?://[^\s<>"]+\b',
+        r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
+        r'\b1-800-[0-9]{3}-[0-9]{4}\b'
+    ]
+
+    spans = []
+
+    def add_spans_for_phrases(phrases, category):
+        for phrase in phrases:
+            p = str(phrase).strip()
+            if len(p) < 2:
+                continue
+            for m in re.finditer(re.escape(p), raw_text, re.IGNORECASE):
+                spans.append((m.start(), m.end(), category))
+
+    def add_spans_for_regexes(patterns, category):
+        for pat in patterns:
+            for m in re.finditer(pat, raw_text, re.IGNORECASE):
+                spans.append((m.start(), m.end(), category))
+
+    add_spans_for_phrases(deadlines, "deadline")
+    add_spans_for_regexes(date_patterns, "deadline")
+    add_spans_for_phrases(amounts, "amount")
+    add_spans_for_regexes(amount_patterns, "amount")
+    add_spans_for_phrases(actions, "action")
+    add_spans_for_phrases(contacts, "reference")
+    add_spans_for_regexes(ref_patterns, "reference")
+
+    spans.sort(key=lambda s: (s[0], -(s[1] - s[0])))
+
+    merged = []
+    last_end = 0
+    for start, end, cat in spans:
+        if start >= last_end and start < end:
+            merged.append((start, end, cat))
+            last_end = end
+
+    pieces = []
+    curr = 0
+    for start, end, cat in merged:
+        if start > curr:
+            pieces.append(html_lib.escape(raw_text[curr:start]))
+        token = raw_text[start:end]
+        cls_name = f"claria-hl-{cat}"
+        pieces.append(f'<mark class="{cls_name}" title="{cat.upper()}">{html_lib.escape(token)}</mark>')
+        curr = end
+    if curr < len(raw_text):
+        pieces.append(html_lib.escape(raw_text[curr:]))
+
+    highlighted_body = "".join(pieces)
+
+    full_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLARIA Highlighted Customer Communication</title>
+  <style>
+    :root {{
+      --bg: #020c16;
+      --panel: #051a2c;
+      --text: #f0f7ff;
+      --border: rgba(7, 140, 255, 0.22);
+    }}
+    * {{ box-sizing: border-box; }}
+    body {{
+      margin: 0;
+      padding: 32px 24px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.75;
+      font-size: 15px;
+    }}
+    .claria-container {{ max-width: 860px; margin: 0 auto; }}
+    .claria-header {{ padding-bottom: 20px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }}
+    .claria-header h1 {{ font-size: 22px; margin: 0 0 6px; color: #fff; display: flex; align-items: center; gap: 10px; }}
+    .claria-badge {{ font-size: 11px; padding: 3px 8px; border-radius: 999px; background: rgba(7, 140, 255, 0.16); color: #38bdf8; border: 1px solid rgba(7, 140, 255, 0.35); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }}
+    .claria-sub {{ font-size: 13.5px; color: #849bb4; margin: 0; }}
+    .claria-legend {{ display: flex; flex-wrap: wrap; gap: 12px; background: var(--panel); border: 1px solid var(--border); padding: 14px 18px; border-radius: 12px; margin-bottom: 26px; font-size: 13px; }}
+    .claria-legend-title {{ font-weight: 700; color: #cbd5e1; width: 100%; margin-bottom: 4px; text-transform: uppercase; font-size: 11px; letter-spacing: 0.6px; }}
+    .legend-item {{ display: inline-flex; align-items: center; gap: 6px; }}
+    .claria-document-box {{ background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 28px 24px; white-space: pre-wrap; word-break: break-word; font-size: 15.5px; box-shadow: 0 16px 40px rgba(0,0,0,0.4); }}
+    .claria-hl-action {{ font-size: 1.25em !important; font-weight: 800 !important; background: rgba(52, 211, 153, 0.22) !important; color: #bbf7d0 !important; border-bottom: 3px solid #34d399 !important; padding: 1px 6px !important; border-radius: 4px !important; display: inline-block !important; }}
+    .claria-hl-deadline {{ font-size: 1.25em !important; font-weight: 800 !important; background: rgba(251, 191, 36, 0.24) !important; color: #fef08a !important; border-bottom: 3px solid #fbbf24 !important; padding: 1px 6px !important; border-radius: 4px !important; display: inline-block !important; }}
+    .claria-hl-amount {{ font-size: 1.28em !important; font-weight: 800 !important; background: rgba(248, 113, 113, 0.26) !important; color: #fecaca !important; border-bottom: 3px solid #f87171 !important; padding: 1px 6px !important; border-radius: 4px !important; display: inline-block !important; }}
+    .claria-hl-reference {{ font-size: 1.20em !important; font-weight: 800 !important; background: rgba(56, 189, 248, 0.22) !important; color: #bae6fd !important; border-bottom: 3px solid #38bdf8 !important; padding: 1px 6px !important; border-radius: 4px !important; display: inline-block !important; }}
+    .claria-footer {{ margin-top: 32px; text-align: center; font-size: 12px; color: #64748b; }}
+  </style>
+</head>
+<body>
+  <div class="claria-container">
+    <div class="claria-header">
+      <h1>CLARIA Highlighted Original Notice <span class="claria-badge">100% Verbatim Preserved</span></h1>
+      <p class="claria-sub">Every original word preserved without alteration. Critical deadlines, actions, and amounts prominently highlighted in distinct colors.</p>
+    </div>
+    <div class="claria-legend">
+      <div class="claria-legend-title">Highlight Legend (Big High-Contrast Styling)</div>
+      <div class="legend-item"><span class="claria-hl-action">Step / Action Required</span></div>
+      <div class="legend-item"><span class="claria-hl-deadline">Deadline &amp; Date</span></div>
+      <div class="legend-item"><span class="claria-hl-amount">Amount, Fee &amp; Penalty</span></div>
+      <div class="legend-item"><span class="claria-hl-reference">Reference, Policy &amp; Contact</span></div>
+    </div>
+    <div class="claria-document-box">{highlighted_body}</div>
+    <div class="claria-footer">Generated by CLARIA Enterprise Customer Communications Specialist · Powered by Amazon Bedrock</div>
+  </div>
+</body>
+</html>"""
+
+    return highlighted_body, full_html

@@ -18,6 +18,7 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
     why_this_matters,
     what_happens_next,
     simplified_communication,
+    highlighted_document: highlightedDoc,
     guardrails = {},
     traceability = []
   } = data
@@ -32,6 +33,20 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
     navigator.clipboard.writeText(simplified_communication)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleDownloadHighlighted = () => {
+    if (!highlightedDoc) return
+    const content = highlightedDoc.full_html || highlightedDoc.snippet_html || ''
+    const blob = new Blob([content], { type: 'text/html;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = highlightedDoc.filename || 'highlighted_communication.html'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -162,6 +177,59 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
             </button>
           </div>
           <div className="simplified-body">{simplified_communication}</div>
+        </div>
+      )}
+
+      {/* HIGHLIGHTED ORIGINAL DOCUMENT (100% VERBATIM PRESERVED) */}
+      {highlightedDoc && (
+        <div className="highlighted-doc-card">
+          <div className="highlighted-doc-header">
+            <div className="highlighted-doc-title">
+              <span className="doc-icon">📄</span>
+              <div>
+                <strong>Highlighted Original Communication (Output File)</strong>
+                <div className="highlighted-doc-sub">100% Word-for-Word Original Input Preserved • Important Things Highlighted in Big Distinct Colors</div>
+              </div>
+            </div>
+            <div className="highlighted-doc-actions">
+              <button
+                type="button"
+                className="doc-action-btn primary"
+                onClick={handleDownloadHighlighted}
+                title="Download original file with big color-coded highlights"
+              >
+                📥 Download Highlighted File (.html)
+              </button>
+              {onOpenDocument && (
+                <button
+                  type="button"
+                  className="doc-action-btn"
+                  onClick={() => onOpenDocument({
+                    filename: highlightedDoc.filename || 'highlighted_notice.html',
+                    view_url: highlightedDoc.view_url,
+                    url: highlightedDoc.download_url
+                  })}
+                >
+                  👁️ Open in Side Viewer ↗
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="highlight-legend-bar">
+            <span className="legend-label">Highlight Legend:</span>
+            <span className="claria-hl-action">Action Required</span>
+            <span className="claria-hl-deadline">Deadline &amp; Date</span>
+            <span className="claria-hl-amount">Amount &amp; Penalty</span>
+            <span className="claria-hl-reference">Reference &amp; Contact</span>
+          </div>
+
+          {highlightedDoc.snippet_html && (
+            <div
+              className="highlighted-verbatim-body"
+              dangerouslySetInnerHTML={{ __html: highlightedDoc.snippet_html }}
+            />
+          )}
         </div>
       )}
 

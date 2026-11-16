@@ -123,5 +123,18 @@ async def redesign(
     if doc_meta:
         result['document_metadata'] = doc_meta
 
+    if result.get('highlighted_document'):
+        hl_html = result['highlighted_document'].get('full_html') or ''
+        orig_disp = _display_name(stored_name) if stored_name else 'notice.txt'
+        hl_name = f"highlighted_{stored_name or uuid.uuid4().hex[:8]}.html"
+        try:
+            (UPLOADS_DIR / hl_name).write_text(hl_html, encoding='utf-8')
+            q = quote(hl_name)
+            result['highlighted_document']['filename'] = f"highlighted_{Path(orig_disp).stem}.html"
+            result['highlighted_document']['download_url'] = f"/api/document/{q}"
+            result['highlighted_document']['view_url'] = f"/api/document/{q}/view"
+        except Exception:
+            pass
+
     return result
 
