@@ -259,7 +259,7 @@ def inspect_and_sanitize(text: str, is_document: bool = False) -> Dict:
                 'rejection_rationale': f'Prohibited content detected ({label}). Exploits and cyberattacks are strictly disallowed.',
                 'message': (
                     f'🛡️ BFSI Security Guardrail Block: Prohibited content ({label}) was detected and blocked. '
-                    'TAXORA strictly prohibits processing cyberattack scripts, exploit payloads, or malicious material.'
+                    'CLARIA strictly prohibits processing cyberattack scripts, exploit payloads, or malicious material.'
                 ),
                 'sanitized_text': '',
                 'guardrails': {
@@ -283,7 +283,7 @@ def inspect_and_sanitize(text: str, is_document: bool = False) -> Dict:
                     'rejection_rationale': 'Direct submission of personal passwords, PINs, or private keys violates Zero-Trust Credential Governance.',
                     'message': (
                         '🛡️ BFSI Privacy & Credential Guardrail Block: You provided a personal password, PIN, CVV, or private cryptographic key. '
-                        'Under Enterprise Banking Data Privacy Regulations (PCI-DSS & GLBA), TAXORA strictly refuses to accept, store, or process personal authentication secrets.'
+                        'Under Enterprise Banking Data Privacy Regulations (PCI-DSS & GLBA), CLARIA strictly refuses to accept, store, or process personal authentication secrets.'
                     ),
                     'sanitized_text': '',
                     'guardrails': {

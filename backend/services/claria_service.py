@@ -3,6 +3,8 @@ import json
 import os
 import re
 import random
+import datetime
+import uuid
 from pathlib import Path
 from services import guardrail_service
 
@@ -346,6 +348,7 @@ def redesign_communication(text: str, conversation_history: list = None) -> dict
             action_data['urgency'] = "None"
             parsed['what_you_need_to_do'] = action_data
 
+        parsed['trace_id'] = f"CLR-{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
         parsed['guardrails'] = {
             "status": "PASSED",
             "framework": "Enterprise BFSI Customer Communications Standard",

@@ -20,7 +20,8 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
     simplified_communication,
     highlighted_document: highlightedDoc,
     guardrails = {},
-    traceability = []
+    traceability = [],
+    trace_id
   } = data
 
   const actionRequired = Boolean(what_you_need_to_do.action_required)
@@ -51,6 +52,57 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
 
   return (
     <div className="claria-result">
+      {/* 0. GUARDRAILS STATUS BAR & TOP-RIGHT TRACE ID */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+          marginBottom: '14px',
+          width: '100%'
+        }}
+      >
+        <span
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 12px',
+            borderRadius: '999px',
+            fontSize: '11.5px',
+            fontWeight: 700,
+            background: 'rgba(52, 211, 153, 0.16)',
+            color: '#34d399',
+            border: '1px solid rgba(52, 211, 153, 0.45)'
+          }}
+        >
+          <span>🛡️</span>
+          <span>Guardrails: Passed · Verified Safe</span>
+        </span>
+
+        {trace_id && (
+          <span
+            style={{
+              fontSize: '11px',
+              fontFamily: 'ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace',
+              fontWeight: 600,
+              color: '#38bdf8',
+              letterSpacing: '0.6px',
+              padding: '3px 9px',
+              borderRadius: '6px',
+              background: 'rgba(7, 140, 255, 0.08)',
+              border: '1px solid rgba(7, 140, 255, 0.24)',
+              marginLeft: 'auto',
+              flexShrink: 0
+            }}
+            title="Verification Trace Code"
+          >
+            {trace_id}
+          </span>
+        )}
+      </div>
+
       {/* 1. DELIVERABLE 2: WHAT YOU NEED TO DO (Action Precision Guardrail) */}
       <div className={`action-banner ${actionRequired ? 'required' : 'no-action'}`}>
         <div className="action-header">
@@ -233,24 +285,19 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
         </div>
       )}
 
-      {/* 6. ENTERPRISE BFSI GUARDRAILS & TRACEABILITY */}
-      <div className="guardrails-footer">
-        <div className="guardrail-tag">
-          <span>🛡️</span>
-          <span>Enterprise BFSI Guardrails Passed · PCI-DSS Sanitized · Zero Hallucinated Action</span>
-        </div>
-
-        {traceability && traceability.length > 0 && (
+      {/* 6. SOURCE AUDIT & TRACEABILITY */}
+      {traceability && traceability.length > 0 && (
+        <div className="guardrails-footer" style={{ justifyContent: 'flex-end' }}>
           <button
             type="button"
             className="copy-btn"
-            style={{ fontSize: '9px', padding: '3px 8px' }}
+            style={{ fontSize: '10px', padding: '4px 10px' }}
             onClick={() => setShowTrace(!showTrace)}
           >
             {showTrace ? 'Hide Source Quotes ▲' : `Source Traceability (${traceability.length} points) ▼`}
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {showTrace && traceability && traceability.length > 0 && (
         <div className="trace-details">
