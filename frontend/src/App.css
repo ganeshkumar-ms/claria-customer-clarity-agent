@@ -83,7 +83,7 @@ button, input, textarea {
   min-height: 100dvh;
   position: relative;
   background: radial-gradient(circle at 50% -10%, rgba(7, 140, 255, 0.18), transparent 38%),
-              radial-gradient(circle at 95% 90%, rgba(255, 189, 74, 0.12), transparent 30%),
+              radial-gradient(circle at 95% 90%, rgba(56, 189, 248, 0.12), transparent 30%),
               var(--bg);
   overflow-x: clip;
 }
@@ -108,7 +108,7 @@ button, input, textarea {
   inset: -35%;
   pointer-events: none;
   background: radial-gradient(circle at 24% 25%, rgba(7, 140, 255, 0.28), transparent 24%),
-              radial-gradient(circle at 78% 70%, rgba(255, 189, 74, 0.22), transparent 26%);
+              radial-gradient(circle at 78% 70%, rgba(56, 189, 248, 0.22), transparent 26%);
   animation: drift 16s ease-in-out infinite alternate;
   z-index: 0;
 }
@@ -136,7 +136,7 @@ header {
   font-size: 21px;
   font-weight: 850;
   letter-spacing: 7px;
-  background: linear-gradient(90deg, #fff, #ff5a36, #ffbd4a);
+  background: linear-gradient(90deg, #fff, #078cff, #38bdf8);
   background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -186,7 +186,7 @@ header {
 
 .eyebrow {
   text-align: center;
-  color: #ff5a36;
+  color: #078cff;
   font-size: 11.5px;
   letter-spacing: 2.8px;
   font-weight: 700;
@@ -206,7 +206,7 @@ header {
 }
 
 .home h1 span {
-  background: linear-gradient(95deg, #ff5a36, #ffbd4a);
+  background: linear-gradient(95deg, #078cff, #38bdf8);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -236,7 +236,7 @@ header {
   position: absolute;
   inset: -3px;
   border-radius: 25px;
-  background: conic-gradient(from 0deg, transparent 40%, #ff5a36, transparent 56%, #ffbd4a, transparent 72%);
+  background: conic-gradient(from 0deg, transparent 40%, #078cff, transparent 56%, #38bdf8, transparent 72%);
   filter: blur(10px);
   opacity: 0.35;
   animation: spin 9s linear infinite;
@@ -254,7 +254,7 @@ header {
   gap: 9px;
   border: 1px solid var(--line);
   border-radius: 23px;
-  background: #26100a;
+  background: #051a2c;
   box-shadow: 0 25px 90px rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(22px);
 }
@@ -280,7 +280,7 @@ header {
   border: 0;
   border-radius: 15px;
   color: #fff;
-  background: #ff5a36;
+  background: #078cff;
   cursor: pointer;
   transition: all 0.25s;
   box-shadow: 0 8px 28px rgba(7, 140, 255, 0.38);
@@ -323,12 +323,12 @@ header {
   display: none;
   max-width: 780px;
   margin: 12px auto 0;
-  color: #ffbd4a;
+  color: #38bdf8;
   font-size: 12.5px;
   text-align: center;
   padding: 6px 16px;
-  background: rgba(255, 189, 74, 0.1);
-  border: 1px solid rgba(255, 189, 74, 0.25);
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   border-radius: 999px;
 }
 
@@ -376,7 +376,7 @@ header {
   border: 1px solid var(--line);
   border-radius: 14px;
   color: #e8deda;
-  background: #26100a;
+  background: #051a2c;
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -460,7 +460,7 @@ header {
 
 .card small {
   font-size: 12px;
-  color: #ff5a36;
+  color: #078cff;
   letter-spacing: 1px;
   font-weight: 600;
   display: block;
@@ -500,7 +500,7 @@ header {
 
 .side {
   border-right: 1px solid var(--line);
-  background: #26100a;
+  background: #051a2c;
   backdrop-filter: blur(24px);
   padding: 22px 14px;
   display: flex;
@@ -534,14 +534,14 @@ header {
 
 .new:hover {
   background: rgba(7, 140, 255, 0.18);
-  border-color: #ff5a36;
+  border-color: #078cff;
   color: #fff;
   transform: translateY(-1px);
 }
 
 .label {
   margin: 26px 9px 10px;
-  color: #8c756e;
+  color: #849bb4;
   font-size: 12px;
   letter-spacing: 1.5px;
   font-weight: 700;
@@ -589,7 +589,7 @@ header {
   min-width: 0;
   border: 0;
   background: transparent !important;
-  color: #e5d7d2;
+  color: #f0f7ff;
   text-align: left;
   padding: 0 54px 0 12px;
   height: 100%;
@@ -606,7 +606,7 @@ header {
 }
 
 .histRow.on .hist {
-  color: #ffbd4a;
+  color: #38bdf8;
   font-weight: 600;
 }
 
@@ -675,12 +675,12 @@ header {
 }
 
 .histIcon.edit {
-  color: #ffbd4a;
+  color: #38bdf8;
 }
 
 .histIcon.edit:hover {
-  border-color: #ffbd4a;
-  background: rgba(255, 189, 74, 0.25);
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.25);
   color: #fff;
 }
 
@@ -705,7 +705,7 @@ header {
   padding: 9px 12px;
   border: 1px solid rgba(7, 140, 255, 0.6);
   border-radius: 10px;
-  background: #1c0b07;
+  background: #051a2c;
   color: #fff;
   font-size: 14px;
   outline: 0;
@@ -833,7 +833,7 @@ header {
   padding: 6px 12px;
   border: 1px solid rgba(7, 140, 255, 0.6);
   border-radius: 8px;
-  background: #1c0b07;
+  background: #051a2c;
   color: #fff;
   font-size: 15px;
   font-weight: 700;
@@ -843,7 +843,7 @@ header {
 .chatHead small {
   display: block;
   margin-top: 3px;
-  color: #ff5a36;
+  color: #078cff;
   font-size: 12px;
   letter-spacing: 1.2px;
   font-weight: 600;
@@ -870,7 +870,7 @@ header {
 
 .user {
   align-self: flex-end;
-  background: linear-gradient(135deg, #ff5a36, #d9401f);
+  background: linear-gradient(135deg, #078cff, #d9401f);
   color: #fff;
   border-radius: 18px 18px 5px 18px;
   box-shadow: 0 8px 24px rgba(7, 140, 255, 0.25);
@@ -878,7 +878,7 @@ header {
 
 .ai {
   align-self: flex-start;
-  background: #26100a;
+  background: #051a2c;
   border: 1px solid var(--line);
   border-radius: 18px 18px 18px 5px;
   backdrop-filter: blur(18px);
@@ -892,7 +892,7 @@ header {
   padding: 13px 18px;
   border: 1px solid var(--line);
   border-radius: 18px 18px 18px 5px;
-  background: #26100a;
+  background: #051a2c;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -903,7 +903,7 @@ header {
   font-weight: 850;
   letter-spacing: 3px;
   font-size: 14px;
-  background: linear-gradient(95deg, #ff5a36, #ffbd4a);
+  background: linear-gradient(95deg, #078cff, #38bdf8);
   background-size: 220% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -923,7 +923,7 @@ header {
   width: 2.5px;
   height: 4px;
   border-radius: 3px;
-  background: #ff5a36;
+  background: #078cff;
   animation: wave 0.75s ease-in-out infinite;
 }
 
@@ -948,7 +948,7 @@ header {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 20px;
-  background: #26100a;
+  background: #051a2c;
   box-shadow: 0 16px 55px rgba(0, 0, 0, 0.7);
   transition: 0.3s;
 }
@@ -991,7 +991,7 @@ header {
   height: 44px;
   border: 0;
   border-radius: 13px;
-  background: #ff5a36;
+  background: #078cff;
   color: #fff;
   cursor: pointer;
   display: grid;
@@ -1045,7 +1045,7 @@ header {
 }
 
 .action-banner.required {
-  background: linear-gradient(135deg, rgba(7, 140, 255, 0.2) 0%, rgba(255, 189, 74, 0.12) 100%);
+  background: linear-gradient(135deg, rgba(7, 140, 255, 0.2) 0%, rgba(56, 189, 248, 0.12) 100%);
   border: 1px solid rgba(7, 140, 255, 0.45);
 }
 
@@ -1071,7 +1071,7 @@ header {
 }
 
 .action-banner.required .action-badge {
-  background: #ff5a36;
+  background: #078cff;
   color: #fff;
 }
 
@@ -1084,7 +1084,7 @@ header {
   font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 1px;
-  color: #ffbd4a;
+  color: #38bdf8;
 }
 
 .action-summary {
@@ -1116,8 +1116,8 @@ header {
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #ffbd4a;
-  background: rgba(255, 189, 74, 0.12);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
   padding: 6px 12px;
   border-radius: 8px;
 }
@@ -1135,7 +1135,7 @@ header {
   font-weight: 800;
   letter-spacing: 1.8px;
   text-transform: uppercase;
-  color: #ff5a36;
+  color: #078cff;
   margin-bottom: 8px;
 }
 
@@ -1164,7 +1164,7 @@ header {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.2px;
-  color: #ffbd4a;
+  color: #38bdf8;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -1238,9 +1238,9 @@ header {
 }
 
 .copy-btn:hover {
-  background: #ff5a36;
+  background: #078cff;
   color: #fff;
-  border-color: #ff5a36;
+  border-color: #078cff;
 }
 
 .simplified-body {
@@ -1289,7 +1289,7 @@ header {
   color: #c4b5ae;
   background: rgba(255, 255, 255, 0.03);
   padding: 6px 10px;
-  border-left: 3px solid #ff5a36;
+  border-left: 3px solid #078cff;
   border-radius: 4px;
   margin-top: 4px;
   display: block;
@@ -1441,7 +1441,7 @@ header {
   min-height: 0;
   height: 100%;
   border-left: 1px solid var(--line);
-  background: #140804;
+  background: #020c16;
   animation: side 0.35s both;
 }
 
@@ -1515,7 +1515,7 @@ header {
   width: 100%;
   height: 100%;
   border: 0;
-  background: #140804;
+  background: #020c16;
 }
 
 .docViewerFallback {
@@ -1638,7 +1638,7 @@ header {
 
 .openDocBtn:hover {
   background: rgba(7, 140, 255, 0.25);
-  border-color: #ff5a36;
+  border-color: #078cff;
   color: #fff;
   transform: translateY(-1px);
 }
@@ -1733,14 +1733,14 @@ header {
 .histIcon.edit,
 .histActionBtn:not(.danger) {
   color: #ffd178 !important;
-  background: rgba(255, 189, 74, 0.20) !important;
-  border: 1px solid rgba(255, 189, 74, 0.45) !important;
+  background: rgba(56, 189, 248, 0.20) !important;
+  border: 1px solid rgba(56, 189, 248, 0.45) !important;
 }
 .histIcon.edit:hover,
 .histActionBtn:not(.danger):hover {
   color: #ffffff !important;
-  background: rgba(255, 189, 74, 0.40) !important;
-  border-color: #ffbd4a !important;
+  background: rgba(56, 189, 248, 0.40) !important;
+  border-color: #38bdf8 !important;
   transform: scale(1.04);
 }
 .histIcon.del,
