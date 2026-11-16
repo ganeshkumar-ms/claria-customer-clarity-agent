@@ -353,11 +353,14 @@ export default function App() {
       }))
 
     try {
-      const responseData = await redesignCommunication({
-        file,
-        text: content,
-        conversationHistory: historyPayload
-      })
+      const [responseData] = await Promise.all([
+        redesignCommunication({
+          file,
+          text: content,
+          conversationHistory: historyPayload
+        }),
+        new Promise(res => setTimeout(res, 900))
+      ])
 
       const docMeta = responseData.document_metadata
       const updatedUserMsg = docMeta && userMessage.file
