@@ -120,6 +120,7 @@ function loadSessions() {
         return { ...s, title, messages }
       })
       .filter(s => (s.messages || []).length > 0)
+      .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
   } catch {
     return []
   }
@@ -227,6 +228,13 @@ export default function App() {
   // Current session object
   const currentSession = sessions.find(s => s.id === currentSessionId)
 
+  const goHome = () => {
+    setCurrentSessionId(null)
+    setMessages([])
+    setAttachedFile(null)
+    setView('home')
+  }
+
   const openNewChat = (initialText = '', file = null) => {
     sessionJustChangedRef.current = true
     if (initialText || file) {
@@ -314,18 +322,21 @@ export default function App() {
 
     if (!content && !file) return
 
-    let activeId = targetSessionId
-    if (!activeId) {
-      activeId = generateId()
-      const newSession = {
-        id: activeId,
-        title: formatSmartTitle(content, file?.name),
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: 'TODAY',
-        messages: []
-      }
-      setSessions(prev => [newSession, ...prev])
+    const isHomeStart = view === 'home' || !targetSessionId
+    let activeId = (!isHomeStart && targetSessionId) ? targetSessionId : generateId()
+    if (isHomeStart) {
       setCurrentSessionId(activeId)
+      setView('chat')
+    }
+
+    const initialSessionTitle = formatSmartTitle(content, file?.name)
+    const newSession = {
+      id: activeId,
+      title: initialSessionTitle,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      date: 'TODAY',
+      updatedAt: Date.now(),
+      messages: []
     }
 
     setInputText('')
@@ -339,9 +350,18 @@ export default function App() {
       timestamp: new Date().toLocaleTimeString()
     }
 
-    const nextMessages = [...messages, userMessage]
+    const baseMsgs = (!isHomeStart && currentSession) ? (currentSession.messages || []) : []
+    const nextMessages = [...baseMsgs, userMessage]
     setMessages(nextMessages)
     setIsThinking(true)
+
+    setSessions(prev => {
+      const existing = prev.find(s => s.id === activeId)
+      const updated = existing
+        ? { ...existing, updatedAt: Date.now(), messages: nextMessages }
+        : { ...newSession, messages: nextMessages }
+      return [updated, ...prev.filter(s => s.id !== activeId)]
+    })
 
     // Build memory history
     const historyPayload = nextMessages
@@ -376,31 +396,32 @@ export default function App() {
         timestamp: new Date().toLocaleTimeString()
       }
 
-      const finalMessages = [...messages, updatedUserMsg, aiMessage]
+      const finalMessages = [...nextMessages.slice(0, -1), updatedUserMsg, aiMessage]
       setMessages(finalMessages)
 
-      // Auto title session if default
-      setSessions(prev => prev.map(s => {
-        if (s.id === activeId) {
-          let updatedTitle = s.title
-          if (!s.titleLocked) {
-            const resultTitle = titleFromResult(responseData)
-            if (resultTitle) {
-              updatedTitle = resultTitle
-            } else if (file) {
-              updatedTitle = formatSmartTitle('', file.name)
-            } else if (content && !isGenericGreeting(content)) {
-              updatedTitle = formatSmartTitle(content)
-            }
-          }
-          return {
-            ...s,
-            title: updatedTitle,
-            messages: finalMessages
+      // Auto title session and move to 1st in recent list
+      setSessions(prev => {
+        const target = prev.find(s => s.id === activeId)
+        if (!target) return prev
+        let updatedTitle = target.title
+        if (!target.titleLocked) {
+          const resultTitle = titleFromResult(responseData)
+          if (resultTitle) {
+            updatedTitle = resultTitle
+          } else if (file) {
+            updatedTitle = formatSmartTitle('', file.name)
+          } else if (content && !isGenericGreeting(content)) {
+            updatedTitle = formatSmartTitle(content)
           }
         }
-        return s
-      }))
+        const updated = {
+          ...target,
+          title: updatedTitle,
+          updatedAt: Date.now(),
+          messages: finalMessages,
+        }
+        return [updated, ...prev.filter(s => s.id !== activeId)]
+      })
     } catch (err) {
       const errorMessage = {
         id: generateId(),
@@ -426,7 +447,7 @@ export default function App() {
       {view === 'home' && (
         <section id="home">
           <header>
-            <div className="word">CLARIA</div>
+            <div className="word" onClick={goHome} style={{ cursor: 'pointer' }}>CLARIA</div>
             <button className="enter" onClick={() => openNewChat()} type="button">
               ENTER WORKSPACE ↗
             </button>
@@ -599,7 +620,7 @@ export default function App() {
                   <small>ENTERPRISE INTELLIGENCE WORKSPACE</small>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <button className="ghost" onClick={() => setView('home')} type="button">
+                  <button className="ghost" onClick={goHome} type="button">
                     <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="m3 10 9-7 9 7" />
                       <path d="M5 9v11h14V9" />
