@@ -212,6 +212,14 @@ def lambda_handler(event, context):
                     'type': 'chat',
                     'message': pre_rej['message'],
                     'rejected': True,
+                    'guardrail_status': 'BLOCKED',
+                    'guardrail_details': {
+                        'guardrails': {
+                            'status': 'BLOCKED',
+                            'triggered_rule': pre_rej.get('title') or 'Authentication Credentials / Access Keys Rejected',
+                            'action': 'BLOCKED_SENSITIVE_CREDENTIALS',
+                        }
+                    },
                     'rejection_details': pre_rej,
                     'document_metadata': {'filename': orig_filename, 'size_bytes': len(file_bytes)},
                 })
