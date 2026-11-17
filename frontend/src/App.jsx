@@ -717,9 +717,8 @@ export default function App() {
                       </svg>
                     </button>
                     <input
-                      ref={chatInputRef}
-                      value={inputVal}
-                      onChange={(e) => setInputVal(e.target.value)}
+                      value={inputText}
+                      onChange={(e) => setInputText(e.target.value)}
                       placeholder="Message CLARIA or attach customer communication..."
                       maxLength={1000}
                       autoComplete="off"
