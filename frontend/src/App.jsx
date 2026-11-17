@@ -677,6 +677,23 @@ export default function App() {
 
               {/* Composer */}
               <div className="composerArea">
+                {attachedFile && (
+                  <div style={{ display: 'flex', justifyContent: 'center', width: '100%', margin: '0 auto 10px' }}>
+                    <div className="attachedRow composerAttached">
+                      <span className="attachChip">
+                        <span className="attachName">{attachedFile.name}</span>
+                        <button
+                          type="button"
+                          className="attachRemove"
+                          aria-label={`Remove ${attachedFile.name}`}
+                          onClick={() => { setAttachedFile(null); if (chatFileInputRef.current) chatFileInputRef.current.value = '' }}
+                        >
+                          ×
+                        </button>
+                      </span>
+                    </div>
+                  </div>
+                )}
                 <div className="composer">
                   <form onSubmit={(e) => { e.preventDefault(); handleSend(); }}>
                     <input
@@ -695,43 +712,29 @@ export default function App() {
                       title="Attach file (PDF, Word, TXT)"
                       onClick={() => chatFileInputRef.current?.click()}
                     >
-                      <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <svg className="icon" viewBox="0 0 24 24" width="18" height="18">
                         <path d="m21.4 11.6-8.9 8.9a6 6 0 0 1-8.5-8.5l9.3-9.3a4 4 0 0 1 5.7 5.7l-9.3 9.3a2 2 0 0 1-2.8-2.8l8.6-8.6" />
                       </svg>
                     </button>
-
                     <input
-                      value={inputText}
-                      onChange={(e) => setInputText(e.target.value)}
-                      placeholder={attachedFile ? `Attached: ${attachedFile.name} (Add note or press Enter)` : "Message CLARIA or paste communication..."}
-                      maxLength={4000}
+                      ref={chatInputRef}
+                      value={inputVal}
+                      onChange={(e) => setInputVal(e.target.value)}
+                      placeholder="Message CLARIA or attach customer communication..."
+                      maxLength={1000}
                       autoComplete="off"
+                      aria-label="Message"
                     />
-
-                    <button className="chatSend" type="submit" aria-label="Send">
-                      <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <button className="chatSend" type="submit" aria-label="Send" disabled={isThinking}>
+                      <svg className="icon" viewBox="0 0 24 24" width="18" height="18">
                         <path d="M5 12h13" />
                         <path d="m13 7 5 5-5 5" />
                       </svg>
                     </button>
                   </form>
                 </div>
-                {attachedFile && (
-                  <div style={{ textAlign: 'center', marginTop: '8px' }}>
-                    <span className="filePill show" style={{ display: 'inline-flex' }}>
-                      📎 {attachedFile.name}
-                      <button
-                        type="button"
-                        onClick={() => setAttachedFile(null)}
-                        style={{ background: 'none', border: 0, color: '#f87171', cursor: 'pointer', fontWeight: 800, fontSize: '14px' }}
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  </div>
-                )}
                 <div className="fine">
-                  ENTERPRISE BFSI CUSTOMER INTELLIGENCE · SECURE & SANITIZED
+                  ENTERPRISE BFSI · CLARIA COMMUNICATIONS AUDITOR · ZERO HALLUCINATIONS · SECURE &amp; SANITIZED
                 </div>
               </div>
             </main>
