@@ -2329,3 +2329,687 @@ html, body {
 .attachRemove:hover {
   color: #ffffff;
 }
+
+/* =====================================================================
+   CLARIA ENTERPRISE DOCUMENT WATCHOUT VIEWER & SIDE-BY-SIDE COMPARE
+   ===================================================================== */
+.bubble {
+  font-size: 15px !important;
+  line-height: 1.65 !important;
+  padding: 15px 18px !important;
+}
+
+.bubble.ai:has(.plain-chat) {
+  width: fit-content !important;
+  max-width: min(86%, 760px) !important;
+}
+
+.bubble.ai:has(.claria-doc-viewer-mode) {
+  width: min(100%, 1020px) !important;
+  max-width: 1020px !important;
+  padding: 16px 18px !important;
+}
+
+.bubble.ai:has(.claria-compare-split-container) {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.claria-doc-viewer-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* 1. Top Status & Integrity Strip */
+.claria-top-status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+}
+
+.claria-status-left {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.claria-guardrail-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.42);
+}
+
+.claria-verbatim-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(7, 140, 255, 0.14);
+  color: #38bdf8;
+  border: 1px solid rgba(7, 140, 255, 0.38);
+}
+
+.claria-action-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.claria-action-status-pill.is-action {
+  background: rgba(245, 158, 11, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.45);
+}
+
+.claria-action-status-pill.is-info {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+}
+
+.claria-trace-badge {
+  font-size: 11px;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  font-weight: 600;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: rgba(7, 140, 255, 0.08);
+  border: 1px solid rgba(7, 140, 255, 0.24);
+  margin-left: auto;
+}
+
+/* 2. File Viewer Outer Card */
+.claria-file-viewer-card {
+  border: 1px solid rgba(7, 140, 255, 0.28);
+  border-radius: 14px;
+  background: #031322;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+}
+
+.claria-viewer-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(180deg, rgba(7, 140, 255, 0.12) 0%, rgba(5, 26, 44, 0.85) 100%);
+  border-bottom: 1px solid rgba(7, 140, 255, 0.22);
+}
+
+.claria-viewer-file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.claria-file-badge-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(7, 140, 255, 0.16);
+  border: 1px solid rgba(7, 140, 255, 0.36);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.claria-file-meta-text {
+  min-width: 0;
+}
+
+.claria-file-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.claria-file-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #ffffff;
+  word-break: break-all;
+}
+
+.claria-view-mode-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(7, 140, 255, 0.22);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.claria-file-subtitle {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.claria-viewer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.claria-tool-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(7, 140, 255, 0.32);
+  background: rgba(5, 26, 44, 0.85);
+  color: #e2e8f0;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.claria-tool-btn:hover {
+  background: rgba(7, 140, 255, 0.22);
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.claria-tool-btn.active {
+  background: rgba(7, 140, 255, 0.24);
+  border-color: #38bdf8;
+  color: #ffffff;
+}
+
+.claria-tool-btn.primary {
+  background: #078cff;
+  border-color: #38bdf8;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.claria-tool-btn.primary:hover {
+  background: #0566be;
+}
+
+/* Interactive Watchout Filter Bar */
+.claria-watchout-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  background: rgba(2, 12, 22, 0.72);
+  border-bottom: 1px solid rgba(7, 140, 255, 0.18);
+}
+
+.claria-filter-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #849bb4;
+  margin-right: 4px;
+}
+
+.claria-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(5, 26, 44, 0.7);
+  color: #cbd5e1;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.claria-filter-pill:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #ffffff;
+}
+
+.claria-filter-pill.active {
+  background: rgba(7, 140, 255, 0.24);
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(7, 140, 255, 0.25);
+}
+
+.claria-filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.claria-filter-count {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.35);
+  color: #f8fafc;
+}
+
+/* Customer Clarity Meaning Banner */
+.claria-watchout-inspector {
+  padding: 10px 18px;
+  background: rgba(7, 140, 255, 0.08);
+  border-bottom: 1px solid rgba(7, 140, 255, 0.22);
+  border-left: 4px solid #38bdf8;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.claria-watchout-inspector.cat-what_to_do {
+  border-left-color: #fde047;
+  background: rgba(253, 224, 71, 0.08);
+}
+
+.claria-watchout-inspector.cat-core_message {
+  border-left-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.claria-watchout-inspector.cat-timeline_dates {
+  border-left-color: #fdba74;
+  background: rgba(253, 186, 116, 0.08);
+}
+
+.claria-watchout-inspector.cat-customer_impact {
+  border-left-color: #6ee7b7;
+  background: rgba(110, 231, 183, 0.08);
+}
+
+.claria-inspector-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.claria-inspector-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 2px 8px;
+  border-radius: 5px;
+  background: rgba(2, 12, 22, 0.75);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.claria-inspector-hint {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.claria-inspector-note {
+  font-size: 13px;
+  color: #f1f5f9;
+  line-height: 1.5;
+}
+
+/* Document Viewport & Verbatim Sheet */
+.claria-document-viewport {
+  max-height: 540px;
+  overflow-y: auto;
+  background: #041628;
+  padding: 20px 22px;
+}
+
+.claria-doc-sheet {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.85;
+  color: #e2e8f0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.claria-doc-line {
+  padding: 4px 8px;
+  border-radius: 5px;
+  min-height: 1.4em;
+}
+
+.claria-blank-line {
+  min-height: 0.75em;
+  padding: 0;
+}
+
+.claria-line-heading {
+  font-weight: 800;
+  color: #ffffff;
+  font-size: 15px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+  letter-spacing: 0.2px;
+}
+
+.claria-line-bullet {
+  padding-left: 14px;
+}
+
+.claria-line-table {
+  font-family: ui-monospace, "JetBrains Mono", Consolas, monospace;
+  font-size: 13px;
+  background: rgba(2, 12, 22, 0.45);
+  border-bottom: 1px solid rgba(7, 140, 255, 0.12);
+}
+
+/* Paragraph-level Left Accent Borders */
+.claria-para-what_to_do {
+  border-left: 3px solid #fde047;
+  padding-left: 12px;
+  margin: 6px 0;
+}
+
+.claria-para-core_message {
+  border-left: 3px solid #7dd3fc;
+  padding-left: 12px;
+  margin: 6px 0;
+}
+
+.claria-para-timeline_dates {
+  border-left: 3px solid #fdba74;
+  padding-left: 12px;
+  margin: 6px 0;
+}
+
+.claria-para-customer_impact {
+  border-left: 3px solid #6ee7b7;
+  padding-left: 12px;
+  margin: 6px 0;
+}
+
+/* Full Sentence Highlight Marks — Crisp Black Text on Bright Marker Colors */
+.claria-doc-sheet mark,
+.claria-hl-sentence {
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #fde047 !important;
+  color: #050b14 !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.claria-doc-sheet mark *,
+.claria-hl-sentence * {
+  color: #050b14 !important;
+}
+
+.claria-hl-sentence:hover {
+  filter: brightness(1.06);
+}
+
+.claria-cat-what_to_do {
+  background: #fde047 !important;
+  color: #050b14 !important;
+}
+
+.claria-cat-core_message {
+  background: #7dd3fc !important;
+  color: #050b14 !important;
+}
+
+.claria-cat-timeline_dates {
+  background: #fdba74 !important;
+  color: #050b14 !important;
+}
+
+.claria-cat-customer_impact {
+  background: #6ee7b7 !important;
+  color: #050b14 !important;
+}
+
+.claria-inline-tag {
+  display: none !important;
+}
+
+/* Category Filter Dimming (Works in both Main Viewport and Compare Viewport) */
+.filter-mode-what_to_do mark:not(.claria-cat-what_to_do),
+.filter-mode-core_message mark:not(.claria-cat-core_message),
+.filter-mode-timeline_dates mark:not(.claria-cat-timeline_dates),
+.filter-mode-customer_impact mark:not(.claria-cat-customer_impact) {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+  font-weight: 400 !important;
+  padding: 0 !important;
+}
+
+.filter-mode-what_to_do mark:not(.claria-cat-what_to_do) *,
+.filter-mode-core_message mark:not(.claria-cat-core_message) *,
+.filter-mode-timeline_dates mark:not(.claria-cat-timeline_dates) *,
+.filter-mode-customer_impact mark:not(.claria-cat-customer_impact) * {
+  color: #e2e8f0 !important;
+}
+
+/* 3. Compare Option Footer Bar (Lastly) */
+.claria-compare-footer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(90deg, rgba(5, 26, 44, 0.95) 0%, rgba(7, 140, 255, 0.14) 100%);
+  border-top: 1px solid rgba(7, 140, 255, 0.28);
+}
+
+.claria-compare-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.claria-compare-icon {
+  font-size: 20px;
+}
+
+.claria-compare-footer-left strong {
+  font-size: 13.5px;
+  color: #ffffff;
+  display: block;
+}
+
+.claria-compare-sub {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.claria-compare-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.claria-compare-toggle-btn {
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid #38bdf8;
+  background: linear-gradient(135deg, #078cff 0%, #0566be 100%);
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 18px rgba(7, 140, 255, 0.32);
+}
+
+.claria-compare-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(7, 140, 255, 0.48);
+}
+
+.claria-compare-toggle-btn.open {
+  background: rgba(7, 140, 255, 0.22);
+}
+
+/* Side-by-Side Split Compare Container */
+.claria-compare-split-container {
+  border-top: 1px solid rgba(7, 140, 255, 0.28);
+  background: #020c16;
+  padding: 14px;
+}
+
+.claria-compare-integrity-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  font-size: 12px;
+}
+
+.claria-compare-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.claria-compare-pane {
+  border: 1px solid rgba(7, 140, 255, 0.26);
+  border-radius: 12px;
+  background: #041628;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.claria-compare-pane-header {
+  padding: 10px 14px;
+  background: rgba(5, 26, 44, 0.92);
+  border-bottom: 1px solid rgba(7, 140, 255, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.claria-pane-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.claria-pane-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.claria-pane-dot.orig {
+  background: #94a3b8;
+}
+
+.claria-pane-dot.hl {
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+.claria-pane-tag {
+  font-size: 10.5px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.claria-pane-tag.highlight {
+  background: rgba(7, 140, 255, 0.2);
+  color: #38bdf8;
+}
+
+.claria-pane-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.claria-mini-tab {
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid rgba(7, 140, 255, 0.25);
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.claria-mini-tab.active {
+  background: #078cff;
+  color: #ffffff;
+  border-color: #38bdf8;
+}
+
+.claria-compare-pane-body {
+  max-height: 460px;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.claria-compare-pane-body.native-frame-wrap {
+  padding: 0;
+  height: 460px;
+}
+
+.claria-native-compare-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #07080d;
+}
+
+@media (max-width: 860px) {
+  .claria-compare-grid {
+    grid-template-columns: 1fr;
+  }
+}

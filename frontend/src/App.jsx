@@ -613,12 +613,18 @@ export default function App() {
               {/* Messages feed: Auto-scrolls to the TOP of the AI card! */}
               <div className="messages" aria-live="polite" ref={messagesContainerRef}>
                 {messages.length === 0 && (
-                  <div style={{ textAlign: 'center', margin: 'auto', color: '#bfaea7', maxWidth: '520px', padding: '20px' }}>
-                    <div style={{ fontSize: '32px', marginBottom: '14px' }}>✉️</div>
-                    <b style={{ color: '#fff', fontSize: '18px' }}>Ready to redesign customer communications</b>
+                  <div style={{ textAlign: 'center', margin: 'auto', color: '#849bb4', maxWidth: '520px', padding: '20px' }}>
+                    <div style={{ display: 'inline-flex', padding: '12px', borderRadius: '14px', background: 'rgba(7, 140, 255, 0.1)', border: '1px solid rgba(7, 140, 255, 0.25)', color: '#38bdf8', marginBottom: '14px' }}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                      </svg>
+                    </div>
+                    <b style={{ display: 'block', color: '#fff', fontSize: '18px' }}>Ready to clarify customer communications</b>
                     <p style={{ fontSize: '14.5px', lineHeight: '1.65', marginTop: '10px' }}>
-                      Paste a bank notice, insurance letter, tariff change, or compliance update below — or attach a PDF/DOCX.
-                      CLARIA will answer: <em>"What is this telling me, and what do I need to do?"</em>
+                      Upload a communication file (PDF, DOCX, HTML, TXT) or paste a customer notice below to highlight the key sentences and paragraphs and compare with the original.
                     </p>
                   </div>
                 )}
@@ -639,7 +645,12 @@ export default function App() {
                           >
                             <div className="userFileHeader">
                               <div className="userFileLeft">
-                                <span className="userFileIcon" aria-hidden="true">📄</span>
+                                <span className="userFileIcon" aria-hidden="true">
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                    <polyline points="14 2 14 8 20 8" />
+                                  </svg>
+                                </span>
                                 <div className="userFileInfo">
                                   <span className="userFileName" title={m.file.name}>{m.file.name}</span>
                                   <span className="userFileMeta">
@@ -647,7 +658,7 @@ export default function App() {
                                   </span>
                                 </div>
                               </div>
-                              <span className="userFileViewBtn">Open ↗</span>
+                              <span className="userFileViewBtn">Open</span>
                             </div>
                           </button>
                         )}

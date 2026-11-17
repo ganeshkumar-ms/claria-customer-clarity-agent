@@ -153,6 +153,12 @@ def lambda_handler(event, context):
                     'isBase64Encoded': True,
                     'body': base64.b64encode(file_path.read_bytes()).decode('ascii'),
                 }
+            if file_path.name.startswith('highlighted_') and file_path.suffix.lower() in ('.html', '.htm'):
+                return {
+                    'statusCode': 200,
+                    'headers': {**CORS_HEADERS, 'Content-Type': 'text/html; charset=utf-8'},
+                    'body': file_path.read_text(encoding='utf-8', errors='ignore'),
+                }
             html_out = viewer_service.render_html(file_path, disp)
             return {
                 'statusCode': 200,
@@ -201,11 +207,15 @@ def lambda_handler(event, context):
             history = []
 
         doc_meta = None
+        stored_name = None
+        raw_doc_text = None
+        doc_filename = None
         combined_text = text or ''
 
         if file_obj:
             file_bytes = file_obj['bytes']
             orig_filename = file_obj['filename']
+            doc_filename = orig_filename
             pre_rej = file_validation.validate_file_pre_extract(orig_filename, file_bytes)
             if pre_rej:
                 return _json_response(200, {
@@ -251,6 +261,7 @@ def lambda_handler(event, context):
                 })
 
             file_content = extracted.get('text', '')
+            raw_doc_text = file_content
             combined_text = (
                 f"[COMMUNICATION DOCUMENT: {orig_filename}]\n"
                 f"==================== ORIGINAL COMMUNICATION ====================\n"
@@ -264,7 +275,12 @@ def lambda_handler(event, context):
             return _json_response(400, {'detail': 'Please provide a communication text or upload a document.'})
 
         try:
-            result = claria_service.redesign_communication(combined_text, history)
+            result = claria_service.redesign_communication(
+                combined_text,
+                history,
+                raw_document_text=raw_doc_text,
+                filename=doc_filename
+            )
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -290,9 +306,13 @@ def lambda_handler(event, context):
                     ContentDisposition=f'inline; filename="highlighted_{Path(orig_disp).stem}.html"'
                 )
                 q = quote(hl_name)
+                result['highlighted_document']['source_filename'] = orig_disp
                 result['highlighted_document']['filename'] = f"highlighted_{Path(orig_disp).stem}.html"
                 result['highlighted_document']['download_url'] = f"/api/document/{q}"
                 result['highlighted_document']['view_url'] = f"/api/document/{q}/view"
+                if doc_meta and doc_meta.get('view_url'):
+                    result['highlighted_document']['original_view_url'] = doc_meta['view_url']
+                    result['highlighted_document']['original_download_url'] = doc_meta.get('url')
             except Exception:
                 pass
 

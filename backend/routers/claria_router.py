@@ -38,12 +38,14 @@ def health():
 
 @router.get('/document/{filename}/view')
 def view_document(filename: str):
-    """Opens the uploaded file inside the browser (PDF inline, Excel/Word/CSV/TXT as HTML)."""
+    """Opens the uploaded file inside the browser (PDF inline, highlighted HTML direct, Excel/Word/CSV/TXT as HTML)."""
     file_path = _resolve_upload(filename)
     name = _display_name(file_path.name)
     if file_path.suffix.lower() == '.pdf':
         return FileResponse(path=file_path, media_type='application/pdf',
                             headers={'Content-Disposition': f'inline; filename="{name}"'})
+    if file_path.name.startswith('highlighted_') and file_path.suffix.lower() in ('.html', '.htm'):
+        return HTMLResponse(file_path.read_text(encoding='utf-8', errors='ignore'))
     return HTMLResponse(viewer_service.render_html(file_path, name))
 
 
@@ -66,10 +68,14 @@ async def redesign(
         history = []
 
     doc_meta = None
+    stored_name = None
+    raw_doc_text = None
+    doc_filename = None
     combined_text = text or ''
 
     if file:
         file_name = file.filename or 'document'
+        doc_filename = file_name
         file_bytes = await file.read()
         pre_rej = file_validation.validate_file_pre_extract(file_name, file_bytes)
         if pre_rej:
@@ -107,6 +113,7 @@ async def redesign(
             }
 
         file_content = extracted.get('text', '')
+        raw_doc_text = file_content
         combined_text = (
             f"[COMMUNICATION DOCUMENT: {file_name}]\n"
             f"==================== ORIGINAL COMMUNICATION ====================\n"
@@ -119,7 +126,12 @@ async def redesign(
     if not combined_text.strip():
         raise HTTPException(status_code=400, detail='Please provide a communication text or upload a document.')
 
-    result = claria_service.redesign_communication(combined_text, history)
+    result = claria_service.redesign_communication(
+        combined_text,
+        history,
+        raw_document_text=raw_doc_text,
+        filename=doc_filename
+    )
     if doc_meta:
         result['document_metadata'] = doc_meta
 
@@ -130,9 +142,13 @@ async def redesign(
         try:
             (UPLOADS_DIR / hl_name).write_text(hl_html, encoding='utf-8')
             q = quote(hl_name)
+            result['highlighted_document']['source_filename'] = orig_disp
             result['highlighted_document']['filename'] = f"highlighted_{Path(orig_disp).stem}.html"
             result['highlighted_document']['download_url'] = f"/api/document/{q}"
             result['highlighted_document']['view_url'] = f"/api/document/{q}/view"
+            if doc_meta and doc_meta.get('view_url'):
+                result['highlighted_document']['original_view_url'] = doc_meta['view_url']
+                result['highlighted_document']['original_download_url'] = doc_meta.get('url')
         except Exception:
             pass
 
