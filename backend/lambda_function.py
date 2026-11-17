@@ -171,7 +171,7 @@ def lambda_handler(event, context):
                 'body': base64.b64encode(file_path.read_bytes()).decode('ascii'),
             }
 
-    if raw_path in ('/api/redesign', '/api/claria/redesign') and method == 'POST':
+    if raw_path in ('/api/simplify', '/api/redesign', '/api/claria/redesign') and method == 'POST':
         headers = {k.lower(): v for k, v in (event.get('headers') or {}).items()}
         ct = headers.get('content-type', '')
         body_raw = event.get('body') or ''

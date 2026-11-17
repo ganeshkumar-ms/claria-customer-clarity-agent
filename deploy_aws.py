@@ -217,7 +217,7 @@ def step4_api_gateway(lambda_arn: str) -> str:
     route_keys = {r['RouteKey'] for r in routes}
     target = f'integrations/{int_id}'
 
-    for rk in ['ANY /{proxy+}', 'GET /health', 'POST /api/redesign']:
+    for rk in ['ANY /{proxy+}', 'GET /health', 'POST /api/redesign', 'POST /api/simplify']:
         if rk not in route_keys:
             try:
                 apigw.create_route(ApiId=api_id, RouteKey=rk, Target=target)
