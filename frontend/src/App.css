@@ -2514,6 +2514,45 @@ html, body {
   margin-top: 2px;
 }
 
+.claria-summary-panel {
+  padding: 14px 18px;
+  background: rgba(4, 18, 34, 0.55);
+  border-bottom: 1px solid rgba(56, 189, 248, 0.14);
+}
+
+.claria-summary-formatted {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #dbeafe;
+}
+
+.claria-summary-intro,
+.claria-summary-outro {
+  margin: 0;
+  color: #e2e8f0;
+}
+
+.claria-summary-outro {
+  color: #bae6fd;
+  padding-top: 2px;
+}
+
+.claria-summary-list {
+  margin: 2px 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #cbd5e1;
+}
+
+.claria-summary-list li {
+  padding-left: 4px;
+}
+
 .claria-viewer-actions {
   display: flex;
   flex-wrap: wrap;

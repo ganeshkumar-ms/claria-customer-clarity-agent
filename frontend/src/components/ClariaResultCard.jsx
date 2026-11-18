@@ -44,6 +44,53 @@ const CAT_LABELS = {
   customer_impact: 'Important Details'
 }
 
+function renderFormattedSummary(text) {
+  const raw = String(text || '').trim()
+  if (!raw) return null
+
+  // Split inline numbered points like "1. ... 2. ... 3. ..." into structured list items
+  const numberedSplit = raw.split(/\s+(?=\d+\.\s+)/)
+  if (numberedSplit.length >= 3) {
+    const intro = numberedSplit[0].trim()
+    const rawItems = numberedSplit.slice(1)
+    const items = []
+    let outro = ''
+
+    rawItems.forEach((item, idx) => {
+      const cleaned = item.replace(/^\d+\.\s*/, '').trim()
+      if (idx === rawItems.length - 1) {
+        const sumMatch = cleaned.match(/^(.*?\.)\s+(In summary,[\s\S]+)$/i)
+        if (sumMatch) {
+          items.push(sumMatch[1].trim())
+          outro = sumMatch[2].trim()
+          return
+        }
+      }
+      items.push(cleaned)
+    })
+
+    return (
+      <div className="claria-summary-formatted">
+        {intro && <p className="claria-summary-intro">{intro}</p>}
+        <ol className="claria-summary-list">
+          {items.map((it, i) => (
+            <li key={i}>{it}</li>
+          ))}
+        </ol>
+        {outro && <p className="claria-summary-outro">{outro}</p>}
+      </div>
+    )
+  }
+
+  return (
+    <div className="claria-summary-formatted">
+      {raw.split(/\n+/).map((p, i) => (
+        <p key={i} className="claria-summary-intro">{p.trim()}</p>
+      ))}
+    </div>
+  )
+}
+
 function normalizeDocumentDom(rawHtml, isHighlighted) {
   if (!rawHtml || typeof window === 'undefined') {
     return { html: rawHtml || '', counts: { all: 0, what_to_do: 0, core_message: 0, timeline_dates: 0, customer_impact: 0 }, items: [] }
@@ -477,7 +524,9 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
               <div className="claria-file-title-row">
                 <strong className="claria-file-name">{sourceFilename}</strong>
               </div>
-              <div className="claria-file-subtitle">{subtitleText}</div>
+              {what_you_need_to_do?.summary && (
+                <div className="claria-file-subtitle">{what_you_need_to_do.summary}</div>
+              )}
             </div>
           </div>
 
@@ -512,6 +561,13 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
             )}
           </div>
         </div>
+
+        {/* 1B. CLEAN STRUCTURED SUMMARY & EXPLANATION PANEL */}
+        {subtitleText && (
+          <div className="claria-summary-panel">
+            {renderFormattedSummary(subtitleText)}
+          </div>
+        )}
 
         {/* 2. INTERACTIVE FILTER BAR */}
         <div className="claria-watchout-filter-bar">
