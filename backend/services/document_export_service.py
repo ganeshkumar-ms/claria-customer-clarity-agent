@@ -22,10 +22,10 @@ def _safe_latin(text: str) -> str:
 
 
 def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
-    """Minimal, spec-compliant multi-page PDF 1.4 generator with zero external dependencies."""
-    page_w, page_h = 595, 842
-    margin_x, top_y, bottom_y = 48, 790, 52
-    line_h = 15
+    """Spec-compliant accessible Letter PDF (1-inch margins, 18pt heading, 16pt section, 12pt body, no footers)."""
+    page_w, page_h = 612, 792  # US Letter
+    margin_x, top_y, bottom_y = 72, 720, 72  # 1 inch = 72pt on all sides
+    line_h = 16
 
     pages_cmds: list[list[str]] = [[]]
     y = top_y
@@ -35,7 +35,7 @@ def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
         pages_cmds.append([])
         y = top_y
 
-    def add_line(txt: str, font: str = 'F1', size: int = 10, rgb: tuple = (0.1, 0.14, 0.2), bg_rgb: tuple | None = None):
+    def add_line(txt: str, font: str = 'F1', size: int = 12, rgb: tuple = (0.1, 0.14, 0.2), bg_rgb: tuple | None = None):
         nonlocal y
         if y < bottom_y:
             new_page()
@@ -44,9 +44,9 @@ def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
         if bg_rgb:
             cmds.append(f"{bg_rgb[0]:.2f} {bg_rgb[1]:.2f} {bg_rgb[2]:.2f} rg {margin_x - 4} {y - 3} {page_w - 2 * margin_x + 8} {line_h} re f")
         cmds.append(f"BT /{font} {size} Tf {rgb[0]:.2f} {rgb[1]:.2f} {rgb[2]:.2f} rg {margin_x} {y} Td ({safe}) Tj ET")
-        y -= line_h
+        y -= (line_h + (4 if size >= 16 else 0))
 
-    add_line(title, font='F2', size=14, rgb=(0.04, 0.24, 0.48))
+    add_line(title, font='F2', size=18, rgb=(0.04, 0.24, 0.48))
     y -= 6
 
     for blk in blocks:
@@ -68,20 +68,19 @@ def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
             continue
         if btype == 'heading':
             y -= 6
-            for wline in textwrap.wrap(text, width=78):
-                add_line(wline, font='F2', size=11, rgb=(0.05, 0.20, 0.42), bg_rgb=bg)
+            for wline in textwrap.wrap(text, width=62):
+                add_line(wline, font='F2', size=16, rgb=(0.05, 0.20, 0.42), bg_rgb=bg)
             y -= 2
         else:
             for raw_ln in text.splitlines():
-                wrapped = textwrap.wrap(raw_ln, width=88) or ['']
+                wrapped = textwrap.wrap(raw_ln, width=74) or ['']
                 for wline in wrapped:
-                    add_line(wline, font='F1', size=10, rgb=(0.12, 0.16, 0.22), bg_rgb=bg)
+                    add_line(wline, font='F1', size=12, rgb=(0.12, 0.16, 0.22), bg_rgb=bg)
             y -= 3
 
-    # Assemble PDF objects
+    # Assemble accessible PDF objects (Catalog with /Lang (en))
     objs: list[bytes] = []
-    # 1: Catalog, 2: Pages, 3: F1 Helvetica, 4: F2 Helvetica-Bold
-    objs.append(b"<< /Type /Catalog /Pages 2 0 R >>")
+    objs.append(b"<< /Type /Catalog /Pages 2 0 R /Lang (en) >>")
     page_obj_nums = []
     next_id = 5
     page_objs_data = []
@@ -127,16 +126,24 @@ def _build_pdf_bytes(title: str, blocks: list[dict[str, Any]]) -> bytes:
     """Uses ReportLab when available for rich typography/tables, falling back to stdlib PDF."""
     try:
         from reportlab.lib import colors
-        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.pagesizes import letter
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
         buf = io.BytesIO()
-        doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=44, rightMargin=44, topMargin=46, bottomMargin=42)
+        doc = SimpleDocTemplate(
+            buf,
+            pagesize=letter,
+            leftMargin=72,
+            rightMargin=72,
+            topMargin=72,
+            bottomMargin=72,
+            title=_safe_latin(title),
+        )
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle('ClariaTitle', parent=styles['Heading1'], fontSize=15, textColor=colors.HexColor('#0B3C78'), spaceAfter=10)
-        head_style = ParagraphStyle('ClariaHead', parent=styles['Heading2'], fontSize=11.5, textColor=colors.HexColor('#0F4C81'), spaceBefore=10, spaceAfter=4)
-        body_style = ParagraphStyle('ClariaBody', parent=styles['Normal'], fontSize=10, leading=14.5, textColor=colors.HexColor('#1E293B'), spaceAfter=5)
+        title_style = ParagraphStyle('ClariaTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor('#0B3C78'), spaceAfter=12)
+        head_style = ParagraphStyle('ClariaHead', parent=styles['Heading2'], fontSize=16, leading=20, textColor=colors.HexColor('#0F4C81'), spaceBefore=12, spaceAfter=6)
+        body_style = ParagraphStyle('ClariaBody', parent=styles['Normal'], fontSize=12, leading=16.5, textColor=colors.HexColor('#1E293B'), spaceAfter=6)
 
         bg_map = {
             'green': colors.HexColor('#DCFCE7'),

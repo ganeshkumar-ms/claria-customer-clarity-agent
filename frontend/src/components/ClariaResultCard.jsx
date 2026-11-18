@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
+import { absApiUrl } from '../services/api'
 import ClariaEnterpriseWorkspace from './ClariaEnterpriseWorkspace'
 
 const CLARITY_LENSES = {
@@ -531,19 +532,30 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           </div>
 
           <div className="claria-viewer-actions">
-            <button
-              type="button"
-              className="claria-tool-btn primary"
-              onClick={handleDownloadHighlighted}
-              title="Download highlighted output file"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span>Download Output</span>
-            </button>
+            {data.downloads?.clean_pdf?.download_url ? (
+              <a
+                className="claria-tool-btn primary"
+                href={absApiUrl(data.downloads.clean_pdf.download_url)}
+                download={data.downloads.clean_pdf.filename || `${sourceFilename}_Redesigned.pdf`}
+                style={{ textDecoration: 'none' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>Download Redesigned PDF</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="claria-tool-btn primary"
+                onClick={handleDownloadHighlighted}
+                title="Download redesigned output file"
+              >
+                <span>Download Output</span>
+              </button>
+            )}
             {onOpenDocument && (
               <button
                 type="button"
@@ -562,171 +574,149 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           </div>
         </div>
 
-        {/* 1B. CLEAN STRUCTURED SUMMARY & EXPLANATION PANEL */}
-        {subtitleText && (
-          <div className="claria-summary-panel">
-            {renderFormattedSummary(subtitleText)}
-          </div>
-        )}
+        {/* 2. REDESIGNED COMMUNICATION INLINE IN CHAT (Reassure -> Explain -> Action -> Consequences -> Support) */}
+        {data.redesigned_document && (() => {
+          const rd = data.redesigned_document
+          const ss = rd.status_summary || {}
+          const acct = rd.account_details || []
+          const cta = rd.call_to_action || {}
+          const opts = rd.options || []
+          const tl = rd.timeline || []
+          const tbc = rd.tbc_placeholders || []
+          return (
+            <div className="claria-redesign-inline">
+              <h2 className="claria-rd-headline">{rd.title || sourceFilename}</h2>
 
-        {/* 2. INTERACTIVE FILTER BAR */}
-        <div className="claria-watchout-filter-bar">
-          <span className="claria-filter-label">FILTER HIGHLIGHTS:</span>
-          {Object.values(CLARITY_LENSES).map((cfg) => {
-            const count = counts[cfg.key] || 0
-            if (cfg.key !== 'all' && count === 0) return null
-            const isActive = activeLens === cfg.key
-            return (
-              <button
-                key={cfg.key}
-                type="button"
-                className={`claria-filter-pill ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveLens(cfg.key)}
-              >
-                <span className="claria-filter-dot" style={{ background: cfg.dot }} />
-                <span>{cfg.label}</span>
-                <span className="claria-filter-count">{count}</span>
-              </button>
-            )
-          })}
-        </div>
+              {(ss.outcome || (ss.key_figures || []).length > 0 || ss.primary_action) && (
+                <div className="claria-rd-status-panel">
+                  <div className="claria-rd-status-item">
+                    <span className="claria-rd-label">Communication Outcome</span>
+                    <strong>{ss.outcome || data.intelligence?.document_type || 'Customer Communication'}</strong>
+                  </div>
+                  {(ss.key_figures || []).length > 0 && (
+                    <div className="claria-rd-status-item">
+                      <span className="claria-rd-label">Key Figures / Dates</span>
+                      <strong>{ss.key_figures.join(' · ')}</strong>
+                    </div>
+                  )}
+                  {ss.primary_action && (
+                    <div className="claria-rd-status-item">
+                      <span className="claria-rd-label">Primary Action</span>
+                      <strong>{ss.primary_action}</strong>
+                    </div>
+                  )}
+                </div>
+              )}
 
-        {/* 3. PLAIN-ENGLISH CLARITY MEANING BAR */}
-        {activeInsight && (
-          <div className={`claria-watchout-inspector cat-${activeInsight.category || 'core_message'}`}>
-            <div className="claria-inspector-head">
-              <span className="claria-inspector-badge">
-                {activeInsight.label || 'Key Sentence'}
-              </span>
-              <span className="claria-inspector-hint">
-                Click any highlighted sentence below to view its plain-English meaning
-              </span>
+              {acct.length > 0 && (
+                <div className="claria-rd-acct-table-wrap">
+                  <table className="claria-rd-acct-table">
+                    <tbody>
+                      {acct.map((row, idx) => (
+                        <tr key={idx}>
+                          <th>{row.label}</th>
+                          <td>{row.value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {cta.instruction && (
+                <div className="claria-rd-cta-panel">
+                  <div className="claria-rd-cta-badge">{cta.label || 'Primary Action'}</div>
+                  <div className="claria-rd-cta-text">{cta.instruction}</div>
+                  {cta.deadline && cta.deadline !== '[TO BE CONFIRMED]' && (
+                    <div className="claria-rd-cta-deadline">Deadline: {cta.deadline}</div>
+                  )}
+                </div>
+              )}
+
+              {rd.salutation && <p className="claria-rd-para">{rd.salutation}</p>}
+              {rd.introduction && <p className="claria-rd-para">{rd.introduction}</p>}
+
+              {(rd.sections || []).map((sec, sIdx) => (
+                <section key={sIdx} className="claria-rd-section">
+                  <h3 className="claria-rd-sec-heading">
+                    {sec.stage ? <span className="claria-rd-stage-pill">{sec.stage}</span> : null}
+                    <span>{sec.heading}</span>
+                  </h3>
+                  {(sec.paragraphs || []).map((p, pIdx) => (
+                    <p key={pIdx} className="claria-rd-para">{p}</p>
+                  ))}
+                  {(sec.bullets || []).length > 0 && (
+                    <ul className="claria-rd-list">
+                      {sec.bullets.map((b, bIdx) => <li key={bIdx}>{b}</li>)}
+                    </ul>
+                  )}
+                  {(sec.table || []).length > 0 && (
+                    <div className="claria-rd-acct-table-wrap">
+                      <table className="claria-rd-acct-table">
+                        <tbody>
+                          {sec.table.map((row, rIdx) => (
+                            <tr key={rIdx}>
+                              {row.map((cell, cIdx) => rIdx === 0 ? <th key={cIdx}>{cell}</th> : <td key={cIdx}>{cell}</td>)}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </section>
+              ))}
+
+              {opts.length > 0 && (
+                <div className="claria-rd-options-grid">
+                  {opts.map((opt, oIdx) => (
+                    <div key={oIdx} className="claria-rd-option-card">
+                      <strong>{opt.title}</strong>
+                      <p>{opt.details}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {tl.length > 0 && (
+                <div className="claria-rd-timeline">
+                  {tl.map((step, tIdx) => (
+                    <div key={tIdx} className="claria-rd-tl-step">
+                      <span className="claria-rd-tl-dot" />
+                      <div>
+                        <strong>{step.step}</strong>
+                        <div>{step.detail}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {(rd.mandatory_disclosures || []).length > 0 && (
+                <section className="claria-rd-section">
+                  <h3 className="claria-rd-sec-heading">Important Regulatory Disclosures</h3>
+                  {(rd.mandatory_disclosures || []).map((d, dIdx) => (
+                    <p key={dIdx} className="claria-rd-para">{d}</p>
+                  ))}
+                </section>
+              )}
+
+              {rd.closing && <p className="claria-rd-para">{rd.closing}</p>}
+
+              {tbc.length > 0 && (
+                <div className="claria-rd-tbc-note">
+                  <strong>[TO BE CONFIRMED] Placeholders:</strong> {tbc.join(' · ')}
+                </div>
+              )}
             </div>
-            <div className="claria-inspector-note">
-              <strong>Plain-English Meaning:</strong> {activeInsight.note}
-            </div>
-          </div>
-        )}
+          )
+        })()}
 
-        {/* 4. VIEWED DOCUMENT SHEET */}
-        <div
-          className="claria-document-viewport"
-          onClick={handleDocumentClick}
-          dangerouslySetInnerHTML={{ __html: normalizedHl.html }}
-        />
-
-        {/* ENTERPRISE TRANSFORMATION, COMPARISON, FACT VERIFICATION & GOVERNANCE WORKSPACE */}
+        {/* 3. ORIGINAL VS REDESIGNED COMPARISON, FACT VERIFICATION & DOWNLOADS */}
         {data.document_id && (
           <ClariaEnterpriseWorkspace
             initialData={data}
             originalTextFallback={highlightedDoc.raw_text || ''}
           />
-        )}
-
-        {/* 5. COMPARE OPTION LASTLY */}
-        <div className="claria-compare-footer-bar">
-          <div className="claria-compare-footer-left">
-            <span className="claria-compare-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <line x1="12" y1="3" x2="12" y2="21" />
-              </svg>
-            </span>
-            <div>
-              <strong>Compare Uploaded File &amp; Highlighted Output</strong>
-              <div className="claria-compare-sub">
-                Compare your original uploaded document side-by-side with the highlighted output
-              </div>
-            </div>
-          </div>
-
-          <div className="claria-compare-footer-actions">
-            {showCompare && (
-              <button
-                type="button"
-                className={`claria-tool-btn ${syncScroll ? 'active' : ''}`}
-                onClick={() => setSyncScroll(!syncScroll)}
-              >
-                <span>{syncScroll ? 'Sync Scroll: ON' : 'Sync Scroll: OFF'}</span>
-              </button>
-            )}
-            <button
-              type="button"
-              className={`claria-compare-toggle-btn ${showCompare ? 'open' : ''}`}
-              onClick={() => setShowCompare(!showCompare)}
-            >
-              {showCompare ? 'Hide Compare View' : 'Compare Input & Output'}
-            </button>
-          </div>
-        </div>
-
-        {/* SIDE-BY-SIDE COMPARE SPLIT VIEW */}
-        {showCompare && (
-          <div className="claria-compare-split-container">
-            <div className="claria-compare-grid">
-              {/* LEFT: UPLOADED FILE */}
-              <div className="claria-compare-pane">
-                <div className="claria-compare-pane-header">
-                  <div className="claria-pane-title">
-                    <span className="claria-pane-dot orig" />
-                    <strong>UPLOADED FILE (INPUT)</strong>
-                  </div>
-                  {originalViewUrl && (
-                    <div className="claria-pane-tabs">
-                      <button
-                        type="button"
-                        className={`claria-mini-tab ${compareLeftMode === 'verbatim' ? 'active' : ''}`}
-                        onClick={() => setCompareLeftMode('verbatim')}
-                      >
-                        Document Text
-                      </button>
-                      <button
-                        type="button"
-                        className={`claria-mini-tab ${compareLeftMode === 'native' ? 'active' : ''}`}
-                        onClick={() => setCompareLeftMode('native')}
-                      >
-                        Original File
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {compareLeftMode === 'native' && originalViewUrl ? (
-                  <div className="claria-compare-pane-body native-frame-wrap">
-                    <iframe
-                      src={originalViewUrl}
-                      title="Original Uploaded File"
-                      className="claria-native-compare-iframe"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="claria-compare-pane-body"
-                    ref={leftScrollRef}
-                    onScroll={handleLeftScroll}
-                    dangerouslySetInnerHTML={{ __html: normalizedOrig.html }}
-                  />
-                )}
-              </div>
-
-              {/* RIGHT: HIGHLIGHTED OUTPUT */}
-              <div className="claria-compare-pane">
-                <div className="claria-compare-pane-header">
-                  <div className="claria-pane-title">
-                    <span className="claria-pane-dot hl" />
-                    <strong>HIGHLIGHTED OUTPUT</strong>
-                  </div>
-                </div>
-                <div
-                  className="claria-compare-pane-body"
-                  ref={rightScrollRef}
-                  onScroll={handleRightScroll}
-                  onClick={handleDocumentClick}
-                  dangerouslySetInnerHTML={{ __html: normalizedHl.html }}
-                />
-              </div>
-            </div>
-          </div>
         )}
       </div>
     </div>

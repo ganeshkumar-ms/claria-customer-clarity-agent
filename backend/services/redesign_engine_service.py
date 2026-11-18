@@ -17,38 +17,50 @@ from services import document_intelligence_service as intel_svc
 PRIMARY_MODEL_ID = 'us.amazon.nova-lite-v1:0'
 FALLBACK_MODEL_ID = 'us.amazon.nova-pro-v1:0'
 
-REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Customer Communication Intelligence, Transformation and Redesign Engine (Senior CCM Architect, BFSI Communication Strategist, Regulatory Content Reviewer & CX Specialist).
-Transform the provided CUSTOMER-FACING document content according to the user's instruction, communication type, tone, and target audience.
+REDESIGN_SYSTEM_PROMPT = """You are a Customer Communication Redesign Assistant, a senior Customer Communications Management (CCM) designer and content strategist specialising in BFSI communications.
+Reorganise and redesign the provided CUSTOMER-FACING communication using ONLY existing source content into the 5-stage flow:
+Reassure -> Explain -> Action -> Consequences -> Support.
 
-CONTEXT-AWARE ARCHITECTURE (DO NOT APPLY A GENERIC TEMPLATE):
-- Loan communications: Approval/rejection summary, loan details, repayment information, conditions, customer action, support.
-- Collections communications: Outstanding amount, payment deadline, available payment instructions, consequences, customer assistance.
-- Insurance communications: Policy information, coverage details, claim status, required documentation, deadlines, support.
-- Banking service communications: Service change, affected products, financial impact, effective date, customer preferences, support.
-- KYC communications: Verification requirements, required documents, submission methods, submission deadline, consequences (if stated in source).
-
-STRICT RULES:
-1. IMMUTABLE SOURCE INTEGRITY: Never alter, round, or fabricate financial amounts, fees, interest rates, EMI values, dates, deadlines, account/loan/policy identifiers, contractual conditions, eligibility requirements, or customer obligations.
-2. MISSING OR CONFLICTING INFORMATION: If required information is missing in the source, mark [TO BE CONFIRMED]. If source information conflicts, preserve the conflicting evidence and flag it.
-3. REGULATORY & TONE SAFETY: Never weaken mandatory disclosures, warnings, or obligations. Never introduce humour, exaggerated reassurance, aggressive urgency, or casual language into debt, default, hardship, fraud, legal action, complaint, rejection, or payment-failure communications.
-4. INTERNAL CONTENT ISOLATION: Never include internal-only staff instructions, internal implementation plans, or governance checklists in the customer-facing output.
-5. BRANDING & TABLES: Preserve tables clearly in structured row arrays. Never invent an organisation's logo, brand identity, or corporate colours.
-6. Output ONLY valid JSON matching this schema:
+CONTENT INTEGRITY RULES (NEVER BREAK):
+1. DO NOT HALLUCINATE: Never add facts, figures, names, dates, phone numbers, clauses, or any information not present in the original.
+2. REUSE EXACT DETAILS: Preserve all financial figures, dates, account/reference/policy numbers, and legal/regulatory clauses verbatim.
+3. MISSING INFO: If required information is missing in the original, insert [TO BE CONFIRMED] and list it in `tbc_placeholders`.
+4. NO REPEATED TITLES, NO FOOTERS: Never repeat the document title and never add page footers.
+5. SINGLE PRIMARY ACTION: Never introduce more than one primary Call to Action.
+6. INTERNAL ISOLATION: Never include internal-only staff instructions or governance checklists.
+7. Output ONLY valid JSON matching this schema:
 {
-  "title": "Clean customer-facing document title",
-  "salutation": "Dear Valued Customer,",
-  "introduction": "Clear, empathetic opening paragraph explaining what this communication is about and the primary message.",
+  "title": "Clear headline drawn from original subject/purpose",
+  "status_summary": {
+    "outcome": "Existing outcome/status from source",
+    "key_figures": ["Existing key amount/rate/date from source"],
+    "primary_action": "Single primary action from source or 'No action required'"
+  },
+  "account_details": [
+    {"label": "Field (e.g., Reference / Account / Date)", "value": "Exact value from source or [TO BE CONFIRMED]"}
+  ],
+  "salutation": "Existing salutation or 'Dear Valued Customer,'",
+  "introduction": "Brief reassuring opening using existing acknowledging/supportive text",
   "sections": [
     {
+      "stage": "Reassure | Explain | Action | Consequences | Support",
       "heading": "Section heading",
-      "paragraphs": ["Clear paragraph text preserving all facts, dates, and obligations."],
-      "bullets": ["Optional bullet items"],
+      "paragraphs": ["Reorganised existing content preserving meaning and facts."],
+      "bullets": ["Optional existing bullet items"],
       "table": [["Col 1", "Col 2"], ["Val 1", "Val 2"]]
     }
   ],
+  "call_to_action": {
+    "label": "Single prominent Call-to-Action from source",
+    "deadline": "Existing deadline or [TO BE CONFIRMED]",
+    "instruction": "Exact existing action instruction"
+  },
+  "options": [{"title": "Option title (only if original lists options)", "details": "Existing details"}],
+  "timeline": [{"step": "Step / Date (only if original implies steps)", "detail": "Existing step detail"}],
   "mandatory_disclosures": ["Preserved regulatory/legal disclosure lines"],
-  "closing": "Clear next steps and official contact / support closing.",
-  "design_notes": "1-sentence summary of the communication architecture, tone, audience, and format adaptations applied."
+  "tbc_placeholders": ["List of any [TO BE CONFIRMED] placeholders"],
+  "closing": "Existing support/contact closing",
+  "design_notes": "1-sentence summary of the Reassure -> Explain -> Action -> Consequences -> Support reorganisation."
 }"""
 
 
@@ -139,22 +151,84 @@ def _deterministic_redesign(
     ][:6]
 
     title = structured_doc.get('document_title') or 'Customer Communication'
-    intro = (
-        f"We are sharing this updated {structured_doc.get('document_type', 'communication').lower()} "
-        f"in a {tone_info['tone_label'].lower()} format tailored for {tone_info['audience']}."
+    comm_intel = structured_doc.get('communication_intelligence') or {}
+    ident = comm_intel.get('document_identity') or {}
+    fin = comm_intel.get('financial_intelligence') or {}
+    act = comm_intel.get('customer_action_intelligence') or {}
+
+    intro = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else (
+        f"Summary of {structured_doc.get('document_type', 'Customer Communication')}: {title}."
     )
     if grouped and grouped[0].get('paragraphs'):
-        intro = grouped[0]['paragraphs'][0]
         grouped[0]['paragraphs'] = grouped[0]['paragraphs'][1:]
+
+    # Build Reassure -> Explain -> Action -> Consequences -> Support sections from existing content
+    reassure_p, explain_p, action_p, conseq_p, support_p = [], [], [], [], []
+    tables_found = []
+    for g in grouped:
+        if g.get('table'):
+            tables_found.append(g['table'])
+        for txt in (g.get('paragraphs') or []) + (g.get('bullets') or []):
+            tl = txt.lower()
+            if any(k in tl for k in ('thank you', 'valued', 'we appreciate', 'here to help', 'support you')):
+                reassure_p.append(txt)
+            elif any(k in tl for k in ('please ', 'must ', 'submit', 'confirm', 'complete ', 'pay ', 'required to')):
+                action_p.append(txt)
+            elif any(k in tl for k in ('if not', 'failure to', 'consequence', 'penalty', 'late fee', 'suspend', 'legal', 'disclosure', 'terms')):
+                conseq_p.append(txt)
+            elif any(k in tl for k in ('helpline', 'support', 'contact', 'toll-free', 'email', 'branch', '1800')):
+                support_p.append(txt)
+            else:
+                explain_p.append(txt)
+
+    flow_sections = []
+    if reassure_p:
+        flow_sections.append({'stage': 'Reassure', 'heading': 'Reassure — Context & Support', 'paragraphs': reassure_p, 'bullets': [], 'table': []})
+    if explain_p or tables_found:
+        flow_sections.append({'stage': 'Explain', 'heading': 'Explain — Key Details', 'paragraphs': explain_p, 'bullets': [], 'table': tables_found[0] if tables_found else []})
+    if action_p:
+        flow_sections.append({'stage': 'Action', 'heading': 'Action — What You Need To Do', 'paragraphs': [], 'bullets': action_p, 'table': []})
+    if conseq_p:
+        flow_sections.append({'stage': 'Consequences', 'heading': 'Consequences & Regulatory Terms', 'paragraphs': conseq_p, 'bullets': [], 'table': []})
+    if support_p:
+        flow_sections.append({'stage': 'Support', 'heading': 'Support & Contact Channels', 'paragraphs': support_p, 'bullets': [], 'table': []})
+    if not flow_sections:
+        flow_sections = [g for g in grouped if g['paragraphs'] or g['bullets'] or g['table']]
+
+    primary_action = (act.get('required_actions') or ['Review the details below'])[0][:180]
+    deadline_val = (fin.get('payment_or_effective_dates') or ['[TO BE CONFIRMED]'])[0]
+    account_details = [
+        {'label': 'Document Type', 'value': structured_doc.get('document_type') or 'Customer Communication'},
+        {'label': 'Reference / ID', 'value': ident.get('document_reference') or '[TO BE CONFIRMED]'},
+        {'label': 'Key Date / Deadline', 'value': deadline_val},
+    ]
+    if fin.get('monetary_amounts'):
+        account_details.append({'label': 'Key Amount(s)', 'value': ', '.join(fin['monetary_amounts'][:3])})
+
+    tbc_list = [f"{a['label']}: [TO BE CONFIRMED]" for a in account_details if '[TO BE CONFIRMED]' in a['value']]
 
     return {
         'title': title,
+        'status_summary': {
+            'outcome': structured_doc.get('document_type') or 'Customer Communication',
+            'key_figures': (fin.get('monetary_amounts') or [])[:3] + (fin.get('rates_and_percentages') or [])[:2],
+            'primary_action': primary_action,
+        },
+        'account_details': account_details,
         'salutation': 'Dear Valued Customer,',
         'introduction': intro,
-        'sections': [g for g in grouped if g['paragraphs'] or g['bullets'] or g['table']],
+        'sections': flow_sections,
+        'call_to_action': {
+            'label': 'Primary Action Required' if act.get('required_actions') else 'For Your Information',
+            'deadline': deadline_val,
+            'instruction': primary_action,
+        },
+        'options': [],
+        'timeline': [],
         'mandatory_disclosures': disclosures,
-        'closing': 'If you have any questions, please contact our customer support team using the official channels listed in your account portal.',
-        'design_notes': f"Applied {tone_info['tone_label']} tone for {tone_info['audience']} ({tone_info['design_mode'].replace('_', ' ')}).",
+        'tbc_placeholders': tbc_list,
+        'closing': (support_p[0] if support_p else 'Contact details: [TO BE CONFIRMED]'),
+        'design_notes': f"Reorganised source content into Reassure -> Explain -> Action -> Consequences -> Support ({tone_info['tone_label']} tone).",
     }
 
 
