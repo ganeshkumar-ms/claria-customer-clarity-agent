@@ -370,16 +370,29 @@ def _deterministic_redesign(
                 f"Thank you for your valued partnership with us. To help us complete the annual review of your commercial loan smoothly, "
                 f"please send us your latest financial information by {deadline_val}. We're here to support you at every step."
             )
+        elif is_friendly:
+            intro = (
+                f"We hope everything is going well with your business! To help us complete your annual commercial loan review, "
+                f"please share your latest financial information with us by {deadline_val}."
+            )
         else:
             intro = f"Please send us your latest financial information by {deadline_val} so we can complete the annual review of your commercial loan."
     else:
         base_intro = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else (
             f"Please review the details below regarding {raw_title}."
         )
-        intro = (
-            "Thank you for your continued partnership with us. We want to make this process as smooth and supportive as possible. "
-            + _soften_text_for_tone(base_intro, tones)
-        ) if is_empathetic else _soften_text_for_tone(base_intro, tones)
+        if is_empathetic:
+            intro = (
+                "Thank you for your continued partnership with us. We want to make this process as smooth and supportive as possible. "
+                + _soften_text_for_tone(base_intro, tones)
+            )
+        elif is_friendly:
+            intro = (
+                "We hope you are doing well! We've put together a clear summary below to make things easy for you. "
+                + _soften_text_for_tone(base_intro, tones)
+            )
+        else:
+            intro = _soften_text_for_tone(base_intro, tones)
 
     account_details: list[dict[str, str]] = []
     if meta.get('customer'):
@@ -410,6 +423,10 @@ def _deterministic_redesign(
         )
     elif is_empathetic and not help_text:
         help_text = "If you have questions or need support at any stage, please reach out to your assigned Relationship Manager — we are here to help."
+    elif is_friendly and help_text:
+        help_text = help_text + " Your assigned Relationship Manager will be glad to help you with anything you need."
+    elif is_friendly and not help_text:
+        help_text = "Have questions? Feel free to reach out to your assigned Relationship Manager — we're always happy to help!"
 
     primary_action = _soften_text_for_tone((act.get('required_actions') or ['Submit the required documents by the deadline'])[0][:180], tones)
     institution = meta.get('institution') or 'Northridge Commercial Bank'
@@ -439,8 +456,12 @@ def _deterministic_redesign(
         'need_help': help_text,
         'obligations_heading': 'Important information about your loan obligations',
         'mandatory_disclosures': disclosures,
-        'closing_heading': 'Thank you for your cooperation',
-        'closing_text': coop_text or f"We appreciate your continued relationship with {institution} and your help in completing the annual credit review.",
+        'closing_heading': 'Thank you for banking with us' if is_friendly else 'Thank you for your cooperation',
+        'closing_text': (
+            f"Thank you for your continued partnership with {institution}! We truly appreciate your business and your help in completing the annual credit review."
+            if is_friendly
+            else (coop_text or f"We appreciate your continued relationship with {institution} and your help in completing the annual credit review.")
+        ),
         'sign_off_division': division,
         'sign_off_institution': institution,
         'footer_note': (

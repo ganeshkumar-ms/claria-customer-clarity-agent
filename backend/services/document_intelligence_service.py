@@ -5,6 +5,7 @@ tone/audience safety checks, and deterministic source fact extraction & verifica
 """
 import re
 import hashlib
+import difflib
 from typing import Any
 
 
@@ -100,19 +101,31 @@ TONE_SYNONYM_GROUPS = (
 )
 
 
+def _matches_tone_keywords(inst: str, tokens: list[str], keywords: tuple[str, ...]) -> bool:
+    for kw in keywords:
+        if re.search(rf'\b{re.escape(kw)}\b', inst):
+            return True
+        if ' ' not in kw and len(kw) >= 4:
+            for tok in tokens:
+                if len(tok) >= 4 and difflib.SequenceMatcher(None, tok, kw).ratio() >= 0.72:
+                    return True
+    return False
+
+
 def parse_tone_and_audience(instruction: str, doc_text: str) -> dict[str, Any]:
     """Extracts requested tone, audience, design mode, tone directive, and evaluates tone safety."""
     inst = (instruction or '').lower()
     doc_lower = (doc_text or '').lower()
+    tokens = re.findall(r'[a-z]+', inst)
 
     requested_tones: list[str] = []
     for canonical, keywords in TONE_SYNONYM_GROUPS:
-        if any(re.search(rf'\b{re.escape(kw)}\b', inst) for kw in keywords):
+        if _matches_tone_keywords(inst, tokens, keywords):
             if canonical not in requested_tones:
                 requested_tones.append(canonical)
 
     for t in SUPPORTED_TONES:
-        if re.search(rf'\b{re.escape(t)}\b', inst) and t not in requested_tones:
+        if _matches_tone_keywords(inst, tokens, (t,)) and t not in requested_tones:
             requested_tones.append(t)
 
     if not requested_tones:

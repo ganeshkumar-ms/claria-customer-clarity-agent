@@ -568,15 +568,6 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
   }
 
   const renderOriginalDocumentView = () => {
-    if (originalViewUrl && inputExt === 'pdf') {
-      return (
-        <iframe
-          src={originalViewUrl}
-          title={sourceFilename}
-          className="claria-orig-doc-iframe"
-        />
-      )
-    }
     return <OriginalFormalDocumentSheet rawText={rawText} rd={rd} sourceFilename={sourceFilename} />
   }
 
@@ -671,10 +662,10 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
                 <div className="claria-compare-pane-header">
                   <div className="claria-pane-title">
                     <span className="claria-pane-dot orig" />
-                    <strong>ORIGINAL INPUT DOCUMENT ({sourceFilename})</strong>
+                    <strong>ORIGINAL INPUT DOCUMENT</strong>
                   </div>
                 </div>
-                <div className="claria-compare-pane-body" style={{ padding: originalViewUrl && inputExt === 'pdf' ? 0 : '14px' }}>
+                <div className="claria-compare-pane-body" style={{ padding: '14px' }}>
                   {renderOriginalDocumentView()}
                 </div>
               </div>
@@ -695,7 +686,7 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
 
         {/* TAB 3: ORIGINAL INPUT DOCUMENT */}
         {deliverableTab === 'original' && (
-          <div className="claria-redesign-body" style={{ padding: originalViewUrl && inputExt === 'pdf' ? 0 : undefined }}>
+          <div className="claria-redesign-body">
             {renderOriginalDocumentView()}
           </div>
         )}

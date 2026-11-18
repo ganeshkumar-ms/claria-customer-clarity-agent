@@ -1,4 +1,5 @@
 import base64
+import difflib
 import json
 import os
 import re
@@ -25,10 +26,37 @@ from services import (
 REFINEMENT_INTENT_RE = (
     r'\b(?:empath\w*|harsh\w*|soft\w*|warm\w*|gentl\w*|kind\w*|compassion\w*|reassur\w*|'
     r'supportive|polite\w*|respectful|friendly|friendlier|conversational|simpl\w*|plain\s+english|'
-    r'easy|easier|clearer|concise|short\w*|brief|formal|corporate|professional|tone|rewrite|'
-    r'redesign|rephrase|reword|make\s+it|change\s+the|less\s+harsh|not\s+harsh|too\s+harsh|'
+    r'easy|easier|clearer|concise|short\w*|brief|formal|corporate|professional|tone|tune|rewrite|'
+    r'redesign|rephrase|reword|make\s+it|want\s+it|change\s+the|less\s+harsh|not\s+harsh|too\s+harsh|'
     r'very\s+harsh|intimidating|threatening|strict|cold|senior\w*|audience|refine)\b'
 )
+
+FUZZY_INTENT_WORDS = (
+    'empathy', 'empathetic', 'harsh', 'softer', 'gentle', 'warm', 'reassuring',
+    'supportive', 'polite', 'friendly', 'conversational', 'simple', 'simplify',
+    'concise', 'formal', 'professional', 'tone', 'rewrite', 'redesign',
+    'rephrase', 'reword', 'refine', 'clearer', 'welcoming', 'approachable',
+)
+
+
+def _has_refinement_intent(text: str, has_active_doc: bool = False) -> bool:
+    if not text or not text.strip():
+        return False
+    low = text.strip().lower()
+    if re.search(REFINEMENT_INTENT_RE, low, re.IGNORECASE):
+        return True
+    tokens = re.findall(r'[a-z]+', low)
+    for tok in tokens:
+        if len(tok) >= 4:
+            for kw in FUZZY_INTENT_WORDS:
+                if difflib.SequenceMatcher(None, tok, kw).ratio() >= 0.72:
+                    return True
+    if has_active_doc and len(tokens) <= 25:
+        pure_greetings = {'hi', 'hello', 'hey', 'ok', 'okay', 'thanks', 'thank', 'bye'}
+        if tokens and not all(t in pure_greetings for t in tokens):
+            if not re.match(r'^(?:what|when|where|who|how|why|is|are|can|do)\b.*\?$', low):
+                return True
+    return False
 
 TMP_UPLOADS = Path(tempfile.gettempdir()) / 'uploads'
 TMP_UPLOADS.mkdir(parents=True, exist_ok=True)
@@ -396,8 +424,8 @@ def lambda_handler(event, context):
             if user_instruction:
                 combined_text += f"\nRecipient's Question / Note: {user_instruction}\n"
 
-        # If no new file was uploaded, check if user is refining an active document in the conversation (e.g. "make it empathy")
-        if not file_obj and user_instruction and len(user_instruction.split()) <= 60 and re.search(REFINEMENT_INTENT_RE, user_instruction, re.IGNORECASE):
+        # If no new file was uploaded, check if user is refining an active document in the conversation (e.g. "make it empathy", "i want it in friednly tune")
+        if not file_obj and user_instruction and len(user_instruction.split()) <= 60 and _has_refinement_intent(user_instruction, has_active_doc=bool(active_document_id or active_document_text.strip())):
             rec = (
                 governance_store_service.get_document_record(active_document_id)
                 if active_document_id
