@@ -181,28 +181,8 @@ function normalizeDocumentDom(rawHtml, isHighlighted) {
       candidateMarks.push({ mark, normCat, txt })
     })
 
-    // Allow 1 key highlight per paragraph/bullet across all sections (up to 18 across a multi-page document)
-    const MAX_HIGHLIGHTS = 18
-    const seenLines = new Set()
-    const perLineMarks = []
-    for (const item of candidateMarks) {
-      const parentLine = item.mark.closest('.claria-doc-line')
-      if (parentLine && seenLines.has(parentLine)) {
-        const textNode = doc.createTextNode(item.mark.textContent || '')
-        item.mark.replaceWith(textNode)
-      } else {
-        if (parentLine) seenLines.add(parentLine)
-        perLineMarks.push(item)
-      }
-    }
-
-    const keptMarks = perLineMarks.slice(0, MAX_HIGHLIGHTS)
-    if (perLineMarks.length > MAX_HIGHLIGHTS) {
-      perLineMarks.slice(MAX_HIGHLIGHTS).forEach((item) => {
-        const textNode = doc.createTextNode(item.mark.textContent || '')
-        item.mark.replaceWith(textNode)
-      })
-    }
+    // Keep all important highlights across the full document without capping
+    const keptMarks = candidateMarks
 
     keptMarks.forEach(({ mark, normCat, txt }) => {
       const cleanLabel = CAT_LABELS[normCat] || 'Key Sentence'

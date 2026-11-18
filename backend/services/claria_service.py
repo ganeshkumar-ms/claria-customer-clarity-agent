@@ -33,10 +33,10 @@ You solve the core customer communication problem at the top level:
 "When a customer receives a long, dense communication, which exact paragraphs and sentences tell them what this is about, what they need to do, when they need to act, and what changes for them?"
 
 === STRICT RULES FOR HIGHLIGHTING ===
-1. SKIM-TO-UNDERSTAND COVERAGE (HIGHLIGHT ALL IMPORTANT POINTS ACROSS EVERY SECTION):
-   - Your goal is that a reader can read ONLY the highlighted sentences/clauses from top to bottom and immediately understand the entire document.
-   - Cover EVERY section and page of the document from beginning to end — do not stop after page 1.
-   - Highlight every genuinely important sentence or self-contained key clause (typically 8 to 20 highlights for a multi-page document, or 4 to 8 for a 1-page notice), while leaving surrounding filler/boilerplate unhighlighted (highlight roughly 1 key sentence per important paragraph/bullet).
+1. COMPLETE COVERAGE ACROSS THE FULL DOCUMENT (NO IMPORTANT DETAIL MISSED):
+   - Your goal is that a reader can read the highlighted sentences/clauses from top to bottom and catch EVERY important point without missing any action, deadline, fee, penalty, obligation, eligibility rule, exclusion, or customer impact.
+   - Cover EVERY section and page of the document from beginning to end — never stop after page 1 or cap the count.
+   - Return as many `sentence_highlights` as needed (there is NO maximum limit) so that every genuinely important sentence or self-contained clause across the entire document is highlighted, while leaving purely decorative filler unhighlighted.
 
 2. COMPLETE MEANINGFUL SENTENCES OR CLAUSES — NEVER SINGLE WORDS:
    - Every `verbatim_sentence` you return in `sentence_highlights` MUST be a complete, meaningful sentence or self-contained clause (at least 6 words) copied word-for-word from the original communication.
@@ -62,7 +62,8 @@ You solve the core customer communication problem at the top level:
 
 === RESPONSE FORMAT (ALWAYS RESPOND WITH ONLY VALID JSON) ===
 
-CASE 1: USER CHATS, GREETS, OR ASKS A CONVERSATIONAL QUESTION WITHOUT DOCUMENT CONTENT
+CASE 1: USER CHATS, GREETS, OR ASKS A CONVERSATIONAL / FOLLOW-UP QUESTION WITHOUT NEW DOCUMENT CONTENT
+(Includes "tell extra about...", "be more specific about...", or questions about customer clarity / prior highlights from conversation history — answer thoroughly and specifically.)
 Respond with ONLY:
 {
   "type": "chat",
@@ -275,10 +276,10 @@ def redesign_communication(
         print(f"[CLARIA Service] Bedrock call error: {e}")
         try:
             fallback_response = client.converse(
-                modelId='us.anthropic.claude-3-haiku-20240307-v1:0',
+                modelId='us.amazon.nova-lite-v1:0',
                 messages=messages,
                 system=[{'text': CLARIA_SYSTEM_PROMPT}],
-                inferenceConfig={'maxTokens': 3000, 'temperature': 0.1}
+                inferenceConfig={'maxTokens': 4000, 'temperature': 0.1}
             )
             output_text = fallback_response['output']['message']['content'][0]['text'].strip()
             json_match = re.search(r'\{[\s\S]*\}', output_text)
@@ -423,25 +424,27 @@ def _split_into_sentences_preserving_ws(text: str):
 
 def _classify_full_sentence(sentence: str, ai_highlights: list, allow_fallback: bool = False) -> dict:
     """
-    Classifies a FULL sentence (must be at least 6 words so single words/headers/fragments are NEVER highlighted).
-    When AI highlights are available, matches ONLY the AI-selected top sentences so 85-90% of the document
-    remains clean unhighlighted text.
+    Classifies a complete sentence or self-contained clause across the full document.
+    Matches AI-selected highlights (including punctuation-normalized matching) and falls back
+    to deterministic clarity patterns so no important obligation, deadline, or impact is missed.
     """
     s_clean = re.sub(r'\s+', ' ', sentence).strip()
     words = s_clean.split()
-    if len(words) < 6:
+    if len(words) < 4:
         return None
 
     s_lower = s_clean.lower()
+    s_norm = re.sub(r'[^\w\s]', '', s_lower)
 
-    # 1. Match against AI-selected top sentence_highlights
+    # 1. Match against AI-selected sentence_highlights
     for item in ai_highlights:
         if item.get('used'):
             continue
         q_clean = item['quote_clean']
-        if len(q_clean.split()) < 6:
+        if len(q_clean.split()) < 4:
             continue
-        if q_clean in s_lower or (len(words) >= 8 and s_lower in q_clean):
+        q_norm = re.sub(r'[^\w\s]', '', q_clean)
+        if q_clean in s_lower or (len(words) >= 6 and s_lower in q_clean) or (q_norm and len(q_norm) >= 18 and (q_norm in s_norm or s_norm in q_norm)):
             item['used'] = True
             cat = item['category']
             meta = CLARITY_CATEGORIES.get(cat, CLARITY_CATEGORIES['core_message'])
@@ -601,7 +604,6 @@ def build_clarity_highlighted_document(raw_text: str, parsed: dict, filename: st
             "verbatim_verified": True
         }
         counter = 0
-        max_total = 18
 
         for block_idx, blk in enumerate(blocks):
             btype = blk['type']
@@ -633,9 +635,7 @@ def build_clarity_highlighted_document(raw_text: str, parsed: dict, filename: st
             line_categories = []
 
             for sent_text, trailing_ws in sentence_chunks:
-                match_info = None
-                if not line_categories and counter < max_total:
-                    match_info = _classify_full_sentence(sent_text, ai_highlights, allow_fallback=allow_fallback)
+                match_info = _classify_full_sentence(sent_text, ai_highlights, allow_fallback=allow_fallback)
 
                 if match_info:
                     counter += 1

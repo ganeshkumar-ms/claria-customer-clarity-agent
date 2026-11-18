@@ -363,19 +363,37 @@ export default function App() {
       return [updated, ...prev.filter(s => s.id !== activeId)]
     })
 
+    const isRetryOrRefine = !file && /\b(retry|try again|re-?analyze|redo|more specific|be more specific|more detail|deeper)\b/i.test(content || '')
+    const priorFileMsg = isRetryOrRefine
+      ? [...nextMessages].reverse().find(m => m.role === 'user' && typeof File !== 'undefined' && m.file instanceof File)
+      : null
+    const effectiveFile = file || priorFileMsg?.file || null
+
     // Build memory history
     const historyPayload = nextMessages
       .filter(m => m.role === 'user' || m.role === 'ai')
       .slice(-6)
       .map(m => ({
         role: m.role,
-        content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content)
+        content: typeof m.content === 'string'
+          ? m.content
+          : JSON.stringify({
+              type: m.content?.type,
+              what_this_is_about: m.content?.what_this_is_about,
+              what_you_need_to_do: m.content?.what_you_need_to_do,
+              message: m.content?.message,
+              highlights: (m.content?.highlighted_document?.watchout_items || m.content?.sentence_highlights || []).slice(0, 12).map(h => ({
+                category: h.category,
+                text: h.verbatim_text || h.verbatim_sentence,
+                note: h.note || h.plain_meaning,
+              })),
+            }).slice(0, 2400)
       }))
 
     try {
       const [responseData] = await Promise.all([
         redesignCommunication({
-          file,
+          file: effectiveFile,
           text: content,
           conversationHistory: historyPayload
         }),
