@@ -580,9 +580,10 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
     if (originalViewUrl && inputExt === 'pdf') {
       return (
         <iframe
-          src={`${originalViewUrl}#toolbar=0&navpanes=0&view=FitH`}
+          src={`${originalViewUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
           title={sourceFilename}
           className="claria-orig-doc-iframe"
+          scrolling="no"
         />
       )
     }
