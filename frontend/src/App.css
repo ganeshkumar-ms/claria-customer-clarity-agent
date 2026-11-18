@@ -3461,21 +3461,26 @@ html, body {
 }
 
 .claria-exec-table {
-  width: 100%;
+  width: 100% !important;
+  display: table !important;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: 13px;
   margin-top: 6px;
 }
 
 .claria-exec-table th,
 .claria-exec-table td {
   border: 1px solid #dce3ec;
-  padding: 8px 12px;
+  padding: 7px 10px;
   text-align: left;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  vertical-align: middle;
 }
 
 .claria-exec-table th {
-  width: 160px;
+  width: 36%;
   background: #f8fafc;
   color: #1e293b;
   font-weight: 700;
@@ -3484,6 +3489,23 @@ html, body {
 .claria-exec-table td {
   background: #ffffff;
   color: #334155;
+}
+
+.claria-orig-meta-grid th {
+  width: 22% !important;
+  font-size: 11.5px !important;
+  background: #f1f5f9 !important;
+  color: #163a5f !important;
+}
+
+.claria-orig-meta-grid td {
+  width: 28% !important;
+  font-size: 11.5px !important;
+  color: #1e293b !important;
+}
+
+.claria-compare-pane-body .claria-exec-paper {
+  padding: 22px 20px 18px;
 }
 
 .claria-exec-checklist {
@@ -3573,14 +3595,14 @@ html, body {
 }
 
 .claria-orig-bank {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
-  color: #0f172a;
+  color: #163a5f;
   letter-spacing: 0.4px;
 }
 
 .claria-orig-div {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #475569;
   letter-spacing: 0.8px;
@@ -3588,38 +3610,29 @@ html, body {
 }
 
 .claria-orig-notice-title {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 800;
-  color: #0f172a;
-  margin-top: 14px;
+  color: #163a5f;
+  margin-top: 12px;
   letter-spacing: 0.3px;
 }
 
 .claria-orig-subject {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #1e293b;
-  margin-top: 6px;
+  margin-top: 5px;
 }
 
 .claria-orig-meta-grid {
-  margin-bottom: 22px;
-}
-
-.claria-orig-meta-grid th {
-  width: 155px;
-  font-size: 12.5px;
-}
-
-.claria-orig-meta-grid td {
-  font-size: 12.5px;
+  margin-bottom: 20px;
 }
 
 .claria-orig-sec-h {
-  margin: 18px 0 8px;
-  font-size: 14.5px;
+  margin: 16px 0 7px;
+  font-size: 14px;
   font-weight: 800;
-  color: #0f172a;
+  color: #163a5f;
 }
 
 .claria-orig-bullet {
@@ -3634,21 +3647,21 @@ html, body {
   flex-direction: column;
   padding: 12px 16px;
   margin: 12px 0 14px;
-  background: #f1f5f9;
-  border: 1px solid #94a3b8;
+  background: #e8f1f8;
+  border: 1px solid #7fa6c9;
 }
 
 .claria-orig-deadline-box span {
   font-size: 10.5px;
   font-weight: 800;
-  color: #334155;
+  color: #163a5f;
   letter-spacing: 0.4px;
 }
 
 .claria-orig-deadline-box strong {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: #163a5f;
   margin-top: 2px;
 }
 
@@ -4137,21 +4150,26 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
 }
 
 .claria-exec-table {
-  width: 100%;
+  width: 100% !important;
+  display: table !important;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 13.5px;
+  font-size: 13px;
   margin-top: 6px;
 }
 
 .claria-exec-table th,
 .claria-exec-table td {
   border: 1px solid #dce3ec;
-  padding: 8px 12px;
+  padding: 7px 10px;
   text-align: left;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  vertical-align: middle;
 }
 
 .claria-exec-table th {
-  width: 160px;
+  width: 36%;
   background: #f8fafc;
   color: #1e293b;
   font-weight: 700;
@@ -4160,6 +4178,23 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
 .claria-exec-table td {
   background: #ffffff;
   color: #334155;
+}
+
+.claria-orig-meta-grid th {
+  width: 22% !important;
+  font-size: 11.5px !important;
+  background: #f1f5f9 !important;
+  color: #163a5f !important;
+}
+
+.claria-orig-meta-grid td {
+  width: 28% !important;
+  font-size: 11.5px !important;
+  color: #1e293b !important;
+}
+
+.claria-compare-pane-body .claria-exec-paper {
+  padding: 22px 20px 18px;
 }
 
 .claria-exec-checklist {
@@ -4249,14 +4284,14 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
 }
 
 .claria-orig-bank {
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 800;
-  color: #0f172a;
+  color: #163a5f;
   letter-spacing: 0.4px;
 }
 
 .claria-orig-div {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: #475569;
   letter-spacing: 0.8px;
@@ -4264,38 +4299,29 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
 }
 
 .claria-orig-notice-title {
-  font-size: 15px;
+  font-size: 14.5px;
   font-weight: 800;
-  color: #0f172a;
-  margin-top: 14px;
+  color: #163a5f;
+  margin-top: 12px;
   letter-spacing: 0.3px;
 }
 
 .claria-orig-subject {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   color: #1e293b;
-  margin-top: 6px;
+  margin-top: 5px;
 }
 
 .claria-orig-meta-grid {
-  margin-bottom: 22px;
-}
-
-.claria-orig-meta-grid th {
-  width: 155px;
-  font-size: 12.5px;
-}
-
-.claria-orig-meta-grid td {
-  font-size: 12.5px;
+  margin-bottom: 20px;
 }
 
 .claria-orig-sec-h {
-  margin: 18px 0 8px;
-  font-size: 14.5px;
+  margin: 16px 0 7px;
+  font-size: 14px;
   font-weight: 800;
-  color: #0f172a;
+  color: #163a5f;
 }
 
 .claria-orig-bullet {
@@ -4310,21 +4336,21 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
   flex-direction: column;
   padding: 12px 16px;
   margin: 12px 0 14px;
-  background: #f1f5f9;
-  border: 1px solid #94a3b8;
+  background: #e8f1f8;
+  border: 1px solid #7fa6c9;
 }
 
 .claria-orig-deadline-box span {
   font-size: 10.5px;
   font-weight: 800;
-  color: #334155;
+  color: #163a5f;
   letter-spacing: 0.4px;
 }
 
 .claria-orig-deadline-box strong {
   font-size: 18px;
   font-weight: 800;
-  color: #0f172a;
+  color: #163a5f;
   margin-top: 2px;
 }
 

@@ -61,7 +61,8 @@ function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
     )
   }
 
-  const existingDetails = (existing.account_details || []).filter(r => r && r.value && r.value !== '[TO BE CONFIRMED]')
+  const isPlaceholder = (v) => !v || /^exact\s+/i.test(String(v).trim()) || String(v).trim() === '[TO BE CONFIRMED]'
+  const existingDetails = (existing.account_details || []).filter(r => r && !isPlaceholder(r.value))
   const finalDetails = extractedDetails.length >= existingDetails.length && extractedDetails.length > 0
     ? extractedDetails
     : existingDetails
@@ -245,15 +246,23 @@ function OriginalFormalDocumentSheet({ rawText, rd, sourceFilename }) {
   const division = (rd.sign_off_division || 'COMMERCIAL BANKING DIVISION').toUpperCase()
 
   const subjLine = lines.find(l => /^subject\s*:/i.test(l)) || 'Subject: Submission of Annual Financial Statements – Commercial Loan Account'
+  const flatRaw = cleaned.replace(/\s+/g, ' ')
+  const rawDateM = flatRaw.match(/\bDate\b[\s:|]*(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})/i)
+  const rawRefM = flatRaw.match(/\b(?:Communication\s+)?Reference\b[\s:|]*([A-Z]{2,6}[-/]\d{4}[-/]\d{3,6})/i)
+  const rawLoanM = flatRaw.match(/\b(?:Account|Loan)\s*(?:Reference|Account)\b[\s:|]*([A-Z]{2,6}[-/]\d{4}[-/]\d{3,6})/i)
+  const rawCustM = cleaned.match(/Custom\s*er(?![\s:|]*Communication\b)[\s:|]+([A-Z][A-Za-z0-9\s&.,()-]+?(?:Ltd\.?|Limited|Inc\.?|PLC|LLP|Corp\.?|Enterprises))/i)
+
   const details = rd.account_details || []
   const getVal = (key, fallback) => {
     const found = details.find(d => d.label.toLowerCase().includes(key))
-    return found?.value || fallback
+    const val = found?.value
+    if (!val || /^exact\s+/i.test(val.trim()) || val.trim() === '[TO BE CONFIRMED]') return fallback
+    return val
   }
-  const dateVal = getVal('date', '18 November 2026')
-  const refVal = getVal('reference', 'CCB/2026/4182')
-  const custVal = getVal('customer', 'Greenfield Agricultural Enterprises Ltd.')
-  const loanVal = getVal('loan', 'CL-2023-09471')
+  const dateVal = rawDateM ? rawDateM[1].trim() : getVal('date', '18 November 2026')
+  const refVal = rawRefM ? rawRefM[1].trim() : getVal('reference', 'CCB-2026-0148')
+  const custVal = rawCustM ? rawCustM[1].replace(/\s+/g, ' ').trim() : getVal('customer', 'Greenfield Agricultural Enterprises Ltd.')
+  const loanVal = rawLoanM ? rawLoanM[1].trim() : getVal('loan', 'CL-2024-00871')
 
   // Group remaining body lines into numbered formal sections or paragraphs
   const bodyLines = lines.filter(l => {
