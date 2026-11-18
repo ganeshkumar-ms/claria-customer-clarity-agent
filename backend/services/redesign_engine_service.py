@@ -377,17 +377,18 @@ def _deterministic_redesign(
         else:
             intro = f"Please send us your latest financial information by {deadline_val} so we can complete the annual review of your commercial loan."
     else:
-        base_intro = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else (
-            f"Please review the details below regarding {raw_title}."
-        )
+        raw_open = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else f"Summary of {raw_title}."
+        # Keep introduction concise (first 1-2 sentences) so the full document body stays in sections
+        sent_split = re.split(r'(?<=[.!?])\s+', raw_open)
+        base_intro = ' '.join(sent_split[:2]).strip()
         if is_empathetic:
             intro = (
-                "Thank you for your continued partnership with us. We want to make this process as smooth and supportive as possible. "
+                "Thank you for your continued partnership with us. We want to make this as clear and supportive as possible. "
                 + _soften_text_for_tone(base_intro, tones)
             )
         elif is_friendly:
             intro = (
-                "We hope you are doing well! We've put together a clear summary below to make things easy for you. "
+                "We hope you are doing well! Here is a clear, friendly overview of this communication. "
                 + _soften_text_for_tone(base_intro, tones)
             )
         else:
@@ -458,7 +459,7 @@ def _deterministic_redesign(
             'Use this checklist to make sure your submission is complete:'
             if (is_annual_review and checklist_bullets) else ''
         ),
-        'checklist': checklist_bullets[:10],
+        'checklist': checklist_bullets[:10] if is_annual_review else [],
         'preparation_requirement': prep_req,
         'why_we_need_heading': 'Why we need these documents' if is_annual_review else 'Why this matters',
         'what_happens_next': why_text,

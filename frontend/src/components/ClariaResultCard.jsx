@@ -76,29 +76,29 @@ function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
         : data?.what_this_is_about || ''),
     deadline_label: existing.deadline_label || 'PLEASE SUBMIT BY',
     deadline,
-    details_heading: existing.details_heading || (loanM || isAnnualReview ? 'Your loan details' : 'Your account details'),
+    details_heading: existing.details_heading || (loanM || isAnnualReview ? 'Your loan details' : 'Key details'),
     account_details: finalDetails,
-    what_we_need_heading: existing.what_we_need_heading || 'What we need from you',
+    what_we_need_heading: existing.what_we_need_heading || (isAnnualReview ? 'What we need from you' : 'Key action items'),
     what_we_need_intro:
       existing.what_we_need_intro ||
-      (defaultChecklist.length > 0
+      (isAnnualReview && defaultChecklist.length > 0
         ? 'Please provide the following documents for your most recently completed financial year. Use this checklist to make sure your submission is complete:'
         : ''),
-    checklist: (existing.checklist && existing.checklist.length > 0) ? existing.checklist : defaultChecklist,
+    checklist: (existing.checklist && existing.checklist.length > 0) ? existing.checklist : (isAnnualReview ? defaultChecklist : []),
     preparation_requirement: existing.preparation_requirement || defaultPrep,
-    why_we_need_heading: existing.why_we_need_heading || 'Why we need these documents',
+    why_we_need_heading: existing.why_we_need_heading || (isAnnualReview ? 'Why we need these documents' : 'Why this matters'),
     what_happens_next: existing.what_happens_next || defaultWhy,
-    how_to_send_heading: existing.how_to_send_heading || 'How to send your documents',
+    how_to_send_heading: existing.how_to_send_heading || (isAnnualReview ? 'How to send your documents' : 'Next steps'),
     how_to_submit_intro:
       existing.how_to_submit_intro ||
-      ((existing.submission_routes?.length || defaultRoutes.length)
+      (isAnnualReview && (existing.submission_routes?.length || defaultRoutes.length)
         ? 'Please send the complete, legible documents using either of these approved routes:'
         : ''),
     submission_routes: (existing.submission_routes && existing.submission_routes.length > 0) ? existing.submission_routes : defaultRoutes,
     how_to_submit: existing.how_to_submit || '',
     need_help: existing.need_help || defaultHelp,
     sections: existing.sections || [],
-    obligations_heading: existing.obligations_heading || 'Important information about your loan obligations',
+    obligations_heading: existing.obligations_heading || (isAnnualReview ? 'Important information about your loan obligations' : 'Important information'),
     mandatory_disclosures:
       (existing.mandatory_disclosures && existing.mandatory_disclosures.length > 0)
         ? existing.mandatory_disclosures
