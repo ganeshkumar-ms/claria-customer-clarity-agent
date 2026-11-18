@@ -604,7 +604,43 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
 
         {/* TAB 1: REDESIGNED CUSTOMER-FRIENDLY COMMUNICATION */}
         {deliverableTab === 'redesigned' && (() => {
-          const rd = data.redesigned_document || {}
+          let rd = data.redesigned_document || {}
+          const hasBackendRedesign = Boolean(
+            rd.introduction || (rd.checklist && rd.checklist.length) || (rd.sections && rd.sections.length)
+          )
+          if (!hasBackendRedesign) {
+            const rawLines = (highlightedDoc.raw_text || '')
+              .split(/\r?\n/)
+              .map(l => l.trim())
+              .filter(Boolean)
+            const dateMatch = (highlightedDoc.raw_text || '').match(
+              /\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4})\b/i
+            )
+            const bulletLines = rawLines
+              .filter(l => /^(?:[•\-*▪▸]|\d+[.)])\s+/.test(l))
+              .map(l => l.replace(/^(?:[•\-*▪▸]|\d+[.)])\s+/, '').trim())
+            const actionSentences = sentenceItems.filter(s => s.category === 'what_to_do').map(s => s.verbatim_text)
+            const impactSentences = sentenceItems.filter(s => s.category === 'customer_impact').map(s => s.verbatim_text)
+            const coreSentences = sentenceItems.filter(s => s.category === 'core_message').map(s => s.verbatim_text)
+            rd = {
+              title: `Let's complete your ${sourceFilename.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ')}`,
+              introduction: what_this_is_about || coreSentences[0] || what_you_need_to_do?.summary || rawLines[0] || '',
+              deadline: dateMatch ? dateMatch[1] : '',
+              checklist: bulletLines.length > 0 ? bulletLines : actionSentences.slice(0, 6),
+              what_happens_next: coreSentences[1] || impactSentences[0] || '',
+              how_to_submit: actionSentences.find(s => /submit|portal|manager|channel|email|upload/i.test(s)) || '',
+              need_help: rawLines.find(l => /contact|relationship manager|help|support|clarification/i.test(l)) || '',
+              sections: [],
+              mandatory_disclosures: impactSentences.length > 0 ? impactSentences : rawLines.slice(-3),
+              tone_applied: 'Customer-Friendly & Clear',
+              plain_text: [
+                what_this_is_about,
+                what_you_need_to_do?.summary,
+                ...(bulletLines.length > 0 ? bulletLines : actionSentences),
+                ...impactSentences,
+              ].filter(Boolean).join('\n\n'),
+            }
+          }
           const deadlineVal = rd.deadline || rd.call_to_action?.deadline
           const checklistItems = (rd.checklist && rd.checklist.length > 0)
             ? rd.checklist

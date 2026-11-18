@@ -11,7 +11,24 @@ from urllib.parse import quote, unquote
 
 import boto3
 from botocore.config import Config
-from services import claria_service, document_service, file_validation, viewer_service
+from services import (
+    claria_service,
+    document_service,
+    file_validation,
+    viewer_service,
+    document_intelligence_service,
+    redesign_engine_service,
+    document_export_service,
+    governance_store_service,
+)
+
+REFINEMENT_INTENT_RE = (
+    r'\b(?:empath\w*|harsh\w*|soft\w*|warm\w*|gentl\w*|kind\w*|compassion\w*|reassur\w*|'
+    r'supportive|polite\w*|respectful|friendly|friendlier|conversational|simpl\w*|plain\s+english|'
+    r'easy|easier|clearer|concise|short\w*|brief|formal|corporate|professional|tone|rewrite|'
+    r'redesign|rephrase|reword|make\s+it|change\s+the|less\s+harsh|not\s+harsh|too\s+harsh|'
+    r'very\s+harsh|intimidating|threatening|strict|cold|senior\w*|audience|refine)\b'
+)
 
 TMP_UPLOADS = Path(tempfile.gettempdir()) / 'uploads'
 TMP_UPLOADS.mkdir(parents=True, exist_ok=True)
@@ -87,6 +104,104 @@ def _resolve_upload(filename: str) -> Path:
         except Exception:
             return None
     return local_path
+
+
+def _run_enterprise_pipeline(
+    raw_text: str,
+    filename: str,
+    instruction: str,
+    doc_meta: dict | None,
+    doc_id: str | None = None,
+    prior_redesigned: dict | None = None,
+    version_reason: str = 'Initial redesign',
+    creator: str = 'Document Creator',
+) -> dict:
+    """Runs full-document intelligence, redesign, fact verification, comparison, export & S3 sync on Lambda."""
+    structured = document_intelligence_service.parse_structured_document(raw_text, filename, doc_id=doc_id or '')
+    used_doc_id = structured['document_id']
+    redesigned = redesign_engine_service.generate_redesigned_document(
+        structured,
+        instruction=instruction,
+        prior_redesigned=prior_redesigned,
+    )
+    fact_ver = document_intelligence_service.verify_output_facts(
+        structured.get('source_facts') or [],
+        redesigned.get('plain_text') or '',
+    )
+    comparison = redesign_engine_service.compare_original_vs_redesigned(structured, redesigned, fact_ver)
+    detected_issues = redesign_engine_service.detect_communication_issues(structured, redesigned, fact_ver, comparison)
+
+    ver_hint = 1
+    existing_rec = governance_store_service.get_document_record(used_doc_id)
+    if existing_rec:
+        ver_hint = len(existing_rec.get('versions') or []) + 1
+
+    prefix = f"{used_doc_id}_v{ver_hint}_{uuid.uuid4().hex[:5]}"
+    exports = document_export_service.generate_all_outputs(
+        out_dir=TMP_UPLOADS,
+        file_prefix=prefix,
+        redesigned=redesigned,
+        fact_verification=fact_ver,
+        comparison=comparison,
+        version_label=f"Version {ver_hint} — {version_reason}",
+    )
+
+    # Persist generated PDF/DOCX exports to S3 so /api/document/{filename} works across any Lambda instance
+    for dl_info in (exports.get('downloads') or {}).values():
+        stored_dl = dl_info.get('stored_name')
+        if stored_dl:
+            local_dl = TMP_UPLOADS / stored_dl
+            if local_dl.exists():
+                try:
+                    s3_client.put_object(
+                        Bucket=S3_BUCKET,
+                        Key=f'uploads/{stored_dl}',
+                        Body=local_dl.read_bytes(),
+                    )
+                except Exception:
+                    pass
+
+    gov = governance_store_service.create_or_add_version(
+        doc_id=used_doc_id,
+        original_meta=doc_meta or {'filename': filename},
+        structured_doc=structured,
+        redesigned=redesigned,
+        fact_verification=fact_ver,
+        comparison=comparison,
+        downloads=exports['downloads'],
+        quality_validation=exports['quality_validation'],
+        instruction=instruction,
+        version_reason=version_reason,
+        creator=creator,
+    )
+
+    return {
+        'document_id': used_doc_id,
+        'version_number': gov['version_number'],
+        'version_label': gov['version_label'],
+        'intelligence': {
+            'document_title': structured['document_title'],
+            'document_type': structured['document_type'],
+            'total_pages': structured['total_pages'],
+            'word_count': structured['word_count'],
+            'customer_elements_count': len(structured['customer_elements']),
+            'internal_elements_count': len(structured['internal_elements']),
+            'internal_sections': [
+                {'section': el.get('section'), 'text': el.get('text')}
+                for el in structured['internal_elements'][:10]
+            ],
+            'headings': structured['headings'][:20],
+            'audience_clarification_needed': structured['audience_clarification_needed'],
+            'communication_intelligence': structured.get('communication_intelligence') or {},
+        },
+        'redesigned_document': redesigned,
+        'fact_verification': fact_ver,
+        'comparison': comparison,
+        'issues': detected_issues,
+        'downloads': exports['downloads'],
+        'quality_validation': exports['quality_validation'],
+        'governance': gov,
+    }
 
 
 def lambda_handler(event, context):
@@ -185,12 +300,18 @@ def lambda_handler(event, context):
 
         text = ''
         conversation_history = '[]'
+        active_document_id = ''
+        active_document_text = ''
+        active_document_filename = ''
         file_obj = None
 
         if 'multipart/form-data' in ct:
             parsed_mp = _parse_multipart(body_bytes, ct)
             text = parsed_mp['fields'].get('text', '')
             conversation_history = parsed_mp['fields'].get('conversation_history', '[]')
+            active_document_id = parsed_mp['fields'].get('active_document_id', '')
+            active_document_text = parsed_mp['fields'].get('active_document_text', '')
+            active_document_filename = parsed_mp['fields'].get('active_document_filename', '')
             file_obj = parsed_mp['file']
         else:
             try:
@@ -198,6 +319,9 @@ def lambda_handler(event, context):
                 text = j.get('text', '')
                 ch = j.get('conversation_history', [])
                 conversation_history = ch if isinstance(ch, str) else json.dumps(ch)
+                active_document_id = j.get('active_document_id', '')
+                active_document_text = j.get('active_document_text', '')
+                active_document_filename = j.get('active_document_filename', '')
             except Exception:
                 pass
 
@@ -210,6 +334,8 @@ def lambda_handler(event, context):
         stored_name = None
         raw_doc_text = None
         doc_filename = None
+        prior_redesigned = None
+        user_instruction = (text or '').strip()
         combined_text = text or ''
 
         if file_obj:
@@ -248,7 +374,6 @@ def lambda_handler(event, context):
             doc_meta['url'] = f'/api/document/{q}'
             doc_meta['view_url'] = f'/api/document/{q}/view'
 
-            user_text = (text or '').strip()
             post_rej = file_validation.validate_file_post_extract(orig_filename, file_bytes, extracted.get('text', ''), meta=doc_meta)
             if post_rej or doc_meta.get('is_empty', False) or len(file_bytes) == 0:
                 msg = post_rej['message'] if post_rej else f"File Not Accepted: '{orig_filename}' is empty."
@@ -268,11 +393,103 @@ def lambda_handler(event, context):
                 f"{file_content}\n"
                 f"===============================================================\n"
             )
-            if user_text:
-                combined_text += f"\nRecipient's Question / Note: {user_text}\n"
+            if user_instruction:
+                combined_text += f"\nRecipient's Question / Note: {user_instruction}\n"
 
-        if not combined_text.strip():
+        # If no new file was uploaded, check if user is refining an active document in the conversation (e.g. "make it empathy")
+        if not file_obj and user_instruction and len(user_instruction.split()) <= 60 and re.search(REFINEMENT_INTENT_RE, user_instruction, re.IGNORECASE):
+            rec = governance_store_service.get_document_record(active_document_id) if active_document_id else None
+            if rec:
+                structured_prev = rec.get('structured_doc') or {}
+                raw_doc_text = '\n'.join(el.get('text', '') for el in (structured_prev.get('elements') or []))
+                doc_filename = rec.get('filename') or active_document_filename or 'Customer_Communication.txt'
+                latest_ver = (rec.get('versions') or [])[-1] if rec.get('versions') else {}
+                prior_redesigned = latest_ver.get('redesigned_document')
+                doc_meta = {
+                    'filename': doc_filename,
+                    'stored_name': rec.get('stored_name'),
+                    'view_url': rec.get('original_view_url'),
+                    'url': rec.get('original_download_url'),
+                }
+            elif active_document_text and active_document_text.strip():
+                raw_doc_text = active_document_text.strip()
+                doc_filename = active_document_filename or 'Customer_Communication.txt'
+                doc_meta = {'filename': doc_filename}
+
+        if not combined_text.strip() and not (raw_doc_text and raw_doc_text.strip()):
             return _json_response(400, {'detail': 'Please provide a communication text or upload a document.'})
+
+        # Fast single-LLM path when we have a document to redesign
+        if raw_doc_text and raw_doc_text.strip():
+            guard = claria_service.guardrail_service.inspect_and_sanitize(raw_doc_text)
+            if guard.get('blocked'):
+                return _json_response(200, {
+                    'type': 'chat',
+                    'message': guard.get('message', 'The submitted communication cannot be processed.'),
+                    'guardrail_status': 'BLOCKED',
+                    'guardrail_details': guard,
+                })
+            clean_source = claria_service._extract_clean_document_text(raw_doc_text, guard.get('sanitized_text', raw_doc_text))
+            effective_instruction = user_instruction or 'Redesign professionally for clarity while preserving all facts and disclosures.'
+
+            ent_bundle = _run_enterprise_pipeline(
+                raw_text=clean_source,
+                filename=doc_filename or 'customer_communication.txt',
+                instruction=effective_instruction,
+                doc_meta=doc_meta,
+                doc_id=active_document_id if prior_redesigned else None,
+                prior_redesigned=prior_redesigned,
+                version_reason=f"Tone/Redesign ({effective_instruction[:40]})" if user_instruction else 'Initial redesign',
+            )
+            rd = ent_bundle.get('redesigned_document') or {}
+            tone_label = rd.get('tone_applied') or 'Professional & Clear'
+            summary_line = f"Redesigned in {tone_label} tone"
+            if user_instruction:
+                summary_line += f" · Instruction applied: \"{user_instruction[:70]}\""
+
+            parsed_stub = {
+                'type': 'redesign',
+                'what_this_is_about': rd.get('introduction') or rd.get('design_notes') or 'Customer communication redesigned for clarity.',
+                'what_you_need_to_do': {
+                    'action_required': bool(rd.get('checklist') or rd.get('deadline')),
+                    'summary': summary_line,
+                },
+                'sentence_highlights': [],
+            }
+            hl_doc = claria_service.build_clarity_highlighted_document(
+                raw_text=clean_source,
+                parsed=parsed_stub,
+                filename=doc_filename or 'Customer_Communication.txt',
+            )
+            parsed_stub['highlighted_document'] = hl_doc
+            if doc_meta:
+                parsed_stub['document_metadata'] = doc_meta
+
+            hl_html = hl_doc.get('full_html') or ''
+            orig_disp = _display_name(stored_name) if stored_name else (doc_filename or 'notice.txt')
+            hl_name = f"highlighted_{stored_name or uuid.uuid4().hex[:8]}.html"
+            try:
+                (TMP_UPLOADS / hl_name).write_text(hl_html, encoding='utf-8')
+                s3_client.put_object(
+                    Bucket=S3_BUCKET,
+                    Key=f'uploads/{hl_name}',
+                    Body=hl_html.encode('utf-8'),
+                    ContentType='text/html; charset=utf-8',
+                    ContentDisposition=f'inline; filename="highlighted_{Path(orig_disp).stem}.html"',
+                )
+                q = quote(hl_name)
+                parsed_stub['highlighted_document']['source_filename'] = orig_disp
+                parsed_stub['highlighted_document']['filename'] = f"highlighted_{Path(orig_disp).stem}.html"
+                parsed_stub['highlighted_document']['download_url'] = f"/api/document/{q}"
+                parsed_stub['highlighted_document']['view_url'] = f"/api/document/{q}/view"
+                if doc_meta and doc_meta.get('view_url'):
+                    parsed_stub['highlighted_document']['original_view_url'] = doc_meta['view_url']
+                    parsed_stub['highlighted_document']['original_download_url'] = doc_meta.get('url')
+            except Exception:
+                pass
+
+            parsed_stub.update(ent_bundle)
+            return _json_response(200, parsed_stub)
 
         try:
             result = claria_service.redesign_communication(
@@ -315,6 +532,17 @@ def lambda_handler(event, context):
                     result['highlighted_document']['original_download_url'] = doc_meta.get('url')
             except Exception:
                 pass
+
+        if result.get('type') == 'redesign':
+            source_for_ent = raw_doc_text or (result.get('highlighted_document') or {}).get('raw_text') or combined_text
+            if source_for_ent.strip():
+                ent_bundle = _run_enterprise_pipeline(
+                    raw_text=source_for_ent,
+                    filename=doc_filename or 'customer_communication.txt',
+                    instruction=user_instruction or 'Redesign professionally for clarity while preserving all facts and disclosures.',
+                    doc_meta=doc_meta,
+                )
+                result.update(ent_bundle)
 
         return _json_response(200, result)
 

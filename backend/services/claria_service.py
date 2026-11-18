@@ -105,18 +105,18 @@ def _sanitize_ai_output(obj):
 
 
 GREETING_RESPONSES = [
-    "Hello! I am CLARIA, your Customer Communications Clarity Specialist. Upload any communication file or paste a notice, and I will keep 100% of your original text and format while highlighting the exact sentences and paragraphs that tell the customer what it's about, what they need to do, and what changes for them — with a side-by-side compare view.",
-    "Hi there! Welcome to CLARIA. Drop a document or paste a customer letter below — I'll display the file in its exact original format and highlight the key paragraphs and sentences so anyone can understand the communication at a glance."
+    "Hello! I am CLARIA, your Customer Communication Redesign Engine. Upload any banking or enterprise document (or paste a notice) and tell me how you want it transformed — for example, 'make it empathetic', 'simplify into plain English', or 'make it friendly'. I will produce a redesigned customer-friendly communication, side-by-side comparison, validation report, and downloadable PDF & DOCX while preserving every factual figure, date, and legal obligation.",
+    "Hi there! Welcome to CLARIA. Drop a document or paste a formal letter below — I'll rewrite and restructure it into a clear, customer-friendly communication with a prominent deadline, action checklist, and preserved legal disclosures."
 ]
 
 BRO_RESPONSES = [
-    "Hey bro! Upload any customer communication file or paste text, and I'll keep the exact same text and format while highlighting the full sentences and paragraphs that matter most, plus a side-by-side compare option.",
-    "Yo bro! Drop a communication file below — I'll highlight the key paragraphs and sentences so it's super easy to understand without changing a single word."
+    "Hey! Upload any customer communication file or paste text (and tell me if you want it empathetic, friendly, or simplified), and I'll redesign it into a clear customer-friendly communication with a deadline card, action checklist, side-by-side comparison, and PDF/DOCX downloads.",
+    "Hi! Drop a communication file below — I'll transform dense or harsh formal letters into a clear, empathetic customer communication while keeping every fact and legal condition intact."
 ]
 
 HOW_ARE_YOU_RESPONSES = [
-    "I'm doing great and ready to clarify your customer communications! Upload a file to see full-sentence and paragraph clarity highlights with side-by-side comparison.",
-    "Doing very well, thank you! Share any customer letter, email, or notice to see it redesigned with smart paragraph & sentence highlights."
+    "I'm doing great and ready to redesign your customer communications! Upload a file or paste a letter (and specify any tone like 'make it empathetic') to get a full 4-deliverable redesign package.",
+    "Doing very well, thank you! Share any customer letter, email, or notice to see it transformed into a clear, customer-friendly communication."
 ]
 
 
