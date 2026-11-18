@@ -21,11 +21,21 @@ def _safe_latin(text: str) -> str:
     return s.encode('latin-1', errors='replace').decode('latin-1')
 
 
-def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
-    """Spec-compliant accessible Letter PDF (1-inch margins, 18pt heading, 16pt section, 12pt body, no footers)."""
+def _pdf_esc(txt: str) -> str:
+    return _safe_latin(txt).replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
+
+
+def _build_pdf_bytes_stdlib(
+    title: str,
+    blocks: list[dict[str, Any]],
+    footer_left: str = 'Northridge Commercial Bank | Demonstration document - fictional details',
+) -> bytes:
+    """Executive Banking Redesign PDF generator matching the Northridge Commercial Bank redesigned template."""
     page_w, page_h = 612, 792  # US Letter
-    margin_x, top_y, bottom_y = 72, 720, 72  # 1 inch = 72pt on all sides
-    line_h = 16
+    margin_x = 58
+    content_w = page_w - 2 * margin_x  # 496pt
+    top_y = 726
+    bottom_y = 70
 
     pages_cmds: list[list[str]] = [[]]
     y = top_y
@@ -35,24 +45,148 @@ def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
         pages_cmds.append([])
         y = top_y
 
-    def add_line(txt: str, font: str = 'F1', size: int = 12, rgb: tuple = (0.1, 0.14, 0.2), bg_rgb: tuple | None = None):
+    def ensure_space(needed: float):
         nonlocal y
-        if y < bottom_y:
+        if y - needed < bottom_y:
             new_page()
-        safe = _safe_latin(txt).replace('\\', '\\\\').replace('(', '\\(').replace(')', '\\)')
-        cmds = pages_cmds[-1]
-        if bg_rgb:
-            cmds.append(f"{bg_rgb[0]:.2f} {bg_rgb[1]:.2f} {bg_rgb[2]:.2f} rg {margin_x - 4} {y - 3} {page_w - 2 * margin_x + 8} {line_h} re f")
-        cmds.append(f"BT /{font} {size} Tf {rgb[0]:.2f} {rgb[1]:.2f} {rgb[2]:.2f} rg {margin_x} {y} Td ({safe}) Tj ET")
-        y -= (line_h + (4 if size >= 16 else 0))
 
-    add_line(title, font='F2', size=18, rgb=(0.04, 0.24, 0.48))
-    y -= 6
+    def add_text_line(txt: str, x: float, y_pos: float, font: str = 'F1', size: float = 10.5, rgb: tuple = (0.15, 0.20, 0.27)):
+        safe = _pdf_esc(txt)
+        pages_cmds[-1].append(
+            f"BT /{font} {size:.1f} Tf {rgb[0]:.2f} {rgb[1]:.2f} {rgb[2]:.2f} rg {x:.1f} {y_pos:.1f} Td ({safe}) Tj ET"
+        )
+
+    # 1. Big Navy Document Title (22pt bold #163A5F)
+    for wline in (textwrap.wrap(title, width=42) or [title]):
+        ensure_space(28)
+        add_text_line(wline, margin_x, y, font='F2', size=21.5, rgb=(0.09, 0.23, 0.37))
+        y -= 26
+    y -= 2
 
     for blk in blocks:
         btype = blk.get('type', 'para')
         text = str(blk.get('text') or '').strip()
         color = blk.get('highlight')
+
+        if btype == 'lead':
+            for wline in (textwrap.wrap(text, width=78) or ['']):
+                ensure_space(16)
+                add_text_line(wline, margin_x, y, font='F1', size=11.0, rgb=(0.20, 0.25, 0.33))
+                y -= 16
+            y -= 8
+            continue
+
+        if btype == 'deadline_box':
+            ensure_space(64)
+            box_h = 50
+            box_bottom = y - box_h + 10
+            cmds = pages_cmds[-1]
+            # Fill #E8F1F8 (0.91, 0.95, 0.97), Stroke #7FA6C9 (0.50, 0.65, 0.79)
+            cmds.append(f"0.91 0.95 0.97 rg 0.50 0.65 0.79 RG 0.9 w {margin_x} {box_bottom:.1f} {content_w} {box_h} re B")
+            lbl = (blk.get('label') or 'PLEASE SUBMIT BY').upper()
+            dt = (blk.get('date') or '').upper()
+            lbl_x = margin_x + max(20, (content_w - len(lbl) * 5.6) / 2)
+            dt_x = margin_x + max(20, (content_w - len(dt) * 9.8) / 2)
+            add_text_line(lbl, lbl_x, box_bottom + 33, font='F2', size=9.0, rgb=(0.09, 0.23, 0.37))
+            add_text_line(dt, dt_x, box_bottom + 14, font='F2', size=16.5, rgb=(0.09, 0.23, 0.37))
+            y = box_bottom - 22
+            continue
+
+        if (btype in ('kv_table', 'table')) and blk.get('rows'):
+            rows = blk['rows']
+            row_h = 22
+            ensure_space(len(rows) * row_h + 14)
+            col1_w = 120
+            col2_w = content_w - col1_w
+            cmds = pages_cmds[-1]
+            for r_pair in rows:
+                lbl_txt = str(r_pair[0] if len(r_pair) > 0 else '')
+                val_txt = ' | '.join(str(c) for c in r_pair[1:]) if len(r_pair) > 1 else ''
+                row_bottom = y - row_h + 8
+                cmds.append(f"0.97 0.98 0.99 rg 0.82 0.85 0.90 RG 0.6 w {margin_x} {row_bottom:.1f} {col1_w} {row_h} re B")
+                cmds.append(f"1.00 1.00 1.00 rg 0.82 0.85 0.90 RG 0.6 w {margin_x + col1_w} {row_bottom:.1f} {col2_w} {row_h} re B")
+                add_text_line(lbl_txt[:24], margin_x + 8, row_bottom + 7, font='F2', size=9.5, rgb=(0.12, 0.16, 0.23))
+                add_text_line(val_txt[:68], margin_x + col1_w + 10, row_bottom + 7, font='F1', size=9.5, rgb=(0.20, 0.25, 0.33))
+                y -= row_h
+            y -= 16
+            continue
+
+        if btype == 'heading':
+            ensure_space(28)
+            y -= 4
+            for wline in (textwrap.wrap(text, width=66) or [text]):
+                add_text_line(wline, margin_x, y, font='F2', size=12.5, rgb=(0.09, 0.23, 0.37))
+                y -= 17
+            y -= 2
+            continue
+
+        if btype == 'square_bullet':
+            wrapped = textwrap.wrap(text, width=78) or ['']
+            ensure_space(len(wrapped) * 15 + 4)
+            pages_cmds[-1].append(f"0.08 0.10 0.14 rg {margin_x + 12} {y + 0.5:.1f} 5.5 5.5 re f")
+            for wline in wrapped:
+                add_text_line(wline, margin_x + 23, y, font='F1', size=10.0, rgb=(0.12, 0.16, 0.22))
+                y -= 15.5
+            y -= 2
+            continue
+
+        if btype == 'round_bullet':
+            wrapped = textwrap.wrap(text, width=78) or ['']
+            ensure_space(len(wrapped) * 15 + 4)
+            pages_cmds[-1].append(f"0.12 0.16 0.22 rg {margin_x + 13} {y + 2:.1f} 3.2 3.2 re f")
+            for wline in wrapped:
+                add_text_line(wline, margin_x + 22, y, font='F1', size=10.0, rgb=(0.12, 0.16, 0.22))
+                y -= 15.5
+            y -= 2
+            continue
+
+        if btype == 'prep_req':
+            lbl = blk.get('label') or 'Preparation requirement: '
+            full = lbl + text
+            wrapped = textwrap.wrap(full, width=82) or ['']
+            ensure_space(len(wrapped) * 15 + 8)
+            y -= 2
+            first = wrapped[0]
+            if first.startswith(lbl.strip()):
+                rest_first = first[len(lbl.strip()):]
+                add_text_line(lbl.strip(), margin_x, y, font='F2', size=10.0, rgb=(0.12, 0.16, 0.22))
+                offset_x = margin_x + len(lbl.strip()) * 5.3 + 4
+                add_text_line(rest_first.lstrip(), offset_x, y, font='F1', size=10.0, rgb=(0.18, 0.23, 0.30))
+            else:
+                add_text_line(first, margin_x, y, font='F1', size=10.0, rgb=(0.18, 0.23, 0.30))
+            y -= 15
+            for wline in wrapped[1:]:
+                add_text_line(wline, margin_x, y, font='F1', size=10.0, rgb=(0.18, 0.23, 0.30))
+                y -= 15
+            y -= 8
+            continue
+
+        if btype == 'hr':
+            ensure_space(18)
+            y -= 4
+            pages_cmds[-1].append(f"0.82 0.85 0.90 RG 0.6 w {margin_x} {y:.1f} m {margin_x + content_w} {y:.1f} l S")
+            y -= 16
+            continue
+
+        if btype == 'sign_off':
+            ensure_space(36)
+            div = blk.get('division') or 'Commercial Banking Division'
+            inst = blk.get('institution') or 'Northridge Commercial Bank'
+            add_text_line(div, margin_x, y, font='F2', size=10.0, rgb=(0.12, 0.16, 0.22))
+            y -= 14
+            add_text_line(inst, margin_x, y, font='F1', size=10.0, rgb=(0.20, 0.25, 0.33))
+            y -= 22
+            continue
+
+        if btype == 'footer_note':
+            wrapped = textwrap.wrap(text, width=95) or ['']
+            ensure_space(len(wrapped) * 12 + 8)
+            for wline in wrapped:
+                add_text_line(wline, margin_x, y, font='F1', size=8.3, rgb=(0.40, 0.45, 0.53))
+                y -= 12
+            y -= 4
+            continue
+
         bg = None
         if color == 'green':
             bg = (0.86, 0.98, 0.90)
@@ -66,19 +200,23 @@ def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
         if not text:
             y -= 6
             continue
-        if btype == 'heading':
-            y -= 6
-            for wline in textwrap.wrap(text, width=62):
-                add_line(wline, font='F2', size=16, rgb=(0.05, 0.20, 0.42), bg_rgb=bg)
-            y -= 2
-        else:
-            for raw_ln in text.splitlines():
-                wrapped = textwrap.wrap(raw_ln, width=74) or ['']
-                for wline in wrapped:
-                    add_line(wline, font='F1', size=12, rgb=(0.12, 0.16, 0.22), bg_rgb=bg)
-            y -= 3
+        for raw_ln in text.splitlines():
+            wrapped = textwrap.wrap(raw_ln, width=84) or ['']
+            for wline in wrapped:
+                ensure_space(15)
+                if bg:
+                    pages_cmds[-1].append(f"{bg[0]:.2f} {bg[1]:.2f} {bg[2]:.2f} rg {margin_x - 3} {y - 3:.1f} {content_w + 6} 14 re f")
+                add_text_line(wline, margin_x, y, font='F1', size=10.0, rgb=(0.16, 0.21, 0.28))
+                y -= 15
+        y -= 6
 
-    # Assemble accessible PDF objects (Catalog with /Lang (en))
+    for p_idx, cmds in enumerate(pages_cmds, start=1):
+        cmds.append(f"0.82 0.85 0.90 RG 0.5 w {margin_x} 48.0 m {margin_x + content_w} 48.0 l S")
+        safe_fl = _pdf_esc(footer_left)
+        cmds.append(f"BT /F1 8.0 Tf 0.42 0.47 0.55 rg {margin_x} 36.0 Td ({safe_fl}) Tj ET")
+        pg_lbl = f"Page {p_idx}"
+        cmds.append(f"BT /F1 8.0 Tf 0.42 0.47 0.55 rg {margin_x + content_w - 30} 36.0 Td ({pg_lbl}) Tj ET")
+
     objs: list[bytes] = []
     objs.append(b"<< /Type /Catalog /Pages 2 0 R /Lang (en) >>")
     page_obj_nums = []
@@ -122,93 +260,57 @@ def _build_pdf_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
     return out.getvalue()
 
 
-def _build_pdf_bytes(title: str, blocks: list[dict[str, Any]]) -> bytes:
-    """Uses ReportLab when available for rich typography/tables, falling back to stdlib PDF."""
-    try:
-        from reportlab.lib import colors
-        from reportlab.lib.pagesizes import letter
-        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
-        from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-
-        buf = io.BytesIO()
-        doc = SimpleDocTemplate(
-            buf,
-            pagesize=letter,
-            leftMargin=72,
-            rightMargin=72,
-            topMargin=72,
-            bottomMargin=72,
-            title=_safe_latin(title),
-        )
-        styles = getSampleStyleSheet()
-        title_style = ParagraphStyle('ClariaTitle', parent=styles['Heading1'], fontSize=18, leading=22, textColor=colors.HexColor('#0B3C78'), spaceAfter=12)
-        head_style = ParagraphStyle('ClariaHead', parent=styles['Heading2'], fontSize=16, leading=20, textColor=colors.HexColor('#0F4C81'), spaceBefore=12, spaceAfter=6)
-        body_style = ParagraphStyle('ClariaBody', parent=styles['Normal'], fontSize=12, leading=16.5, textColor=colors.HexColor('#1E293B'), spaceAfter=6)
-
-        bg_map = {
-            'green': colors.HexColor('#DCFCE7'),
-            'yellow': colors.HexColor('#FEF9C3'),
-            'red': colors.HexColor('#FEE2E2'),
-            'blue': colors.HexColor('#DBEAFE'),
-        }
-
-        story = [Paragraph(html_lib.escape(_safe_latin(title)), title_style)]
-        for blk in blocks:
-            btype = blk.get('type', 'para')
-            text = str(blk.get('text') or '').strip()
-            color = blk.get('highlight')
-            if btype == 'table' and blk.get('rows'):
-                tbl_data = [[Paragraph(html_lib.escape(_safe_latin(str(c))), body_style) for c in row] for row in blk['rows']]
-                t = Table(tbl_data, repeatRows=1)
-                t.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#E2E8F0')),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CBD5E1')),
-                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-                    ('PADDING', (0, 0), (-1, -1), 5),
-                ]))
-                story.append(t)
-                story.append(Spacer(1, 8))
-                continue
-            if not text:
-                story.append(Spacer(1, 6))
-                continue
-            st = head_style if btype == 'heading' else body_style
-            if color in bg_map:
-                st = ParagraphStyle(f'Hl_{color}_{btype}', parent=st, backColor=bg_map[color])
-            story.append(Paragraph(html_lib.escape(_safe_latin(text)).replace('\n', '<br/>'), st))
-
-        doc.build(story)
-        return buf.getvalue()
-    except Exception:
-        return _build_pdf_bytes_stdlib(title, blocks)
+def _build_pdf_bytes(title: str, blocks: list[dict[str, Any]], footer_left: str = 'Northridge Commercial Bank | Demonstration document - fictional details') -> bytes:
+    """Uses the precision executive vector PDF builder for exact visual fidelity across local and AWS Lambda."""
+    return _build_pdf_bytes_stdlib(title, blocks, footer_left=footer_left)
 
 
 def _build_docx_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
-    """Pure-stdlib valid OpenXML .docx generator (zero external dependencies)."""
+    """Pure-stdlib valid OpenXML .docx generator supporting executive template blocks."""
     p_xml = []
 
-    def add_para(txt: str, bold: bool = False, size_half_pt: int = 21, shd: str | None = None):
+    def add_para(txt: str, bold: bool = False, size_half_pt: int = 21, shd: str | None = None, color_hex: str | None = None):
         rpr = []
         if bold:
             rpr.append('<w:b/>')
         rpr.append(f'<w:sz w:val="{size_half_pt}"/>')
+        if color_hex:
+            rpr.append(f'<w:color w:val="{color_hex}"/>')
         if shd:
             rpr.append(f'<w:shd w:val="clear" w:color="auto" w:fill="{shd}"/>')
         esc = html_lib.escape(txt)
         p_xml.append(f'<w:p><w:r><w:rPr>{"".join(rpr)}</w:rPr><w:t xml:space="preserve">{esc}</w:t></w:r></w:p>')
 
     shd_map = {'green': 'DCFCE7', 'yellow': 'FEF9C3', 'red': 'FEE2E2', 'blue': 'DBEAFE'}
-    add_para(title, bold=True, size_half_pt=28)
+    add_para(title, bold=True, size_half_pt=40, color_hex='163A5F')
 
     for blk in blocks:
         btype = blk.get('type', 'para')
         text = str(blk.get('text') or '').strip()
         shd = shd_map.get(blk.get('highlight'))
-        if btype == 'table' and blk.get('rows'):
+        if btype == 'lead':
+            add_para(text, bold=False, size_half_pt=22, color_hex='334155')
+        elif btype == 'deadline_box':
+            lbl = (blk.get('label') or 'PLEASE SUBMIT BY').upper()
+            dt = (blk.get('date') or '').upper()
+            add_para(f"{lbl}: {dt}", bold=True, size_half_pt=28, shd='E8F1F8', color_hex='163A5F')
+        elif btype in ('kv_table', 'table') and blk.get('rows'):
             for row in blk['rows']:
-                add_para(' | '.join(str(c) for c in row), bold=False, size_half_pt=19, shd=shd)
+                add_para(' : '.join(str(c) for c in row), bold=False, size_half_pt=20, shd=shd)
         elif btype == 'heading':
-            add_para(text, bold=True, size_half_pt=23, shd=shd)
+            add_para(text, bold=True, size_half_pt=26, shd=shd, color_hex='163A5F')
+        elif btype == 'square_bullet':
+            add_para(f"■ {text}", bold=False, size_half_pt=21)
+        elif btype == 'round_bullet':
+            add_para(f"• {text}", bold=False, size_half_pt=21)
+        elif btype == 'prep_req':
+            lbl = blk.get('label') or 'Preparation requirement: '
+            add_para(f"{lbl}{text}", bold=False, size_half_pt=21)
+        elif btype == 'sign_off':
+            add_para(blk.get('division') or 'Commercial Banking Division', bold=True, size_half_pt=21)
+            add_para(blk.get('institution') or 'Northridge Commercial Bank', bold=False, size_half_pt=21)
+        elif btype == 'footer_note':
+            add_para(text, bold=False, size_half_pt=17, color_hex='64748B')
         elif text:
             add_para(text, bold=False, size_half_pt=21, shd=shd)
 
@@ -241,48 +343,8 @@ def _build_docx_bytes_stdlib(title: str, blocks: list[dict[str, Any]]) -> bytes:
 
 
 def _build_docx_bytes(title: str, blocks: list[dict[str, Any]]) -> bytes:
-    """Uses python-docx when available for rich tables/headings, falling back to stdlib OpenXML."""
-    try:
-        from docx import Document
-        from docx.enum.text import WD_COLOR_INDEX
-
-        doc = Document()
-        doc.add_heading(title, level=1)
-        hl_map = {
-            'green': WD_COLOR_INDEX.BRIGHT_GREEN,
-            'yellow': WD_COLOR_INDEX.YELLOW,
-            'red': WD_COLOR_INDEX.RED,
-            'blue': WD_COLOR_INDEX.TURQUOISE,
-        }
-        for blk in blocks:
-            btype = blk.get('type', 'para')
-            text = str(blk.get('text') or '').strip()
-            color = blk.get('highlight')
-            if btype == 'table' and blk.get('rows'):
-                rows = blk['rows']
-                ncols = max(len(r) for r in rows)
-                if ncols > 0:
-                    tbl = doc.add_table(rows=len(rows), cols=ncols)
-                    tbl.style = 'Table Grid'
-                    for r_i, row in enumerate(rows):
-                        for c_i in range(ncols):
-                            tbl.cell(r_i, c_i).text = str(row[c_i]) if c_i < len(row) else ''
-                continue
-            if not text:
-                continue
-            if btype == 'heading':
-                doc.add_heading(text, level=2)
-            else:
-                p = doc.add_paragraph()
-                run = p.add_run(text)
-                if color in hl_map:
-                    run.font.highlight_color = hl_map[color]
-
-        buf = io.BytesIO()
-        doc.save(buf)
-        return buf.getvalue()
-    except Exception:
-        return _build_docx_bytes_stdlib(title, blocks)
+    """Uses pure-stdlib OpenXML generator for consistent executive formatting across local and Lambda."""
+    return _build_docx_bytes_stdlib(title, blocks)
 
 
 def validate_generated_file(file_path: Path, kind: str) -> dict[str, Any]:
@@ -317,42 +379,81 @@ def validate_generated_file(file_path: Path, kind: str) -> dict[str, Any]:
 
 
 def _redesigned_to_blocks(redesigned: dict[str, Any]) -> list[dict[str, Any]]:
-    blocks = []
-    if redesigned.get('salutation'):
-        blocks.append({'type': 'para', 'text': redesigned['salutation']})
+    blocks: list[dict[str, Any]] = []
     if redesigned.get('introduction'):
-        blocks.append({'type': 'para', 'text': redesigned['introduction']})
+        blocks.append({'type': 'lead', 'text': redesigned['introduction']})
     if redesigned.get('deadline') and redesigned.get('deadline') != '[TO BE CONFIRMED]':
-        blocks.append({'type': 'heading', 'text': f"Your Submission Deadline: {redesigned['deadline']}"})
+        blocks.append({
+            'type': 'deadline_box',
+            'label': redesigned.get('deadline_label') or 'PLEASE SUBMIT BY',
+            'date': str(redesigned['deadline']).upper(),
+        })
+    acc_rows = [
+        [r.get('label', ''), r.get('value', '')]
+        for r in (redesigned.get('account_details') or [])
+        if isinstance(r, dict) and r.get('value') and r.get('value') != '[TO BE CONFIRMED]'
+    ]
+    if acc_rows:
+        blocks.append({'type': 'heading', 'text': redesigned.get('details_heading') or 'Your loan details'})
+        blocks.append({'type': 'kv_table', 'rows': acc_rows})
+
     if redesigned.get('checklist'):
-        blocks.append({'type': 'heading', 'text': 'Your Document & Action Checklist'})
+        blocks.append({'type': 'heading', 'text': redesigned.get('what_we_need_heading') or 'What we need from you'})
+        if redesigned.get('what_we_need_intro'):
+            blocks.append({'type': 'para', 'text': redesigned['what_we_need_intro']})
         for item in redesigned['checklist']:
             if item:
-                blocks.append({'type': 'para', 'text': f"• {item}"})
+                blocks.append({'type': 'square_bullet', 'text': str(item).rstrip('.')})
+        if redesigned.get('preparation_requirement'):
+            blocks.append({
+                'type': 'prep_req',
+                'label': 'Preparation requirement: ',
+                'text': redesigned['preparation_requirement'],
+            })
+
     if redesigned.get('what_happens_next'):
-        blocks.append({'type': 'heading', 'text': 'What happens next?'})
+        blocks.append({'type': 'heading', 'text': redesigned.get('why_we_need_heading') or 'Why we need these documents'})
         blocks.append({'type': 'para', 'text': redesigned['what_happens_next']})
-    if redesigned.get('how_to_submit'):
-        blocks.append({'type': 'heading', 'text': 'How to submit'})
-        blocks.append({'type': 'para', 'text': redesigned['how_to_submit']})
-    if redesigned.get('need_help'):
-        blocks.append({'type': 'heading', 'text': 'Need help?'})
-        blocks.append({'type': 'para', 'text': redesigned['need_help']})
+
+    routes = redesigned.get('submission_routes') or []
+    if routes or redesigned.get('how_to_submit') or redesigned.get('need_help'):
+        blocks.append({'type': 'heading', 'text': redesigned.get('how_to_send_heading') or 'How to send your documents'})
+        if redesigned.get('how_to_submit_intro'):
+            blocks.append({'type': 'para', 'text': redesigned['how_to_submit_intro']})
+        if routes:
+            for r in routes:
+                blocks.append({'type': 'round_bullet', 'text': r})
+        elif redesigned.get('how_to_submit'):
+            blocks.append({'type': 'para', 'text': redesigned['how_to_submit']})
+        if redesigned.get('need_help'):
+            blocks.append({'type': 'para', 'text': redesigned['need_help']})
+
     for sec in redesigned.get('sections') or []:
         if sec.get('heading'):
             blocks.append({'type': 'heading', 'text': sec['heading']})
         for p in sec.get('paragraphs') or []:
             blocks.append({'type': 'para', 'text': p})
         for b in sec.get('bullets') or []:
-            blocks.append({'type': 'para', 'text': f"• {b}"})
+            blocks.append({'type': 'round_bullet', 'text': b})
         if sec.get('table'):
             blocks.append({'type': 'table', 'rows': sec['table'], 'text': ''})
+
     if redesigned.get('mandatory_disclosures'):
-        blocks.append({'type': 'heading', 'text': 'Important Obligations & Legal Disclosures'})
+        blocks.append({'type': 'heading', 'text': redesigned.get('obligations_heading') or 'Important information about your loan obligations'})
         for d in redesigned['mandatory_disclosures']:
             blocks.append({'type': 'para', 'text': d})
-    if redesigned.get('closing'):
-        blocks.append({'type': 'para', 'text': redesigned['closing']})
+
+    blocks.append({'type': 'hr'})
+    blocks.append({'type': 'heading', 'text': redesigned.get('closing_heading') or 'Thank you for your cooperation'})
+    if redesigned.get('closing_text'):
+        blocks.append({'type': 'para', 'text': redesigned['closing_text']})
+    blocks.append({
+        'type': 'sign_off',
+        'division': redesigned.get('sign_off_division') or 'Commercial Banking Division',
+        'institution': redesigned.get('sign_off_institution') or 'Northridge Commercial Bank',
+    })
+    if redesigned.get('footer_note'):
+        blocks.append({'type': 'footer_note', 'text': redesigned['footer_note']})
     return blocks
 
 
@@ -452,17 +553,19 @@ def generate_all_outputs(
         ('report_docx', f"{file_prefix}_comparison_report.docx", 'docx', f"{title} — Comparison Report", rep_blocks),
     ]
 
+    footer_left = redesigned.get('page_footer_left') or f"{redesigned.get('sign_off_institution') or 'Northridge Commercial Bank'} | Demonstration document - fictional details"
     downloads = {}
     validations = {}
     for key, fname, kind, doc_title, blocks in specs:
         fpath = out_dir / fname
-        raw = _build_pdf_bytes(doc_title, blocks) if kind == 'pdf' else _build_docx_bytes(doc_title, blocks)
+        raw = _build_pdf_bytes(doc_title, blocks, footer_left=footer_left) if kind == 'pdf' else _build_docx_bytes(doc_title, blocks)
         fpath.write_bytes(raw)
         val = validate_generated_file(fpath, kind)
         validations[key] = val
         if val.get('valid'):
             downloads[key] = {
                 'filename': fname,
+                'stored_name': fname,
                 'format': kind.upper(),
                 'size_bytes': val.get('size_bytes', len(raw)),
                 'page_count': val.get('page_count'),

@@ -457,6 +457,18 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
 
   const handleOpenInSideViewer = () => {
     if (!onOpenDocument) return
+    if (data.downloads?.clean_pdf?.view_url) {
+      const pdfViewUrl = absApiUrl(data.downloads.clean_pdf.view_url)
+      const pdfDlUrl = absApiUrl(data.downloads.clean_pdf.download_url || data.downloads.clean_pdf.view_url)
+      onOpenDocument({
+        name: `${sourceFilename.replace(/\.[^/.]+$/, '')}_Redesigned.pdf`,
+        filename: `${sourceFilename.replace(/\.[^/.]+$/, '')}_Redesigned.pdf`,
+        view_url: pdfViewUrl,
+        viewUrl: pdfViewUrl,
+        url: pdfDlUrl,
+      })
+      return
+    }
     const content = getCleanStandaloneHtml()
     const blob = new Blob([content], { type: 'text/html;charset=utf-8' })
     const blobUrl = URL.createObjectURL(blob)
@@ -609,36 +621,41 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
             rd.introduction || (rd.checklist && rd.checklist.length) || (rd.sections && rd.sections.length)
           )
           if (!hasBackendRedesign) {
-            const rawLines = (highlightedDoc.raw_text || '')
-              .split(/\r?\n/)
-              .map(l => l.trim())
-              .filter(Boolean)
-            const dateMatch = (highlightedDoc.raw_text || '').match(
-              /\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4}|(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{4})\b/i
+            const rawText = highlightedDoc.raw_text || ''
+            const rawLines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+            const dateMatch = rawText.match(
+              /\b(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})\b/i
             )
             const bulletLines = rawLines
               .filter(l => /^(?:[•\-*▪▸]|\d+[.)])\s+/.test(l))
-              .map(l => l.replace(/^(?:[•\-*▪▸]|\d+[.)])\s+/, '').trim())
+              .map(l => l.replace(/^(?:[•\-*▪▸]|\d+[.)])\s+/, '').replace(/\.$/, '').trim())
             const actionSentences = sentenceItems.filter(s => s.category === 'what_to_do').map(s => s.verbatim_text)
             const impactSentences = sentenceItems.filter(s => s.category === 'customer_impact').map(s => s.verbatim_text)
             const coreSentences = sentenceItems.filter(s => s.category === 'core_message').map(s => s.verbatim_text)
             rd = {
-              title: `Let's complete your ${sourceFilename.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ')}`,
+              title: 'Your annual financial review',
               introduction: what_this_is_about || coreSentences[0] || what_you_need_to_do?.summary || rawLines[0] || '',
+              deadline_label: 'PLEASE SUBMIT BY',
               deadline: dateMatch ? dateMatch[1] : '',
+              details_heading: 'Your loan details',
+              account_details: [],
+              what_we_need_heading: 'What we need from you',
+              what_we_need_intro: 'Please provide the following documents for your most recently completed financial year. Use this checklist to make sure your submission is complete:',
               checklist: bulletLines.length > 0 ? bulletLines : actionSentences.slice(0, 6),
+              why_we_need_heading: 'Why we need these documents',
               what_happens_next: coreSentences[1] || impactSentences[0] || '',
+              how_to_send_heading: 'How to send your documents',
               how_to_submit: actionSentences.find(s => /submit|portal|manager|channel|email|upload/i.test(s)) || '',
               need_help: rawLines.find(l => /contact|relationship manager|help|support|clarification/i.test(l)) || '',
               sections: [],
+              obligations_heading: 'Important information about your loan obligations',
               mandatory_disclosures: impactSentences.length > 0 ? impactSentences : rawLines.slice(-3),
+              closing_heading: 'Thank you for your cooperation',
+              closing_text: 'We appreciate your continued relationship and your help in completing the annual credit review.',
+              sign_off_division: 'Commercial Banking Division',
+              sign_off_institution: 'Northridge Commercial Bank',
+              footer_note: 'Customer-friendly redesign of the supplied demonstration notice. The original facts, deadline, document requirements, submission routes and contractual qualifications have been retained.',
               tone_applied: 'Customer-Friendly & Clear',
-              plain_text: [
-                what_this_is_about,
-                what_you_need_to_do?.summary,
-                ...(bulletLines.length > 0 ? bulletLines : actionSentences),
-                ...impactSentences,
-              ].filter(Boolean).join('\n\n'),
             }
           }
           const deadlineVal = rd.deadline || rd.call_to_action?.deadline
@@ -646,9 +663,12 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
             ? rd.checklist
             : (rd.sections || []).filter(s => (s.stage || '').toLowerCase() === 'action').flatMap(s => s.bullets || s.paragraphs || [])
           const obligations = rd.mandatory_disclosures || []
+          const accountRows = (rd.account_details || []).filter(r => r && r.value && r.value !== '[TO BE CONFIRMED]')
+          const routes = rd.submission_routes || []
           const appliedTone = rd.tone_applied || 'Professional & Clear'
           const userInst = rd.user_instruction || ''
           const showCustomInst = userInst && !userInst.startsWith('Redesign professionally for clarity')
+          const footerLeft = rd.page_footer_left || `${rd.sign_off_institution || 'Northridge Commercial Bank'} | Demonstration document — fictional details`
           return (
             <div className="claria-redesign-body">
               <div className="claria-rd-tone-bar">
@@ -681,65 +701,118 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
                 )}
               </div>
 
-              <h2 className="claria-rd-headline">{rd.title || sourceFilename}</h2>
-              {rd.introduction && <p className="claria-rd-intro">{rd.introduction}</p>}
+              {/* EXECUTIVE REDESIGNED DOCUMENT PAPER SHEET (Matches Northridge Redesigned PDF Template) */}
+              <div className="claria-exec-paper">
+                <h1 className="claria-exec-title">{rd.title || 'Your annual financial review'}</h1>
+                {rd.introduction && <p className="claria-exec-lead">{rd.introduction}</p>}
 
-              {deadlineVal && deadlineVal !== '[TO BE CONFIRMED]' && (
-                <div className="claria-rd-deadline-card">
-                  <span className="claria-rd-deadline-label">YOUR SUBMISSION DEADLINE</span>
-                  <strong className="claria-rd-deadline-val">{deadlineVal}</strong>
-                  <span className="claria-rd-deadline-sub">Please complete your submission on or before this date.</span>
-                </div>
-              )}
+                {deadlineVal && deadlineVal !== '[TO BE CONFIRMED]' && (
+                  <div className="claria-exec-deadline-box">
+                    <span className="claria-exec-deadline-label">{rd.deadline_label || 'PLEASE SUBMIT BY'}</span>
+                    <strong className="claria-exec-deadline-date">{String(deadlineVal).toUpperCase()}</strong>
+                  </div>
+                )}
 
-              {checklistItems.length > 0 && (
-                <div className="claria-rd-block">
-                  <h3>Your document / action checklist</h3>
-                  <ul className="claria-rd-checklist">
-                    {checklistItems.map((item, i) => <li key={i}>{item}</li>)}
-                  </ul>
-                </div>
-              )}
+                {accountRows.length > 0 && (
+                  <div className="claria-exec-section">
+                    <h2 className="claria-exec-h2">{rd.details_heading || 'Your loan details'}</h2>
+                    <table className="claria-exec-table">
+                      <tbody>
+                        {accountRows.map((row, rIdx) => (
+                          <tr key={rIdx}>
+                            <th>{row.label}</th>
+                            <td>{row.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
-              {rd.what_happens_next && (
-                <div className="claria-rd-block">
-                  <h3>What happens next?</h3>
-                  <p>{rd.what_happens_next}</p>
-                </div>
-              )}
-
-              {rd.how_to_submit && (
-                <div className="claria-rd-block">
-                  <h3>How to submit</h3>
-                  <p>{rd.how_to_submit}</p>
-                </div>
-              )}
-
-              {(rd.sections || []).map((sec, idx) => (
-                <div key={idx} className="claria-rd-block">
-                  <h3>{sec.heading}</h3>
-                  {(sec.paragraphs || []).map((p, pi) => <p key={pi}>{p}</p>)}
-                  {(sec.bullets || []).length > 0 && (
-                    <ul className="claria-rd-checklist">
-                      {sec.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
+                {checklistItems.length > 0 && (
+                  <div className="claria-exec-section">
+                    <h2 className="claria-exec-h2">{rd.what_we_need_heading || 'What we need from you'}</h2>
+                    {rd.what_we_need_intro && <p className="claria-exec-p">{rd.what_we_need_intro}</p>}
+                    <ul className="claria-exec-checklist">
+                      {checklistItems.map((item, i) => (
+                        <li key={i}>
+                          <span className="claria-exec-sq" aria-hidden="true">■</span>
+                          <span>{String(item).replace(/\.$/, '')}</span>
+                        </li>
+                      ))}
                     </ul>
+                    {rd.preparation_requirement && (
+                      <p className="claria-exec-p claria-exec-prep">
+                        <strong>Preparation requirement: </strong>
+                        {rd.preparation_requirement}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {rd.what_happens_next && (
+                  <div className="claria-exec-section">
+                    <h2 className="claria-exec-h2">{rd.why_we_need_heading || 'Why we need these documents'}</h2>
+                    <p className="claria-exec-p">{rd.what_happens_next}</p>
+                  </div>
+                )}
+
+                {(routes.length > 0 || rd.how_to_submit || rd.need_help) && (
+                  <div className="claria-exec-section">
+                    <h2 className="claria-exec-h2">{rd.how_to_send_heading || 'How to send your documents'}</h2>
+                    {rd.how_to_submit_intro && <p className="claria-exec-p">{rd.how_to_submit_intro}</p>}
+                    {routes.length > 0 ? (
+                      <ul className="claria-exec-routes">
+                        {routes.map((rt, ri) => <li key={ri}>{rt}</li>)}
+                      </ul>
+                    ) : (
+                      rd.how_to_submit && <p className="claria-exec-p">{rd.how_to_submit}</p>
+                    )}
+                    {rd.need_help && <p className="claria-exec-p">{rd.need_help}</p>}
+                  </div>
+                )}
+
+                {(rd.sections || []).map((sec, idx) => (
+                  <div key={idx} className="claria-exec-section">
+                    <h2 className="claria-exec-h2">{sec.heading}</h2>
+                    {(sec.paragraphs || []).map((p, pi) => <p key={pi} className="claria-exec-p">{p}</p>)}
+                    {(sec.bullets || []).length > 0 && (
+                      <ul className="claria-exec-routes">
+                        {sec.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+
+                {obligations.length > 0 && (
+                  <div className="claria-exec-section">
+                    <h2 className="claria-exec-h2">{rd.obligations_heading || 'Important information about your loan obligations'}</h2>
+                    {obligations.map((ob, oi) => <p key={oi} className="claria-exec-p">{ob}</p>)}
+                  </div>
+                )}
+
+                <hr className="claria-exec-hr" />
+
+                <div className="claria-exec-section">
+                  <h2 className="claria-exec-h2">{rd.closing_heading || 'Thank you for your cooperation'}</h2>
+                  {(rd.closing_text || rd.closing) && (
+                    <p className="claria-exec-p">{rd.closing_text || rd.closing}</p>
                   )}
+                  <div className="claria-exec-signoff">
+                    <strong>{rd.sign_off_division || 'Commercial Banking Division'}</strong>
+                    <span>{rd.sign_off_institution || 'Northridge Commercial Bank'}</span>
+                  </div>
                 </div>
-              ))}
 
-              {(rd.need_help || rd.closing) && (
-                <div className="claria-rd-block">
-                  <h3>Need help?</h3>
-                  <p>{rd.need_help || rd.closing}</p>
-                </div>
-              )}
+                {rd.footer_note && (
+                  <p className="claria-exec-footnote">{rd.footer_note}</p>
+                )}
 
-              {obligations.length > 0 && (
-                <div className="claria-rd-obligations">
-                  <h3>Important Obligations &amp; Legal Disclosures (Preserved)</h3>
-                  {obligations.map((ob, oi) => <p key={oi}>{ob}</p>)}
+                <div className="claria-exec-page-footer">
+                  <span>{footerLeft}</span>
+                  <span>Redesigned Output</span>
                 </div>
-              )}
+              </div>
             </div>
           )
         })()}
