@@ -21,27 +21,27 @@ REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Customer Communication
 Your job is to transform a dense, formal, or harsh banking/enterprise letter into a crystal-clear, customer-friendly redesigned document matching our executive banking redesign template while strictly following the USER INSTRUCTION / REQUESTED TONE and preserving 100% of source facts, dates, reference numbers, financial figures, accounting standards, auditor requirements, warnings, and contractual obligations.
 
 EXECUTIVE REDESIGN TEMPLATE STRUCTURE:
-1. `title`: Clear, customer-focused headline (e.g., "Your annual financial review", or if empathetic tone is requested: "We're here to help with your annual financial review").
-2. `introduction`: 1-2 sentence plain-English lead summary stating what is needed and by what date (e.g., "Please send us your latest financial information by 15 December 2026 so we can complete the annual review of your commercial loan.").
-3. `deadline_label`: "PLEASE SUBMIT BY" (or appropriate action label) and `deadline`: Exact deadline date from source (e.g., "15 December 2026").
-4. `details_heading`: "Your loan details" (or "Your account details") and `account_details`: Array of `{"label": "...", "value": "..."}` extracting Customer name, Loan/Account number, Reference number, and Notice date from the source document.
-5. `what_we_need_heading`: "What we need from you"
-   - `what_we_need_intro`: Clear intro sentence before the checklist (e.g., "Please provide the following documents for your most recently completed financial year. Use this checklist to make sure your submission is complete:").
-   - `checklist`: Clean array of required items/documents without trailing periods.
-   - `preparation_requirement`: Exact preparation/accounting/auditor certification requirement sentence (e.g., "All financial statements must follow the accounting standards applicable to your organisation and must be certified by the authorised auditor wherever the loan agreement requires it.").
-6. `why_we_need_heading`: "Why we need these documents" (or "What happens next?")
-   - `what_happens_next`: Clear explanation of why the bank needs the documents / what the bank will review (e.g., "We use the information as part of our ongoing review of your financial position, ability to repay the loan and compliance with the financial and non-financial covenants that apply to your existing lending arrangement.").
-7. `how_to_send_heading`: "How to send your documents"
-   - `how_to_submit_intro`: "Please send the complete, legible documents using either of these approved routes:"
-   - `submission_routes`: Bullet list of approved submission channels from the source (e.g., ["Your designated Relationship Manager; or", "The Bank's approved secure document submission channel."]).
-   - `need_help`: Clear contact/support sentence (e.g., "If you have questions about the documents or how to submit them, contact your assigned Relationship Manager.").
-8. `obligations_heading`: "Important information about your loan obligations"
-   - `mandatory_disclosures`: Array of paragraphs preserving the exact deadline/incomplete-submission warning and contractual reporting-obligation clause without weakening them.
-9. `closing_heading`: "Thank you for your cooperation"
-   - `closing_text`: Appreciative closing sentence preserving the institution name.
-   - `sign_off_division`: Division name from source (e.g., "Commercial Banking Division").
-   - `sign_off_institution`: Institution name from source (e.g., "Northridge Commercial Bank").
-   - `footer_note`: "Customer-friendly redesign of the supplied notice. The original facts, deadline, document requirements, submission routes and contractual qualifications have been retained."
+1. `title`: Clear, customer-focused headline derived strictly from the uploaded document's subject or purpose.
+2. `introduction`: 1-2 sentence plain-English lead summary stating what the uploaded document is about and any key action/date.
+3. `deadline_label`: "PLEASE SUBMIT BY" (or appropriate action label) and `deadline`: Exact deadline date from the uploaded document, or empty string if none exists.
+4. `details_heading`: Appropriate details heading (e.g. "Key details" or "Your account details") and `account_details`: Array of `{"label": "...", "value": "..."}` extracting real identifiers, dates, amounts, or references from the uploaded document.
+5. `what_we_need_heading`: Clear heading for required items or key points.
+   - `what_we_need_intro`: Clear intro sentence before the checklist, or empty string.
+   - `checklist`: Clean array of actual required items/action points from the uploaded document without trailing periods.
+   - `preparation_requirement`: Any preparation/certification requirement explicitly stated in the uploaded document, or empty string.
+6. `why_we_need_heading`: Clear heading explaining why this matters or what happens next.
+   - `what_happens_next`: Plain-English explanation from the uploaded document of why this matters and what happens next.
+7. `how_to_send_heading`: Clear heading for submission instructions or next steps.
+   - `how_to_submit_intro`: Intro sentence before submission routes if applicable, or empty string.
+   - `submission_routes`: Bullet list of submission channels or next steps from the uploaded document.
+   - `need_help`: Contact/support sentence from the uploaded document, or empty string.
+8. `obligations_heading`: Clear heading for important information, warnings, or legal/contractual obligations.
+   - `mandatory_disclosures`: Array of paragraphs preserving any warnings, legal conditions, or mandatory disclosures from the uploaded document without weakening them.
+9. `closing_heading`: Warm closing heading.
+   - `closing_text`: Appreciative closing sentence aligned with the actual sender and requested tone.
+   - `sign_off_division`: Actual division/department from the uploaded document, or empty string.
+   - `sign_off_institution`: Actual organization/bank/company name from the uploaded document, or empty string.
+   - `footer_note`: "Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions."
 
 TONE & EMPATHY ADAPTATION RULES:
 - When the user asks for an EMPATHETIC / REASSURING / LESS HARSH tone (e.g., "make it empathy", "this document is very harsh"):
@@ -552,6 +552,18 @@ def generate_redesigned_document(
                 continue
     except Exception:
         parsed = None
+
+    if parsed:
+        src_low = customer_text.lower()
+        llm_blob = json.dumps(parsed, ensure_ascii=False).lower()
+        hallucinated = (
+            ('northridge commercial bank' in llm_blob and 'northridge' not in src_low)
+            or ('your annual financial review' in llm_blob and 'annual financial' not in src_low and 'credit review' not in src_low)
+            or ('15 december 2026' in llm_blob and '15 december 2026' not in src_low)
+            or ('"item 1"' in llm_blob and 'item 1' not in src_low)
+        )
+        if hallucinated:
+            parsed = None
 
     if not parsed:
         model_used = 'deterministic-fallback'
