@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import ClariaSidebar from './components/ClariaSidebar.jsx'
 import ClariaResultCard from './components/ClariaResultCard.jsx'
+import ClariaDashboardModal from './components/ClariaDashboardModal.jsx'
 import DocumentViewer from './components/DocumentViewer.jsx'
 import { redesignCommunication, toViewerDoc } from './services/api.js'
 
@@ -171,6 +172,7 @@ export default function App() {
   const sessionsRef = useRef(sessions)
   const prevLastRoleRef = useRef(null)
   const sessionJustChangedRef = useRef(false)
+  const [dashboardOpen, setDashboardOpen] = useState(false)
 
   useEffect(() => {
     sessionsRef.current = sessions
@@ -638,6 +640,9 @@ export default function App() {
                   <small>ENTERPRISE INTELLIGENCE WORKSPACE</small>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button className="ghost" onClick={() => setDashboardOpen(true)} type="button">
+                    <span>DASHBOARD</span>
+                  </button>
                   <button className="ghost" onClick={goHome} type="button">
                     <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="m3 10 9-7 9 7" />
@@ -791,6 +796,7 @@ export default function App() {
           </div>
         </section>
       )}
+      <ClariaDashboardModal open={dashboardOpen} onClose={() => setDashboardOpen(false)} />
     </div>
   )
 }

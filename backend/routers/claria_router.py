@@ -5,14 +5,23 @@ from typing import Optional
 import json
 import uuid
 from urllib.parse import quote
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Body, Query
 from fastapi.responses import FileResponse, HTMLResponse
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
-from services import claria_service, document_service, file_validation, viewer_service
+from services import (
+    claria_service,
+    document_service,
+    file_validation,
+    viewer_service,
+    document_intelligence_service,
+    redesign_engine_service,
+    document_export_service,
+    governance_store_service,
+)
 
 router = APIRouter(prefix='/api')
 UPLOADS_DIR = Path('/tmp/uploads') if os.path.exists('/tmp') else (Path(__file__).resolve().parent.parent / 'uploads')
@@ -51,9 +60,94 @@ def view_document(filename: str):
 
 @router.get('/document/{filename}')
 def get_document(filename: str):
-    """Downloads the original uploaded file."""
+    """Downloads the original or generated file (.pdf, .docx, .html, etc.)."""
     file_path = _resolve_upload(filename)
-    return FileResponse(path=file_path, filename=_display_name(file_path.name))
+    ext = file_path.suffix.lower()
+    mtype = None
+    if ext == '.pdf':
+        mtype = 'application/pdf'
+    elif ext == '.docx':
+        mtype = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    return FileResponse(path=file_path, media_type=mtype, filename=_display_name(file_path.name))
+
+
+def _run_enterprise_pipeline(
+    raw_text: str,
+    filename: str,
+    instruction: str,
+    doc_meta: dict | None,
+    doc_id: str | None = None,
+    prior_redesigned: dict | None = None,
+    version_reason: str = 'Initial redesign',
+    creator: str = 'Document Creator',
+) -> dict:
+    """Runs full-document intelligence, redesign, fact verification, comparison, export & governance."""
+    structured = document_intelligence_service.parse_structured_document(raw_text, filename, doc_id=doc_id or '')
+    used_doc_id = structured['document_id']
+    redesigned = redesign_engine_service.generate_redesigned_document(
+        structured,
+        instruction=instruction,
+        prior_redesigned=prior_redesigned,
+    )
+    fact_ver = document_intelligence_service.verify_output_facts(
+        structured.get('source_facts') or [],
+        redesigned.get('plain_text') or '',
+    )
+    comparison = redesign_engine_service.compare_original_vs_redesigned(structured, redesigned, fact_ver)
+
+    ver_hint = 1
+    existing_rec = governance_store_service.get_document_record(used_doc_id)
+    if existing_rec:
+        ver_hint = len(existing_rec.get('versions') or []) + 1
+
+    prefix = f"{used_doc_id}_v{ver_hint}_{uuid.uuid4().hex[:5]}"
+    exports = document_export_service.generate_all_outputs(
+        out_dir=UPLOADS_DIR,
+        file_prefix=prefix,
+        redesigned=redesigned,
+        fact_verification=fact_ver,
+        comparison=comparison,
+        version_label=f"Version {ver_hint} — {version_reason}",
+    )
+    gov = governance_store_service.create_or_add_version(
+        doc_id=used_doc_id,
+        original_meta=doc_meta or {'filename': filename},
+        structured_doc=structured,
+        redesigned=redesigned,
+        fact_verification=fact_ver,
+        comparison=comparison,
+        downloads=exports['downloads'],
+        quality_validation=exports['quality_validation'],
+        instruction=instruction,
+        version_reason=version_reason,
+        creator=creator,
+    )
+
+    return {
+        'document_id': used_doc_id,
+        'version_number': gov['version_number'],
+        'version_label': gov['version_label'],
+        'intelligence': {
+            'document_title': structured['document_title'],
+            'document_type': structured['document_type'],
+            'total_pages': structured['total_pages'],
+            'word_count': structured['word_count'],
+            'customer_elements_count': len(structured['customer_elements']),
+            'internal_elements_count': len(structured['internal_elements']),
+            'internal_sections': [
+                {'section': el.get('section'), 'text': el.get('text')}
+                for el in structured['internal_elements'][:10]
+            ],
+            'headings': structured['headings'][:20],
+            'audience_clarification_needed': structured['audience_clarification_needed'],
+        },
+        'redesigned_document': redesigned,
+        'fact_verification': fact_ver,
+        'comparison': comparison,
+        'downloads': exports['downloads'],
+        'quality_validation': exports['quality_validation'],
+        'governance': gov,
+    }
 
 
 @router.post('/redesign')
@@ -152,5 +246,222 @@ async def redesign(
         except Exception:
             pass
 
+    if result.get('type') == 'redesign':
+        source_for_ent = raw_doc_text or (result.get('highlighted_document') or {}).get('raw_text') or ''
+        if source_for_ent.strip():
+            ent_bundle = _run_enterprise_pipeline(
+                raw_text=source_for_ent,
+                filename=doc_filename or 'customer_communication.txt',
+                instruction=(text or '').strip() or 'Redesign professionally for clarity while preserving all facts and disclosures.',
+                doc_meta=doc_meta,
+            )
+            result.update(ent_bundle)
+
     return result
+
+
+@router.post('/documents/{doc_id}/refine')
+def refine_document(doc_id: str, payload: dict = Body(...)):
+    """Iterative conversational refinement on an active document without restarting."""
+    rec = governance_store_service.get_document_record(doc_id)
+    if not rec:
+        raise HTTPException(status_code=404, detail='Document not found.')
+    instruction = str(payload.get('instruction') or '').strip()
+    if not instruction:
+        raise HTTPException(status_code=400, detail='Refinement instruction is required.')
+
+    latest = (rec.get('versions') or [])[-1] if rec.get('versions') else {}
+    prior_red = latest.get('redesigned_document')
+    structured = rec.get('structured_doc') or {}
+    raw_text = '\n'.join(el.get('text', '') for el in (structured.get('elements') or []))
+
+    ent = _run_enterprise_pipeline(
+        raw_text=raw_text,
+        filename=rec.get('filename', 'document.txt'),
+        instruction=instruction,
+        doc_meta={
+            'filename': rec.get('filename'),
+            'sha256': rec.get('sha256'),
+            'stored_name': rec.get('stored_name'),
+            'view_url': rec.get('original_view_url'),
+            'url': rec.get('original_download_url'),
+        },
+        doc_id=doc_id,
+        prior_redesigned=prior_red,
+        version_reason=f"Refinement ({instruction[:36]})",
+        creator=rec.get('creator', 'Document Creator'),
+    )
+    return {'type': 'redesign_update', **ent}
+
+
+@router.post('/documents/{doc_id}/correct')
+def correct_document(doc_id: str, payload: dict = Body(...)):
+    """Applies ONLY user-approved/edited corrections (YES) or records NO decision preserving version."""
+    rec = governance_store_service.get_document_record(doc_id)
+    if not rec:
+        raise HTTPException(status_code=404, detail='Document not found.')
+    decision_mode = str(payload.get('confirm') or 'yes').strip().lower()
+    corrections = payload.get('corrections') or []
+    actor = str(payload.get('actor') or 'Editor').strip()
+
+    latest = (rec.get('versions') or [])[-1] if rec.get('versions') else None
+    if not latest:
+        raise HTTPException(status_code=400, detail='No redesigned version found.')
+
+    if decision_mode == 'no':
+        gov_res = governance_store_service.record_approval_action(
+            doc_id=doc_id,
+            decision='preserve_no_correction',
+            reviewer_name=actor,
+            reviewer_role='Editor',
+            comments='User chose NO — preserved current redesigned version and kept discrepancy findings available.',
+            version_number=latest['version_number'],
+        )
+        return {'type': 'correction_preserved', 'preserved': True, 'governance': gov_res}
+
+    updated_red, decision_log = redesign_engine_service.apply_selected_corrections(
+        latest['redesigned_document'],
+        corrections,
+    )
+    structured = rec.get('structured_doc') or {}
+    fact_ver = document_intelligence_service.verify_output_facts(
+        structured.get('source_facts') or [],
+        updated_red.get('plain_text') or '',
+    )
+    comparison = redesign_engine_service.compare_original_vs_redesigned(structured, updated_red, fact_ver)
+    ver_num = len(rec.get('versions') or []) + 1
+    prefix = f"{doc_id}_v{ver_num}_{uuid.uuid4().hex[:5]}"
+    exports = document_export_service.generate_all_outputs(
+        out_dir=UPLOADS_DIR,
+        file_prefix=prefix,
+        redesigned=updated_red,
+        fact_verification=fact_ver,
+        comparison=comparison,
+        version_label=f"Version {ver_num} — Approved corrections",
+    )
+    gov = governance_store_service.create_or_add_version(
+        doc_id=doc_id,
+        original_meta={'filename': rec.get('filename'), 'sha256': rec.get('sha256')},
+        structured_doc=structured,
+        redesigned=updated_red,
+        fact_verification=fact_ver,
+        comparison=comparison,
+        downloads=exports['downloads'],
+        quality_validation=exports['quality_validation'],
+        instruction='Applied approved user corrections',
+        version_reason='Approved corrections',
+        creator=rec.get('creator', 'Document Creator'),
+    )
+    governance_store_service.append_audit_event(
+        doc_id=doc_id,
+        action='Applied Approved Corrections',
+        actor=actor,
+        role='Editor',
+        details=f"Processed {len(decision_log)} issue decision(s); created Version {gov['version_number']}.",
+        version_number=gov['version_number'],
+    )
+    return {
+        'type': 'correction_applied',
+        'document_id': doc_id,
+        'version_number': gov['version_number'],
+        'version_label': gov['version_label'],
+        'decision_log': decision_log,
+        'redesigned_document': updated_red,
+        'fact_verification': fact_ver,
+        'comparison': comparison,
+        'downloads': exports['downloads'],
+        'quality_validation': exports['quality_validation'],
+        'governance': gov,
+    }
+
+
+@router.get('/documents/{doc_id}/compare')
+def compare_versions(doc_id: str, v1: int = Query(0), v2: int = Query(0)):
+    """Compares Original (0) vs any version, or any two versions."""
+    rec = governance_store_service.get_document_record(doc_id)
+    if not rec:
+        raise HTTPException(status_code=404, detail='Document not found.')
+    vers = rec.get('versions') or []
+    if not vers:
+        raise HTTPException(status_code=400, detail='No versions available.')
+
+    target_v2 = next((v for v in vers if v['version_number'] == v2), vers[-1])
+    if v1 == 0:
+        return {
+            'document_id': doc_id,
+            'left_label': 'Original Document',
+            'right_label': target_v2['version_label'],
+            'left_text': '\n'.join(el.get('text', '') for el in (rec.get('structured_doc', {}).get('customer_elements') or [])),
+            'right_text': target_v2['redesigned_document'].get('plain_text', ''),
+            'comparison': target_v2['comparison'],
+            'fact_verification': target_v2['fact_verification'],
+        }
+
+    target_v1 = next((v for v in vers if v['version_number'] == v1), vers[0])
+    fake_struct = {
+        'customer_elements': [
+            {'element_type': 'paragraph', 'text': ln}
+            for ln in (target_v1['redesigned_document'].get('plain_text') or '').splitlines() if ln.strip()
+        ],
+        'total_pages': rec.get('total_pages', 1),
+    }
+    cmp_res = redesign_engine_service.compare_original_vs_redesigned(
+        fake_struct,
+        target_v2['redesigned_document'],
+        target_v2['fact_verification'],
+    )
+    return {
+        'document_id': doc_id,
+        'left_label': target_v1['version_label'],
+        'right_label': target_v2['version_label'],
+        'left_text': target_v1['redesigned_document'].get('plain_text', ''),
+        'right_text': target_v2['redesigned_document'].get('plain_text', ''),
+        'comparison': cmp_res,
+        'fact_verification': target_v2['fact_verification'],
+    }
+
+
+@router.post('/documents/{doc_id}/approve')
+def approve_document(doc_id: str, payload: dict = Body(...)):
+    """Human approval workflow enforcing role-based separation of duties."""
+    decision = str(payload.get('decision') or '').strip()
+    reviewer_name = str(payload.get('reviewer_name') or '').strip() or 'Compliance Reviewer'
+    reviewer_role = str(payload.get('reviewer_role') or 'Compliance Reviewer').strip()
+    comments = str(payload.get('comments') or '').strip()
+    ver_num = payload.get('version_number')
+
+    res = governance_store_service.record_approval_action(
+        doc_id=doc_id,
+        decision=decision,
+        reviewer_name=reviewer_name,
+        reviewer_role=reviewer_role,
+        comments=comments,
+        version_number=ver_num,
+    )
+    if res.get('error'):
+        raise HTTPException(status_code=403, detail=res['error'])
+    return res
+
+
+@router.get('/documents/{doc_id}')
+def get_document_details(doc_id: str):
+    rec = governance_store_service.get_document_record(doc_id)
+    if not rec:
+        raise HTTPException(status_code=404, detail='Document not found.')
+    return rec
+
+
+@router.get('/dashboard')
+def dashboard(
+    status: str = Query(''),
+    doc_type: str = Query(''),
+    severity: str = Query(''),
+    search: str = Query(''),
+):
+    return governance_store_service.get_dashboard_metrics(
+        status_filter=status,
+        doc_type_filter=doc_type,
+        severity_filter=severity,
+        search=search,
+    )
 

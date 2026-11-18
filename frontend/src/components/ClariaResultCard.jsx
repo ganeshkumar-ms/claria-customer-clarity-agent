@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
+import ClariaEnterpriseWorkspace from './ClariaEnterpriseWorkspace'
 
 const CLARITY_LENSES = {
   all: {
@@ -557,6 +558,14 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           onClick={handleDocumentClick}
           dangerouslySetInnerHTML={{ __html: normalizedHl.html }}
         />
+
+        {/* ENTERPRISE TRANSFORMATION, COMPARISON, FACT VERIFICATION & GOVERNANCE WORKSPACE */}
+        {data.document_id && (
+          <ClariaEnterpriseWorkspace
+            initialData={data}
+            originalTextFallback={highlightedDoc.raw_text || ''}
+          />
+        )}
 
         {/* 5. COMPARE OPTION LASTLY */}
         <div className="claria-compare-footer-bar">

@@ -1,0 +1,858 @@
+{
+  "documents": {
+    "doc-76f56cd357": {
+      "document_id": "doc-76f56cd357",
+      "filename": "bank_notice.txt",
+      "document_title": "BANK FEE SCHEDULE & NOTICE",
+      "document_type": "Financial / Fee Notice",
+      "department": "Customer Communications",
+      "creator": "Document Creator",
+      "created_at": "2026-11-18T12:17:42+00:00",
+      "updated_at": "2026-11-18T12:17:42+00:00",
+      "sha256": "",
+      "stored_name": "",
+      "original_view_url": "",
+      "original_download_url": "",
+      "total_pages": 2,
+      "word_count": 52,
+      "structured_doc": {
+        "document_id": "doc-76f56cd357",
+        "filename": "bank_notice.txt",
+        "document_title": "BANK FEE SCHEDULE & NOTICE",
+        "document_type": "Financial / Fee Notice",
+        "total_pages": 2,
+        "word_count": 52,
+        "elements": [
+          {
+            "element_id": "doc-76f56cd357-hd-1",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE & NOTICE",
+            "element_type": "heading",
+            "text": "BANK FEE SCHEDULE & NOTICE",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-76f56cd357-el-2",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE & NOTICE",
+            "element_type": "paragraph",
+            "text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "classification": "mandatory_disclosure",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-76f56cd357-hd-3",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "heading",
+            "text": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-76f56cd357-el-4",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "paragraph",
+            "text": "Staff must update core banking flag X-42 before rollout.",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "customer_elements": [
+          {
+            "element_id": "doc-76f56cd357-hd-1",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE & NOTICE",
+            "element_type": "heading",
+            "text": "BANK FEE SCHEDULE & NOTICE",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-76f56cd357-el-2",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE & NOTICE",
+            "element_type": "paragraph",
+            "text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "classification": "mandatory_disclosure",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "internal_elements": [
+          {
+            "element_id": "doc-76f56cd357-hd-3",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "heading",
+            "text": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-76f56cd357-el-4",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "paragraph",
+            "text": "Staff must update core banking flag X-42 before rollout.",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "headings": [
+          {
+            "page": 1,
+            "text": "BANK FEE SCHEDULE & NOTICE",
+            "internal": false
+          },
+          {
+            "page": 2,
+            "text": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "internal": true
+          }
+        ],
+        "tables": [],
+        "source_facts": [
+          {
+            "fact_id": "doc-76f56cd357-F001",
+            "category": "financial_amount",
+            "extracted_value": "₹150",
+            "normalized_value": "₹150",
+            "source_page": 1,
+            "source_section": "BANK FEE SCHEDULE & NOTICE",
+            "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "extraction_confidence": "Verified",
+            "verification_status": "Pending output check"
+          },
+          {
+            "fact_id": "doc-76f56cd357-F002",
+            "category": "date_deadline",
+            "extracted_value": "15 Dec 2026",
+            "normalized_value": "15dec2026",
+            "source_page": 1,
+            "source_section": "BANK FEE SCHEDULE & NOTICE",
+            "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "extraction_confidence": "Verified",
+            "verification_status": "Pending output check"
+          }
+        ],
+        "has_internal_content": true,
+        "audience_clarification_needed": false
+      },
+      "versions": [
+        {
+          "version_number": 1,
+          "version_label": "Version 1 — Initial redesign",
+          "parent_version": 0,
+          "created_at": "2026-11-18T12:17:42+00:00",
+          "instruction": "Make this friendly and professional for customers",
+          "model_governance": {
+            "model_id": "deterministic-fallback",
+            "prompt_version": "claria-enterprise-v2.0",
+            "processed_at": "2026-11-18T12:17:42+00:00",
+            "document_id": "doc-76f56cd357",
+            "version_number": 1,
+            "validation_status": "Verified"
+          },
+          "redesigned_document": {
+            "title": "BANK FEE SCHEDULE & NOTICE",
+            "salutation": "Dear Valued Customer,",
+            "introduction": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "sections": [],
+            "mandatory_disclosures": [
+              "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations."
+            ],
+            "closing": "If you have any questions, please contact our customer support team using the official channels listed in your account portal.",
+            "design_notes": "Applied Professional & Friendly tone for general public (preserve format).",
+            "tone_applied": "Professional & Friendly",
+            "audience_applied": "general public",
+            "design_mode": "preserve_format",
+            "tone_safety_warning": null,
+            "model_used": "deterministic-fallback",
+            "plain_text": "BANK FEE SCHEDULE & NOTICE\nDear Valued Customer,\nPursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.\n\nImportant Disclosures\nPursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.\n\nIf you have any questions, please contact our customer support team using the official channels listed in your account portal."
+          },
+          "fact_verification": {
+            "overall_status": "Verified",
+            "total_facts": 2,
+            "verified_count": 2,
+            "discrepancy_count": 0,
+            "missing_count": 0,
+            "facts": [
+              {
+                "fact_id": "doc-76f56cd357-F001",
+                "category": "financial_amount",
+                "extracted_value": "₹150",
+                "normalized_value": "₹150",
+                "source_page": 1,
+                "source_section": "BANK FEE SCHEDULE & NOTICE",
+                "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+                "extraction_confidence": "Verified",
+                "verification_status": "Verified",
+                "output_value": "₹150"
+              },
+              {
+                "fact_id": "doc-76f56cd357-F002",
+                "category": "date_deadline",
+                "extracted_value": "15 Dec 2026",
+                "normalized_value": "15dec2026",
+                "source_page": 1,
+                "source_section": "BANK FEE SCHEDULE & NOTICE",
+                "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+                "extraction_confidence": "Verified",
+                "verification_status": "Verified",
+                "output_value": "15 Dec 2026"
+              }
+            ],
+            "issues": [],
+            "out_money_count": 2
+          },
+          "comparison": {
+            "changes": [
+              {
+                "change_id": "CHG-001",
+                "category": "Added content",
+                "severity": "Low",
+                "highlight_color": "green",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "—",
+                "revised_text": "BANK FEE SCHEDULE & NOTICE Dear Valued Customer,",
+                "change_explanation": "New customer-friendly framing or transitional text added during redesign.",
+                "source_evidence": "Added in redesigned version",
+                "impact_assessment": "Cosmetic / readability simplification",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              },
+              {
+                "change_id": "CHG-002",
+                "category": "Added content",
+                "severity": "Low",
+                "highlight_color": "green",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "—",
+                "revised_text": "Important Disclosures Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations. If you have any questions, please contact our customer support team using the official channels listed in your account portal.",
+                "change_explanation": "New customer-friendly framing or transitional text added during redesign.",
+                "source_evidence": "Added in redesigned version",
+                "impact_assessment": "Cosmetic / readability simplification",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              }
+            ],
+            "counts": {
+              "total_changes": 2,
+              "added": 2,
+              "modified": 0,
+              "removed": 0,
+              "structural": 0,
+              "critical": 0,
+              "high": 0
+            },
+            "highlighted_changes_html": "<div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">BANK FEE SCHEDULE &amp; NOTICE</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Dear Valued Customer,</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Important Disclosures</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">If you have any questions, please contact our customer support team using the official channels listed in your account portal.</mark></div>",
+            "actionable_issues": [],
+            "correction_prompt": null,
+            "coverage": {
+              "status": "Successfully compared",
+              "pages_total": 2,
+              "pages_compared": 2,
+              "checks_performed": [
+                "Content diff",
+                "Financial fact verification",
+                "Mandatory disclosure check",
+                "Structural & semantic comparison"
+              ],
+              "pagination_note": "Best-effort section alignment applied between original and redesigned layouts."
+            }
+          },
+          "downloads": {
+            "clean_pdf": {
+              "filename": "doc-76f56cd357_v1_33aa4_clean.pdf",
+              "format": "PDF",
+              "size_bytes": 2009,
+              "page_count": 1,
+              "download_url": "/api/document/doc-76f56cd357_v1_33aa4_clean.pdf",
+              "view_url": "/api/document/doc-76f56cd357_v1_33aa4_clean.pdf/view",
+              "validated": true
+            },
+            "clean_docx": {
+              "filename": "doc-76f56cd357_v1_33aa4_clean.docx",
+              "format": "DOCX",
+              "size_bytes": 36874,
+              "page_count": null,
+              "download_url": "/api/document/doc-76f56cd357_v1_33aa4_clean.docx",
+              "view_url": "/api/document/doc-76f56cd357_v1_33aa4_clean.docx",
+              "validated": true
+            },
+            "highlighted_pdf": {
+              "filename": "doc-76f56cd357_v1_33aa4_highlighted.pdf",
+              "format": "PDF",
+              "size_bytes": 2259,
+              "page_count": 1,
+              "download_url": "/api/document/doc-76f56cd357_v1_33aa4_highlighted.pdf",
+              "view_url": "/api/document/doc-76f56cd357_v1_33aa4_highlighted.pdf/view",
+              "validated": true
+            },
+            "highlighted_docx": {
+              "filename": "doc-76f56cd357_v1_33aa4_highlighted.docx",
+              "format": "DOCX",
+              "size_bytes": 37009,
+              "page_count": null,
+              "download_url": "/api/document/doc-76f56cd357_v1_33aa4_highlighted.docx",
+              "view_url": "/api/document/doc-76f56cd357_v1_33aa4_highlighted.docx",
+              "validated": true
+            },
+            "report_pdf": {
+              "filename": "doc-76f56cd357_v1_33aa4_comparison_report.pdf",
+              "format": "PDF",
+              "size_bytes": 3019,
+              "page_count": 1,
+              "download_url": "/api/document/doc-76f56cd357_v1_33aa4_comparison_report.pdf",
+              "view_url": "/api/document/doc-76f56cd357_v1_33aa4_comparison_report.pdf/view",
+              "validated": true
+            },
+            "report_docx": {
+              "filename": "doc-76f56cd357_v1_33aa4_comparison_report.docx",
+              "format": "DOCX",
+              "size_bytes": 37369,
+              "page_count": null,
+              "download_url": "/api/document/doc-76f56cd357_v1_33aa4_comparison_report.docx",
+              "view_url": "/api/document/doc-76f56cd357_v1_33aa4_comparison_report.docx",
+              "validated": true
+            }
+          },
+          "quality_validation": {
+            "clean_pdf": {
+              "valid": true,
+              "size_bytes": 2009,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "clean_docx": {
+              "valid": true,
+              "size_bytes": 36874,
+              "format": "DOCX"
+            },
+            "highlighted_pdf": {
+              "valid": true,
+              "size_bytes": 2259,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "highlighted_docx": {
+              "valid": true,
+              "size_bytes": 37009,
+              "format": "DOCX"
+            },
+            "report_pdf": {
+              "valid": true,
+              "size_bytes": 3019,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "report_docx": {
+              "valid": true,
+              "size_bytes": 37369,
+              "format": "DOCX"
+            }
+          },
+          "status": "Approved"
+        }
+      ],
+      "audit_trail": [
+        {
+          "event_id": "AUD-393E54D7",
+          "timestamp": "2026-11-18T12:17:42+00:00",
+          "document_id": "doc-76f56cd357",
+          "version_number": 1,
+          "action": "Governance: Approved",
+          "actor": "Jane Compliance",
+          "role": "Compliance Reviewer",
+          "details": "Verified disclosures"
+        },
+        {
+          "event_id": "AUD-EF439EC5",
+          "timestamp": "2026-11-18T12:17:42+00:00",
+          "document_id": "doc-76f56cd357",
+          "version_number": 1,
+          "action": "Generated Version 1 — Initial redesign",
+          "actor": "Document Creator",
+          "role": "Document Creator",
+          "details": "Fact check: Verified; Changes: 2"
+        }
+      ],
+      "status": "Approved",
+      "approval_records": [
+        {
+          "approval_id": "APR-5292F5",
+          "reviewer": "Jane Compliance",
+          "role": "Compliance Reviewer",
+          "decision": "Approved",
+          "comments": "Verified disclosures",
+          "version_number": 1,
+          "timestamp": "2026-11-18T12:17:42+00:00"
+        }
+      ]
+    },
+    "doc-95144a93ec": {
+      "document_id": "doc-95144a93ec",
+      "filename": "fee_notice.txt",
+      "document_title": "BANK FEE SCHEDULE NOTICE",
+      "document_type": "Financial / Fee Notice",
+      "department": "Customer Communications",
+      "creator": "Document Creator",
+      "created_at": "2026-11-18T12:22:34+00:00",
+      "updated_at": "2026-11-18T12:22:34+00:00",
+      "sha256": "",
+      "stored_name": "",
+      "original_view_url": "",
+      "original_download_url": "",
+      "total_pages": 2,
+      "word_count": 51,
+      "structured_doc": {
+        "document_id": "doc-95144a93ec",
+        "filename": "fee_notice.txt",
+        "document_title": "BANK FEE SCHEDULE NOTICE",
+        "document_type": "Financial / Fee Notice",
+        "total_pages": 2,
+        "word_count": 51,
+        "elements": [
+          {
+            "element_id": "doc-95144a93ec-hd-1",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE NOTICE",
+            "element_type": "heading",
+            "text": "BANK FEE SCHEDULE NOTICE",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-95144a93ec-el-2",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE NOTICE",
+            "element_type": "paragraph",
+            "text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "classification": "mandatory_disclosure",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-95144a93ec-hd-3",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "heading",
+            "text": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-95144a93ec-el-4",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "paragraph",
+            "text": "Staff must update core banking flag X-42 before rollout.",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "customer_elements": [
+          {
+            "element_id": "doc-95144a93ec-hd-1",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE NOTICE",
+            "element_type": "heading",
+            "text": "BANK FEE SCHEDULE NOTICE",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-95144a93ec-el-2",
+            "page": 1,
+            "section": "BANK FEE SCHEDULE NOTICE",
+            "element_type": "paragraph",
+            "text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "classification": "mandatory_disclosure",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "internal_elements": [
+          {
+            "element_id": "doc-95144a93ec-hd-3",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "heading",
+            "text": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-95144a93ec-el-4",
+            "page": 2,
+            "section": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "element_type": "paragraph",
+            "text": "Staff must update core banking flag X-42 before rollout.",
+            "classification": "internal_only",
+            "sensitivity": "Internal",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "headings": [
+          {
+            "page": 1,
+            "text": "BANK FEE SCHEDULE NOTICE",
+            "internal": false
+          },
+          {
+            "page": 2,
+            "text": "INTERNAL IMPLEMENTATION PLAN (INTERNAL USE ONLY)",
+            "internal": true
+          }
+        ],
+        "tables": [],
+        "source_facts": [
+          {
+            "fact_id": "doc-95144a93ec-F001",
+            "category": "financial_amount",
+            "extracted_value": "₹150",
+            "normalized_value": "₹150",
+            "source_page": 1,
+            "source_section": "BANK FEE SCHEDULE NOTICE",
+            "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "extraction_confidence": "Verified",
+            "verification_status": "Pending output check"
+          },
+          {
+            "fact_id": "doc-95144a93ec-F002",
+            "category": "date_deadline",
+            "extracted_value": "15 Dec 2026",
+            "normalized_value": "15dec2026",
+            "source_page": 1,
+            "source_section": "BANK FEE SCHEDULE NOTICE",
+            "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "extraction_confidence": "Verified",
+            "verification_status": "Pending output check"
+          }
+        ],
+        "has_internal_content": true,
+        "audience_clarification_needed": false
+      },
+      "versions": [
+        {
+          "version_number": 1,
+          "version_label": "Version 1 — Initial redesign",
+          "parent_version": 0,
+          "created_at": "2026-11-18T12:22:34+00:00",
+          "instruction": "Make this friendly and clear",
+          "model_governance": {
+            "model_id": "deterministic-fallback",
+            "prompt_version": "claria-enterprise-v2.0",
+            "processed_at": "2026-11-18T12:22:34+00:00",
+            "document_id": "doc-95144a93ec",
+            "version_number": 1,
+            "validation_status": "Verified"
+          },
+          "redesigned_document": {
+            "title": "BANK FEE SCHEDULE NOTICE",
+            "salutation": "Dear Valued Customer,",
+            "introduction": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+            "sections": [],
+            "mandatory_disclosures": [
+              "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations."
+            ],
+            "closing": "If you have any questions, please contact our customer support team using the official channels listed in your account portal.",
+            "design_notes": "Applied Friendly tone for general public (preserve format).",
+            "tone_applied": "Friendly",
+            "audience_applied": "general public",
+            "design_mode": "preserve_format",
+            "tone_safety_warning": null,
+            "model_used": "deterministic-fallback",
+            "plain_text": "BANK FEE SCHEDULE NOTICE\nDear Valued Customer,\nPursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.\n\nImportant Disclosures\nPursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.\n\nIf you have any questions, please contact our customer support team using the official channels listed in your account portal."
+          },
+          "fact_verification": {
+            "overall_status": "Verified",
+            "total_facts": 2,
+            "verified_count": 2,
+            "discrepancy_count": 0,
+            "missing_count": 0,
+            "facts": [
+              {
+                "fact_id": "doc-95144a93ec-F001",
+                "category": "financial_amount",
+                "extracted_value": "₹150",
+                "normalized_value": "₹150",
+                "source_page": 1,
+                "source_section": "BANK FEE SCHEDULE NOTICE",
+                "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+                "extraction_confidence": "Verified",
+                "verification_status": "Verified",
+                "output_value": "₹150"
+              },
+              {
+                "fact_id": "doc-95144a93ec-F002",
+                "category": "date_deadline",
+                "extracted_value": "15 Dec 2026",
+                "normalized_value": "15dec2026",
+                "source_page": 1,
+                "source_section": "BANK FEE SCHEDULE NOTICE",
+                "source_text": "Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.",
+                "extraction_confidence": "Verified",
+                "verification_status": "Verified",
+                "output_value": "15 Dec 2026"
+              }
+            ],
+            "issues": [],
+            "out_money_count": 2
+          },
+          "comparison": {
+            "changes": [
+              {
+                "change_id": "CHG-001",
+                "category": "Added content",
+                "severity": "Low",
+                "highlight_color": "green",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "—",
+                "revised_text": "BANK FEE SCHEDULE NOTICE Dear Valued Customer,",
+                "change_explanation": "New customer-friendly framing or transitional text added during redesign.",
+                "source_evidence": "Added in redesigned version",
+                "impact_assessment": "Cosmetic / readability simplification",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              },
+              {
+                "change_id": "CHG-002",
+                "category": "Added content",
+                "severity": "Low",
+                "highlight_color": "green",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "—",
+                "revised_text": "Important Disclosures Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations. If you have any questions, please contact our customer support team using the official channels listed in your account portal.",
+                "change_explanation": "New customer-friendly framing or transitional text added during redesign.",
+                "source_evidence": "Added in redesigned version",
+                "impact_assessment": "Cosmetic / readability simplification",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              }
+            ],
+            "counts": {
+              "total_changes": 2,
+              "added": 2,
+              "modified": 0,
+              "removed": 0,
+              "structural": 0,
+              "critical": 0,
+              "high": 0
+            },
+            "highlighted_changes_html": "<div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">BANK FEE SCHEDULE NOTICE</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Dear Valued Customer,</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Important Disclosures</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">Pursuant to Clause 14.2, the replacement debit card fee is ₹150 effective 15 Dec 2026. Mandatory Disclosure: Deposits are insured under applicable banking regulations.</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">If you have any questions, please contact our customer support team using the official channels listed in your account portal.</mark></div>",
+            "actionable_issues": [],
+            "correction_prompt": null,
+            "coverage": {
+              "status": "Successfully compared",
+              "pages_total": 2,
+              "pages_compared": 2,
+              "checks_performed": [
+                "Content diff",
+                "Financial fact verification",
+                "Mandatory disclosure check",
+                "Structural & semantic comparison"
+              ],
+              "pagination_note": "Best-effort section alignment applied between original and redesigned layouts."
+            }
+          },
+          "downloads": {
+            "clean_pdf": {
+              "filename": "doc-95144a93ec_v1_d70d4_clean.pdf",
+              "format": "PDF",
+              "size_bytes": 2002,
+              "page_count": 1,
+              "download_url": "/api/document/doc-95144a93ec_v1_d70d4_clean.pdf",
+              "view_url": "/api/document/doc-95144a93ec_v1_d70d4_clean.pdf/view",
+              "validated": true
+            },
+            "clean_docx": {
+              "filename": "doc-95144a93ec_v1_d70d4_clean.docx",
+              "format": "DOCX",
+              "size_bytes": 36868,
+              "page_count": null,
+              "download_url": "/api/document/doc-95144a93ec_v1_d70d4_clean.docx",
+              "view_url": "/api/document/doc-95144a93ec_v1_d70d4_clean.docx",
+              "validated": true
+            },
+            "highlighted_pdf": {
+              "filename": "doc-95144a93ec_v1_d70d4_highlighted.pdf",
+              "format": "PDF",
+              "size_bytes": 2251,
+              "page_count": 1,
+              "download_url": "/api/document/doc-95144a93ec_v1_d70d4_highlighted.pdf",
+              "view_url": "/api/document/doc-95144a93ec_v1_d70d4_highlighted.pdf/view",
+              "validated": true
+            },
+            "highlighted_docx": {
+              "filename": "doc-95144a93ec_v1_d70d4_highlighted.docx",
+              "format": "DOCX",
+              "size_bytes": 37007,
+              "page_count": null,
+              "download_url": "/api/document/doc-95144a93ec_v1_d70d4_highlighted.docx",
+              "view_url": "/api/document/doc-95144a93ec_v1_d70d4_highlighted.docx",
+              "validated": true
+            },
+            "report_pdf": {
+              "filename": "doc-95144a93ec_v1_d70d4_comparison_report.pdf",
+              "format": "PDF",
+              "size_bytes": 2992,
+              "page_count": 1,
+              "download_url": "/api/document/doc-95144a93ec_v1_d70d4_comparison_report.pdf",
+              "view_url": "/api/document/doc-95144a93ec_v1_d70d4_comparison_report.pdf/view",
+              "validated": true
+            },
+            "report_docx": {
+              "filename": "doc-95144a93ec_v1_d70d4_comparison_report.docx",
+              "format": "DOCX",
+              "size_bytes": 37358,
+              "page_count": null,
+              "download_url": "/api/document/doc-95144a93ec_v1_d70d4_comparison_report.docx",
+              "view_url": "/api/document/doc-95144a93ec_v1_d70d4_comparison_report.docx",
+              "validated": true
+            }
+          },
+          "quality_validation": {
+            "clean_pdf": {
+              "valid": true,
+              "size_bytes": 2002,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "clean_docx": {
+              "valid": true,
+              "size_bytes": 36868,
+              "format": "DOCX"
+            },
+            "highlighted_pdf": {
+              "valid": true,
+              "size_bytes": 2251,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "highlighted_docx": {
+              "valid": true,
+              "size_bytes": 37007,
+              "format": "DOCX"
+            },
+            "report_pdf": {
+              "valid": true,
+              "size_bytes": 2992,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "report_docx": {
+              "valid": true,
+              "size_bytes": 37358,
+              "format": "DOCX"
+            }
+          },
+          "status": "Approved"
+        }
+      ],
+      "audit_trail": [
+        {
+          "event_id": "AUD-78C3B5AD",
+          "timestamp": "2026-11-18T12:22:34+00:00",
+          "document_id": "doc-95144a93ec",
+          "version_number": 1,
+          "action": "Governance: Approved",
+          "actor": "Audit Lead",
+          "role": "Compliance Reviewer",
+          "details": "Verified"
+        },
+        {
+          "event_id": "AUD-59B292D2",
+          "timestamp": "2026-11-18T12:22:34+00:00",
+          "document_id": "doc-95144a93ec",
+          "version_number": 1,
+          "action": "Generated Version 1 — Initial redesign",
+          "actor": "Document Creator",
+          "role": "Document Creator",
+          "details": "Fact check: Verified; Changes: 2"
+        }
+      ],
+      "status": "Approved",
+      "approval_records": [
+        {
+          "approval_id": "APR-610DA3",
+          "reviewer": "Audit Lead",
+          "role": "Compliance Reviewer",
+          "decision": "Approved",
+          "comments": "Verified",
+          "version_number": 1,
+          "timestamp": "2026-11-18T12:22:34+00:00"
+        }
+      ]
+    }
+  },
+  "audit_log": [
+    {
+      "event_id": "AUD-78C3B5AD",
+      "timestamp": "2026-11-18T12:22:34+00:00",
+      "document_id": "doc-95144a93ec",
+      "version_number": 1,
+      "action": "Governance: Approved",
+      "actor": "Audit Lead",
+      "role": "Compliance Reviewer",
+      "details": "Verified"
+    },
+    {
+      "event_id": "AUD-59B292D2",
+      "timestamp": "2026-11-18T12:22:34+00:00",
+      "document_id": "doc-95144a93ec",
+      "version_number": 1,
+      "action": "Generated Version 1 — Initial redesign",
+      "actor": "Document Creator",
+      "role": "Document Creator",
+      "details": "Fact check: Verified; Changes: 2"
+    },
+    {
+      "event_id": "AUD-393E54D7",
+      "timestamp": "2026-11-18T12:17:42+00:00",
+      "document_id": "doc-76f56cd357",
+      "version_number": 1,
+      "action": "Governance: Approved",
+      "actor": "Jane Compliance",
+      "role": "Compliance Reviewer",
+      "details": "Verified disclosures"
+    },
+    {
+      "event_id": "AUD-EF439EC5",
+      "timestamp": "2026-11-18T12:17:42+00:00",
+      "document_id": "doc-76f56cd357",
+      "version_number": 1,
+      "action": "Generated Version 1 — Initial redesign",
+      "actor": "Document Creator",
+      "role": "Document Creator",
+      "details": "Fact check: Verified; Changes: 2"
+    }
+  ]
+}
