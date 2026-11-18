@@ -1,39 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { absApiUrl } from '../services/api'
-
-function cleanOriginalHtml(rawHtml, rawText) {
-  if (!rawHtml || typeof window === 'undefined') {
-    const safe = String(rawText || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    return `<div class="claria-doc-sheet" style="white-space:pre-wrap">${safe}</div>`
-  }
-  const cleanedStr = rawHtml
-    .replace(/\(cid:127\)/g, '• ')
-    .replace(/<span[^>]*class="[^"]*claria-inline-tag[^"]*"[^>]*>[\s\S]*?<\/span>/gi, '')
-
-  const parser = new DOMParser()
-  const doc = parser.parseFromString(`<div id="root">${cleanedStr}</div>`, 'text/html')
-  const root = doc.getElementById('root')
-  if (!root) return cleanedStr
-
-  // Remove any internal metadata header lines and unwrap any <mark> tags so original document is 100% unhighlighted
-  let inMeta = false
-  Array.from(root.querySelectorAll('.claria-doc-line')).forEach((ln) => {
-    const txt = (ln.textContent || '').trim()
-    if (txt.includes('[FULL-DOCUMENT ANALYSIS METADATA]')) {
-      inMeta = true
-      ln.remove()
-      return
-    }
-    if (inMeta) {
-      ln.remove()
-      if (txt.startsWith('====')) inMeta = false
-    }
-  })
-  Array.from(root.querySelectorAll('mark')).forEach((m) => {
-    m.replaceWith(doc.createTextNode(m.textContent || ''))
-  })
-  return root.innerHTML
-}
 
 function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
   const existing = data?.redesigned_document || {}
@@ -217,6 +183,149 @@ function buildStandaloneRedesignedHtml(rd) {
 </html>`
 }
 
+function buildStandaloneRedesignedTxt(rd) {
+  const lines = [
+    rd.title || 'Your annual financial review',
+    '='.repeat((rd.title || 'Your annual financial review').length),
+    '',
+  ]
+  if (rd.introduction) {
+    lines.push(rd.introduction, '')
+  }
+  if (rd.deadline) {
+    lines.push(`${rd.deadline_label || 'PLEASE SUBMIT BY'}: ${String(rd.deadline).toUpperCase()}`, '')
+  }
+  if (rd.account_details?.length) {
+    lines.push(rd.details_heading || 'Your loan details')
+    rd.account_details.forEach(r => lines.push(`  - ${r.label}: ${r.value}`))
+    lines.push('')
+  }
+  if (rd.checklist?.length) {
+    lines.push(rd.what_we_need_heading || 'What we need from you')
+    if (rd.what_we_need_intro) lines.push(rd.what_we_need_intro)
+    rd.checklist.forEach(item => lines.push(`  [■] ${String(item).replace(/\.$/, '')}`))
+    if (rd.preparation_requirement) lines.push('', `Preparation requirement: ${rd.preparation_requirement}`)
+    lines.push('')
+  }
+  if (rd.what_happens_next) {
+    lines.push(rd.why_we_need_heading || 'Why we need these documents', rd.what_happens_next, '')
+  }
+  if (rd.submission_routes?.length || rd.how_to_submit || rd.need_help) {
+    lines.push(rd.how_to_send_heading || 'How to send your documents')
+    if (rd.how_to_submit_intro) lines.push(rd.how_to_submit_intro)
+    ;(rd.submission_routes || []).forEach(rt => lines.push(`  • ${rt}`))
+    if (!rd.submission_routes?.length && rd.how_to_submit) lines.push(rd.how_to_submit)
+    if (rd.need_help) lines.push(rd.need_help)
+    lines.push('')
+  }
+  if (rd.mandatory_disclosures?.length) {
+    lines.push(rd.obligations_heading || 'Important information about your loan obligations')
+    rd.mandatory_disclosures.forEach(ob => lines.push(ob, ''))
+  }
+  lines.push(
+    '------------------------------------------------------------',
+    rd.closing_heading || 'Thank you for your cooperation',
+    rd.closing_text || '',
+    '',
+    rd.sign_off_division || 'Commercial Banking Division',
+    rd.sign_off_institution || 'Northridge Commercial Bank'
+  )
+  return lines.join('\n')
+}
+
+function OriginalFormalDocumentSheet({ rawText, rd, sourceFilename }) {
+  const cleaned = String(rawText || '')
+    .replace(/\[FULL-DOCUMENT ANALYSIS METADATA\][\s\S]*?={6,}\s*/gi, '')
+    .replace(/\(cid:127\)/g, '• ')
+    .replace(/\r\n/g, '\n')
+    .trim()
+
+  const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean)
+  const institution = (rd.sign_off_institution || 'NORTHRIDGE COMMERCIAL BANK').toUpperCase()
+  const division = (rd.sign_off_division || 'COMMERCIAL BANKING DIVISION').toUpperCase()
+
+  const subjLine = lines.find(l => /^subject\s*:/i.test(l)) || 'Subject: Submission of Annual Financial Statements – Commercial Loan Account'
+  const details = rd.account_details || []
+  const getVal = (key, fallback) => {
+    const found = details.find(d => d.label.toLowerCase().includes(key))
+    return found?.value || fallback
+  }
+  const dateVal = getVal('date', '18 November 2026')
+  const refVal = getVal('reference', 'CCB/2026/4182')
+  const custVal = getVal('customer', 'Greenfield Agricultural Enterprises Ltd.')
+  const loanVal = getVal('loan', 'CL-2023-09471')
+
+  // Group remaining body lines into numbered formal sections or paragraphs
+  const bodyLines = lines.filter(l => {
+    if (/^(?:NORTHRIDGE|COMMERCIAL BANKING|CUSTOMER COMMUNICATION NOTICE|Subject\s*:)/i.test(l)) return false
+    if (/^(?:Date|Customer|Communication Reference|Account Reference|Page\s+\d+)\b/i.test(l) && l.length < 75) return false
+    if (/\| Customer Communication Notice$/i.test(l)) return false
+    return true
+  })
+
+  return (
+    <div className="claria-exec-paper claria-orig-formal-paper">
+      <div className="claria-orig-formal-header">
+        <div className="claria-orig-bank">{institution}</div>
+        <div className="claria-orig-div">{division}</div>
+        <div className="claria-orig-notice-title">CUSTOMER COMMUNICATION NOTICE</div>
+        <div className="claria-orig-subject">{subjLine}</div>
+      </div>
+
+      {details.length > 0 && (
+        <table className="claria-exec-table claria-orig-meta-grid">
+          <tbody>
+            <tr>
+              <th>Date</th>
+              <td>{dateVal}</td>
+              <th>Communication Reference</th>
+              <td>{refVal}</td>
+            </tr>
+            <tr>
+              <th>Customer</th>
+              <td>{custVal}</td>
+              <th>Account Reference</th>
+              <td>{loanVal}</td>
+            </tr>
+          </tbody>
+        </table>
+      )}
+
+      <div className="claria-orig-formal-body">
+        {bodyLines.length > 0 ? (
+          bodyLines.map((line, idx) => {
+            if (/^\d+\.\s+[A-Z]/.test(line)) {
+              return <h3 key={idx} className="claria-orig-sec-h">{line}</h3>
+            }
+            if (/^DOCUMENT SUBMISSION DEADLINE/i.test(line)) {
+              return (
+                <div key={idx} className="claria-orig-deadline-box">
+                  <span>DOCUMENT SUBMISSION DEADLINE</span>
+                  <strong>{rd.deadline || '15 December 2026'}</strong>
+                </div>
+              )
+            }
+            if (rd.deadline && line === rd.deadline) {
+              return null
+            }
+            if (/^[•\-*▪▸]\s*/.test(line)) {
+              return <div key={idx} className="claria-orig-bullet">{line}</div>
+            }
+            return <p key={idx} className="claria-exec-p">{line}</p>
+          })
+        ) : (
+          <p className="claria-exec-p">Source communication: {sourceFilename}</p>
+        )}
+      </div>
+
+      <div className="claria-exec-page-footer">
+        <span>{rd.sign_off_institution || 'Northridge Commercial Bank'} | Customer Communication Notice</span>
+        <span>Original Input Document</span>
+      </div>
+    </div>
+  )
+}
+
 function ExecutiveRedesignedSheet({ rd }) {
   const accountRows = (rd.account_details || []).filter(r => r && r.value && r.value !== '[TO BE CONFIRMED]')
   const checklistItems = rd.checklist || []
@@ -334,14 +443,11 @@ function ExecutiveRedesignedSheet({ rd }) {
   )
 }
 
-export default function ClariaResultCard({ data, documentMetadata, onOpenDocument, onApplyTone }) {
+export default function ClariaResultCard({ data, documentMetadata, onApplyTone }) {
   const [deliverableTab, setDeliverableTab] = useState('redesigned') // 'redesigned' | 'compare' | 'original' | 'validation'
 
   const highlightedDoc = data?.highlighted_document || {}
-  const rawOriginalHtml = highlightedDoc.original_html || ''
   const rawText = highlightedDoc.raw_text || ''
-
-  const cleanOrigHtml = useMemo(() => cleanOriginalHtml(rawOriginalHtml, rawText), [rawOriginalHtml, rawText])
 
   if (!data) return null
 
@@ -358,48 +464,120 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
     (highlightedDoc.source_filename && highlightedDoc.source_filename !== 'notice.txt' ? highlightedDoc.source_filename : '') ||
     'Customer_Communication.pdf'
 
+  const inputExt = (sourceFilename.split('.').pop() || 'pdf').toLowerCase()
+  const baseSourceName = sourceFilename.replace(/\.[^/.]+$/, '')
+
+  const originalViewUrl = absApiUrl(
+    documentMetadata?.view_url ||
+    documentMetadata?.viewUrl ||
+    highlightedDoc?.original_view_url ||
+    data?.document_metadata?.view_url
+  )
+
   const rd = resolveRedesignedDoc(data, highlightedDoc, sourceFilename)
   const appliedTone = rd.tone_applied || 'Customer-Friendly & Clear'
   const userInst = rd.user_instruction || ''
   const showCustomInst = userInst && !userInst.startsWith('Redesign professionally for clarity')
 
-  const handleDownloadRedesignedHtml = () => {
-    const content = buildStandaloneRedesignedHtml(rd)
-    const blob = new Blob([content], { type: 'text/html;charset=utf-8' })
+  const handleDownloadBlob = (content, mimeType, ext) => {
+    const blob = new Blob([content], { type: mimeType })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${sourceFilename.replace(/\.[^/.]+$/, '')}_Redesigned.html`
+    a.download = `${baseSourceName}_Redesigned.${ext}`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
   }
 
-  const handleOpenInSideViewer = () => {
-    if (!onOpenDocument) return
-    if (data.downloads?.clean_pdf?.view_url) {
-      const pdfViewUrl = absApiUrl(data.downloads.clean_pdf.view_url)
-      const pdfDlUrl = absApiUrl(data.downloads.clean_pdf.download_url || data.downloads.clean_pdf.view_url)
-      onOpenDocument({
-        name: `${sourceFilename.replace(/\.[^/.]+$/, '')}_Redesigned.pdf`,
-        filename: `${sourceFilename.replace(/\.[^/.]+$/, '')}_Redesigned.pdf`,
-        view_url: pdfViewUrl,
-        viewUrl: pdfViewUrl,
-        url: pdfDlUrl,
-      })
-      return
+  // Match redesigned output download format to input document format
+  const renderMatchedFormatDownload = () => {
+    const dlIcon = (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="7 10 12 15 17 10" />
+        <line x1="12" y1="15" x2="12" y2="3" />
+      </svg>
+    )
+
+    if ((inputExt === 'docx' || inputExt === 'doc') && data.downloads?.clean_docx?.download_url) {
+      return (
+        <a
+          className="claria-tool-btn primary"
+          href={absApiUrl(data.downloads.clean_docx.download_url)}
+          download={data.downloads.clean_docx.filename || `${baseSourceName}_Redesigned.docx`}
+          style={{ textDecoration: 'none' }}
+        >
+          {dlIcon}
+          <span>Download Redesigned DOCX</span>
+        </a>
+      )
     }
-    const content = buildStandaloneRedesignedHtml(rd)
-    const blob = new Blob([content], { type: 'text/html;charset=utf-8' })
-    const blobUrl = URL.createObjectURL(blob)
-    onOpenDocument({
-      name: `${sourceFilename.replace(/\.[^/.]+$/, '')}_Redesigned.html`,
-      filename: `${sourceFilename.replace(/\.[^/.]+$/, '')}_Redesigned.html`,
-      view_url: blobUrl,
-      viewUrl: blobUrl,
-      url: blobUrl,
-    })
+
+    if (inputExt === 'html' || inputExt === 'htm') {
+      return (
+        <button
+          type="button"
+          className="claria-tool-btn primary"
+          onClick={() => handleDownloadBlob(buildStandaloneRedesignedHtml(rd), 'text/html;charset=utf-8', 'html')}
+        >
+          {dlIcon}
+          <span>Download Redesigned HTML</span>
+        </button>
+      )
+    }
+
+    if (inputExt === 'txt') {
+      return (
+        <button
+          type="button"
+          className="claria-tool-btn primary"
+          onClick={() => handleDownloadBlob(buildStandaloneRedesignedTxt(rd), 'text/plain;charset=utf-8', 'txt')}
+        >
+          {dlIcon}
+          <span>Download Redesigned TXT</span>
+        </button>
+      )
+    }
+
+    if (data.downloads?.clean_pdf?.download_url) {
+      return (
+        <a
+          className="claria-tool-btn primary"
+          href={absApiUrl(data.downloads.clean_pdf.download_url)}
+          download={data.downloads.clean_pdf.filename || `${baseSourceName}_Redesigned.pdf`}
+          style={{ textDecoration: 'none' }}
+        >
+          {dlIcon}
+          <span>Download Redesigned PDF</span>
+        </a>
+      )
+    }
+
+    return (
+      <button
+        type="button"
+        className="claria-tool-btn primary"
+        onClick={() => handleDownloadBlob(buildStandaloneRedesignedHtml(rd), 'text/html;charset=utf-8', 'html')}
+      >
+        {dlIcon}
+        <span>Download Redesigned Document</span>
+      </button>
+    )
+  }
+
+  const renderOriginalDocumentView = () => {
+    if (originalViewUrl && inputExt === 'pdf') {
+      return (
+        <iframe
+          src={originalViewUrl}
+          title={sourceFilename}
+          className="claria-orig-doc-iframe"
+        />
+      )
+    }
+    return <OriginalFormalDocumentSheet rawText={rawText} rd={rd} sourceFilename={sourceFilename} />
   }
 
   return (
@@ -425,54 +603,7 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           </div>
 
           <div className="claria-viewer-actions">
-            {data.downloads?.clean_pdf?.download_url ? (
-              <a
-                className="claria-tool-btn primary"
-                href={absApiUrl(data.downloads.clean_pdf.download_url)}
-                download={data.downloads.clean_pdf.filename || `${sourceFilename}_Redesigned.pdf`}
-                style={{ textDecoration: 'none' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                <span>Download Redesigned PDF</span>
-              </a>
-            ) : (
-              <button
-                type="button"
-                className="claria-tool-btn primary"
-                onClick={handleDownloadRedesignedHtml}
-              >
-                <span>Download Redesigned Document</span>
-              </button>
-            )}
-            {data.downloads?.clean_docx?.download_url && (
-              <a
-                className="claria-tool-btn"
-                href={absApiUrl(data.downloads.clean_docx.download_url)}
-                download={data.downloads.clean_docx.filename || `${sourceFilename}_Redesigned.docx`}
-                style={{ textDecoration: 'none' }}
-              >
-                <span>Download DOCX</span>
-              </a>
-            )}
-            {onOpenDocument && (
-              <button
-                type="button"
-                className="claria-tool-btn"
-                onClick={handleOpenInSideViewer}
-                title="Open redesigned document in side viewer"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-                <span>Open in Viewer</span>
-              </button>
-            )}
+            {renderMatchedFormatDownload()}
           </div>
         </div>
 
@@ -532,7 +663,7 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           </div>
         )}
 
-        {/* TAB 2: SIDE-BY-SIDE INPUT VS REDESIGNED OUTPUT */}
+        {/* TAB 2: SIDE-BY-SIDE INPUT DOCUMENT VS REDESIGNED OUTPUT DOCUMENT */}
         {deliverableTab === 'compare' && (
           <div className="claria-redesign-compare">
             <div className="claria-compare-grid">
@@ -540,19 +671,18 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
                 <div className="claria-compare-pane-header">
                   <div className="claria-pane-title">
                     <span className="claria-pane-dot orig" />
-                    <strong>ORIGINAL FORMAL INPUT DOCUMENT</strong>
+                    <strong>ORIGINAL INPUT DOCUMENT ({sourceFilename})</strong>
                   </div>
                 </div>
-                <div
-                  className="claria-compare-pane-body"
-                  dangerouslySetInnerHTML={{ __html: cleanOrigHtml }}
-                />
+                <div className="claria-compare-pane-body" style={{ padding: originalViewUrl && inputExt === 'pdf' ? 0 : '14px' }}>
+                  {renderOriginalDocumentView()}
+                </div>
               </div>
               <div className="claria-compare-pane">
                 <div className="claria-compare-pane-header">
                   <div className="claria-pane-title">
                     <span className="claria-pane-dot hl" />
-                    <strong>REDESIGNED CUSTOMER-FRIENDLY OUTPUT</strong>
+                    <strong>REDESIGNED CUSTOMER-FRIENDLY DOCUMENT</strong>
                   </div>
                 </div>
                 <div className="claria-compare-pane-body" style={{ padding: '14px' }}>
@@ -565,10 +695,9 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
 
         {/* TAB 3: ORIGINAL INPUT DOCUMENT */}
         {deliverableTab === 'original' && (
-          <div
-            className="claria-document-viewport"
-            dangerouslySetInnerHTML={{ __html: cleanOrigHtml }}
-          />
+          <div className="claria-redesign-body" style={{ padding: originalViewUrl && inputExt === 'pdf' ? 0 : undefined }}>
+            {renderOriginalDocumentView()}
+          </div>
         )}
 
         {/* TAB 4: FACT & OBLIGATION VERIFICATION */}
