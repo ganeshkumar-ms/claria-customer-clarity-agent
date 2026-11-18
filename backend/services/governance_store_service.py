@@ -201,6 +201,16 @@ def get_document_record(doc_id: str) -> dict[str, Any] | None:
         return store['documents'].get(doc_id)
 
 
+def get_latest_document_record() -> dict[str, Any] | None:
+    with _LOCK:
+        store = _load_store()
+        docs = list((store.get('documents') or {}).values())
+        if not docs:
+            return None
+        docs.sort(key=lambda d: d.get('updated_at') or d.get('created_at') or '', reverse=True)
+        return docs[0]
+
+
 def record_approval_action(
     doc_id: str,
     decision: str,

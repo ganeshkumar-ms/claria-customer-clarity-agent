@@ -96,10 +96,43 @@ function loadSessions() {
       .map(s => {
         let title = s.title || 'New conversation'
         // Filter out any corrupt HTML responses from earlier CloudFront 403 errors
-        const messages = (s.messages || []).filter(m => {
-          const str = typeof m.content === 'string' ? m.content : (typeof m.content?.message === 'string' ? m.content.message : '')
-          return !str.includes('<!doctype') && !str.includes('<html')
-        })
+        // and repair any legacy "notice.txt" short-prompt responses stored in localStorage
+        let lastValidDocMsg = null
+        const messages = (s.messages || [])
+          .filter(m => {
+            const str = typeof m.content === 'string' ? m.content : (typeof m.content?.message === 'string' ? m.content.message : '')
+            return !str.includes('<!doctype') && !str.includes('<html')
+          })
+          .map(m => {
+            if (m.role === 'ai' && m.content?.type === 'redesign') {
+              const rawTxt = (m.content?.highlighted_document?.raw_text || '').trim()
+              const srcName = m.content?.highlighted_document?.source_filename || ''
+              const isShortPromptStub = (srcName === 'notice.txt' && rawTxt.split(/\s+/).length < 22 && !m.content?.redesigned_document)
+              if (!isShortPromptStub && rawTxt.split(/\s+/).length >= 15) {
+                lastValidDocMsg = m
+              } else if (isShortPromptStub) {
+                if (lastValidDocMsg?.content?.highlighted_document) {
+                  return {
+                    ...m,
+                    document_metadata: lastValidDocMsg.document_metadata,
+                    content: {
+                      ...lastValidDocMsg.content,
+                      what_this_is_about: m.content.what_this_is_about || lastValidDocMsg.content.what_this_is_about,
+                      what_you_need_to_do: m.content.what_you_need_to_do || lastValidDocMsg.content.what_you_need_to_do,
+                    },
+                  }
+                }
+                return {
+                  ...m,
+                  content: {
+                    type: 'chat',
+                    message: [m.content?.what_this_is_about, m.content?.what_you_need_to_do?.summary].filter(Boolean).join('\n\n') || 'Ready to redesign your document.',
+                  },
+                }
+              }
+            }
+            return m
+          })
 
         // Upgrade unlocked sessions: prefer AI topic, or smart-stripped prompt/filename
         if (!s.titleLocked) {

@@ -79,12 +79,15 @@ def step1_s3_and_upload():
                 ctype = 'text/css'
             elif file_path.suffix == '.html':
                 ctype = 'text/html; charset=utf-8'
-            s3.put_object(
-                Bucket=BUCKET_NAME,
-                Key=rel,
-                Body=file_path.read_bytes(),
-                ContentType=ctype or 'application/octet-stream',
-            )
+            put_kwargs = {
+                'Bucket': BUCKET_NAME,
+                'Key': rel,
+                'Body': file_path.read_bytes(),
+                'ContentType': ctype or 'application/octet-stream',
+            }
+            if file_path.suffix == '.html':
+                put_kwargs['CacheControl'] = 'no-cache, no-store, must-revalidate'
+            s3.put_object(**put_kwargs)
             print(f'   Uploaded s3://{BUCKET_NAME}/{rel} ({ctype})')
 
 

@@ -318,6 +318,18 @@ def redesign_communication(
             "sentence_highlights": []
         }
 
+    # Guard: Never turn a short conversational prompt/instruction (< 22 words, with no uploaded file) into a fake document card
+    if not raw_document_text and len((pure_doc_text or '').split()) < 22 and parsed.get('type') == 'redesign':
+        about = (parsed.get('what_this_is_about') or '').strip()
+        todo = ((parsed.get('what_you_need_to_do') or {}).get('summary') or '').strip()
+        msg_parts = [p for p in (about, todo) if p]
+        parsed = {
+            "type": "chat",
+            "message": "\n\n".join(msg_parts) if msg_parts else (
+                "Please attach your customer communication file (PDF, DOCX, TXT) or paste the full communication text so I can redesign it for you."
+            ),
+        }
+
     if parsed.get('type') == 'redesign':
         action_data = parsed.get('what_you_need_to_do') or {}
         informational_markers = [

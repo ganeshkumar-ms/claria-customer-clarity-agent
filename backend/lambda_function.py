@@ -398,11 +398,16 @@ def lambda_handler(event, context):
 
         # If no new file was uploaded, check if user is refining an active document in the conversation (e.g. "make it empathy")
         if not file_obj and user_instruction and len(user_instruction.split()) <= 60 and re.search(REFINEMENT_INTENT_RE, user_instruction, re.IGNORECASE):
-            rec = governance_store_service.get_document_record(active_document_id) if active_document_id else None
+            rec = (
+                governance_store_service.get_document_record(active_document_id)
+                if active_document_id
+                else governance_store_service.get_latest_document_record()
+            )
             if rec:
                 structured_prev = rec.get('structured_doc') or {}
                 raw_doc_text = '\n'.join(el.get('text', '') for el in (structured_prev.get('elements') or []))
-                doc_filename = rec.get('filename') or active_document_filename or 'Customer_Communication.txt'
+                doc_filename = rec.get('filename') or active_document_filename or 'Customer_Communication.pdf'
+                active_document_id = rec.get('document_id') or active_document_id
                 latest_ver = (rec.get('versions') or [])[-1] if rec.get('versions') else {}
                 prior_redesigned = latest_ver.get('redesigned_document')
                 doc_meta = {
@@ -413,8 +418,82 @@ def lambda_handler(event, context):
                 }
             elif active_document_text and active_document_text.strip():
                 raw_doc_text = active_document_text.strip()
-                doc_filename = active_document_filename or 'Customer_Communication.txt'
+                doc_filename = active_document_filename or 'Customer_Communication.pdf'
                 doc_meta = {'filename': doc_filename}
+            else:
+                # Recover latest uploaded source document from TMP_UPLOADS or S3 uploads/
+                candidates = [
+                    p for p in TMP_UPLOADS.glob('*')
+                    if p.is_file()
+                    and not p.name.startswith('highlighted_')
+                    and not p.name.startswith('doc-')
+                ]
+                if candidates:
+                    candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
+                    latest_p = candidates[0]
+                    stored_name = latest_p.name
+                    doc_filename = _display_name(stored_name)
+                    ext_res = document_service.extract_text(latest_p.read_bytes(), doc_filename)
+                    raw_doc_text = ext_res.get('text', '')
+                    q = quote(stored_name)
+                    doc_meta = {
+                        'filename': doc_filename,
+                        'stored_name': stored_name,
+                        'url': f'/api/document/{q}',
+                        'view_url': f'/api/document/{q}/view',
+                    }
+                else:
+                    try:
+                        s3_objs = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix='uploads/').get('Contents') or []
+                        src_objs = [
+                            o for o in s3_objs
+                            if not Path(o['Key']).name.startswith('highlighted_')
+                            and not Path(o['Key']).name.startswith('doc-')
+                            and o.get('Size', 0) > 20
+                        ]
+                        if src_objs:
+                            src_objs.sort(key=lambda o: o['LastModified'], reverse=True)
+                            latest_key = src_objs[0]['Key']
+                            stored_name = Path(latest_key).name
+                            doc_filename = _display_name(stored_name)
+                            f_bytes = s3_client.get_object(Bucket=S3_BUCKET, Key=latest_key)['Body'].read()
+                            ext_res = document_service.extract_text(f_bytes, doc_filename)
+                            raw_doc_text = ext_res.get('text', '')
+                            q = quote(stored_name)
+                            doc_meta = {
+                                'filename': doc_filename,
+                                'stored_name': stored_name,
+                                'url': f'/api/document/{q}',
+                                'view_url': f'/api/document/{q}/view',
+                            }
+                    except Exception:
+                        pass
+
+                # Last resort: reconstruct from conversation_history highlights if present
+                if not (raw_doc_text and raw_doc_text.strip()) and history:
+                    for h_msg in reversed(history):
+                        c_raw = h_msg.get('content')
+                        try:
+                            c_obj = json.loads(c_raw) if isinstance(c_raw, str) and c_raw.startswith('{') else (c_raw if isinstance(c_raw, dict) else None)
+                        except Exception:
+                            c_obj = None
+                        if isinstance(c_obj, dict) and c_obj.get('type') == 'redesign':
+                            hl_list = c_obj.get('highlights') or []
+                            hl_texts = [h.get('text') for h in hl_list if isinstance(h, dict) and h.get('text')]
+                            if hl_texts or c_obj.get('what_this_is_about'):
+                                raw_doc_text = '\n\n'.join([c_obj.get('what_this_is_about') or ''] + hl_texts).strip()
+                                doc_filename = active_document_filename or 'Customer_Communication.pdf'
+                                doc_meta = {'filename': doc_filename}
+                                break
+
+            if not (raw_doc_text and raw_doc_text.strip()):
+                return _json_response(200, {
+                    'type': 'chat',
+                    'message': (
+                        f"I'm ready to apply your instruction (\"{user_instruction}\")! "
+                        "Please attach the customer communication file (PDF, DOCX, TXT) or paste the communication text you would like me to redesign."
+                    ),
+                })
 
         if not combined_text.strip() and not (raw_doc_text and raw_doc_text.strip()):
             return _json_response(400, {'detail': 'Please provide a communication text or upload a document.'})
@@ -466,7 +545,7 @@ def lambda_handler(event, context):
                 parsed_stub['document_metadata'] = doc_meta
 
             hl_html = hl_doc.get('full_html') or ''
-            orig_disp = _display_name(stored_name) if stored_name else (doc_filename or 'notice.txt')
+            orig_disp = _display_name(stored_name) if stored_name else (doc_filename or 'Customer_Communication.pdf')
             hl_name = f"highlighted_{stored_name or uuid.uuid4().hex[:8]}.html"
             try:
                 (TMP_UPLOADS / hl_name).write_text(hl_html, encoding='utf-8')
@@ -511,7 +590,7 @@ def lambda_handler(event, context):
 
         if result.get('highlighted_document'):
             hl_html = result['highlighted_document'].get('full_html') or ''
-            orig_disp = _display_name(stored_name) if stored_name else 'notice.txt'
+            orig_disp = _display_name(stored_name) if stored_name else (doc_filename or 'Customer_Communication.pdf')
             hl_name = f"highlighted_{stored_name or uuid.uuid4().hex[:8]}.html"
             try:
                 (TMP_UPLOADS / hl_name).write_text(hl_html, encoding='utf-8')
