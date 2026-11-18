@@ -746,12 +746,15 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
           const fv = data.fact_verification || {}
           const verifiedFacts = fv.verified_facts || fv.facts || []
           const discrepancies = fv.discrepancies || []
+          const verifiedCount = fv.verified_count ?? verifiedFacts.filter(f => (f.verification_status || f.status || '').toLowerCase() === 'verified').length
           return (
             <div className="claria-redesign-body">
               <div className="claria-rd-val-summary">
-                <strong>Fact &amp; Contractual Obligation Preservation:</strong>{' '}
-                {fv.overall_status || fv.status || (discrepancies.length === 0 ? '100% VERIFIED & RETAINED' : 'REVIEW REQUIRED')}
-                {' · '}Deadline, loan details, document checklist, submission routes, accounting standards, and contractual clauses retained.
+                <strong>Fact &amp; Obligation Verification ({rd.title || sourceFilename}):</strong>{' '}
+                {fv.overall_status || fv.status || (discrepancies.length === 0 ? 'VERIFIED & RETAINED' : 'REVIEW REQUIRED')}
+                {verifiedFacts.length > 0
+                  ? ` · ${verifiedCount} of ${verifiedFacts.length} extracted source facts verified in redesigned output.`
+                  : ' · All extracted document facts, dates, identifiers, and obligations retained.'}
               </div>
               {verifiedFacts.length > 0 ? (
                 <div className="claria-rd-block">
