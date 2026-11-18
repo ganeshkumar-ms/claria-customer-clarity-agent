@@ -17,50 +17,41 @@ from services import document_intelligence_service as intel_svc
 PRIMARY_MODEL_ID = 'us.amazon.nova-lite-v1:0'
 FALLBACK_MODEL_ID = 'us.amazon.nova-pro-v1:0'
 
-REDESIGN_SYSTEM_PROMPT = """You are a Customer Communication Redesign Assistant, a senior Customer Communications Management (CCM) designer and content strategist specialising in BFSI communications.
-Reorganise and redesign the provided CUSTOMER-FACING communication using ONLY existing source content into the 5-stage flow:
-Reassure -> Explain -> Action -> Consequences -> Support.
+REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Customer Communication Redesign Engine (Senior CCM Designer & BFSI Content Strategist).
+Your job is to transform a dense, formal banking/enterprise letter into a clear, customer-friendly communication while preserving EVERY financial figure, date, deadline, accounting standard, auditor certification requirement, incomplete-submission warning, and contractual obligation.
 
-CONTENT INTEGRITY RULES (NEVER BREAK):
-1. DO NOT HALLUCINATE: Never add facts, figures, names, dates, phone numbers, clauses, or any information not present in the original.
-2. REUSE EXACT DETAILS: Preserve all financial figures, dates, account/reference/policy numbers, and legal/regulatory clauses verbatim.
-3. MISSING INFO: If required information is missing in the original, insert [TO BE CONFIRMED] and list it in `tbc_placeholders`.
-4. NO REPEATED TITLES, NO FOOTERS: Never repeat the document title and never add page footers.
-5. SINGLE PRIMARY ACTION: Never introduce more than one primary Call to Action.
-6. INTERNAL ISOLATION: Never include internal-only staff instructions or governance checklists.
-7. Output ONLY valid JSON matching this schema:
+OUTPUT STRUCTURE:
+1. Clear customer-friendly headline (e.g., "Let's complete your annual financial review") + short plain-English opening.
+2. Prominent submission/action deadline (exact date from source, or [TO BE CONFIRMED] if absent).
+3. Actionable checklist (clear bullet items of what the customer must submit or do).
+4. Clear "What happens next?", "How to submit", and "Need help?" sections.
+5. Dedicated "Important Obligations & Regulatory Disclosures" preserving all contractual, legal, accounting, and warning clauses verbatim without weakening them.
+
+RULES:
+- NEVER invent facts, dates, amounts, phone numbers, or bank names not in the source.
+- NEVER remove or weaken accounting standards, auditor requirements, warnings, or contractual clauses.
+- NEVER include internal-only staff instructions.
+- Output ONLY valid JSON matching this schema:
 {
-  "title": "Clear headline drawn from original subject/purpose",
-  "status_summary": {
-    "outcome": "Existing outcome/status from source",
-    "key_figures": ["Existing key amount/rate/date from source"],
-    "primary_action": "Single primary action from source or 'No action required'"
-  },
-  "account_details": [
-    {"label": "Field (e.g., Reference / Account / Date)", "value": "Exact value from source or [TO BE CONFIRMED]"}
-  ],
-  "salutation": "Existing salutation or 'Dear Valued Customer,'",
-  "introduction": "Brief reassuring opening using existing acknowledging/supportive text",
+  "title": "Customer-friendly headline",
+  "salutation": "Dear Valued Customer,",
+  "introduction": "Clear, empathetic opening explaining what is needed and why.",
+  "deadline": "Exact deadline date from source (e.g. 15 December 2026) or '' if none",
+  "checklist": ["Actionable checklist item 1", "Item 2"],
+  "what_happens_next": "Plain-English explanation of what the bank/organisation will do next.",
+  "how_to_submit": "Clear submission channel instructions from source.",
+  "need_help": "Contact / Relationship Manager help instructions from source.",
   "sections": [
     {
-      "stage": "Reassure | Explain | Action | Consequences | Support",
       "heading": "Section heading",
-      "paragraphs": ["Reorganised existing content preserving meaning and facts."],
-      "bullets": ["Optional existing bullet items"],
+      "paragraphs": ["Clear paragraph text preserving all facts and dates."],
+      "bullets": ["Optional bullet items"],
       "table": [["Col 1", "Col 2"], ["Val 1", "Val 2"]]
     }
   ],
-  "call_to_action": {
-    "label": "Single prominent Call-to-Action from source",
-    "deadline": "Existing deadline or [TO BE CONFIRMED]",
-    "instruction": "Exact existing action instruction"
-  },
-  "options": [{"title": "Option title (only if original lists options)", "details": "Existing details"}],
-  "timeline": [{"step": "Step / Date (only if original implies steps)", "detail": "Existing step detail"}],
-  "mandatory_disclosures": ["Preserved regulatory/legal disclosure lines"],
-  "tbc_placeholders": ["List of any [TO BE CONFIRMED] placeholders"],
-  "closing": "Existing support/contact closing",
-  "design_notes": "1-sentence summary of the Reassure -> Explain -> Action -> Consequences -> Support reorganisation."
+  "mandatory_disclosures": ["Exact preserved accounting standards, auditor certification, incomplete-submission warnings, and contractual reporting obligations"],
+  "closing": "Institutional sign-off from source.",
+  "design_notes": "1-sentence summary of what was restructured and why it improves customer clarity."
 }"""
 
 
@@ -209,6 +200,11 @@ def _deterministic_redesign(
 
     return {
         'title': title,
+        'deadline': deadline_val if deadline_val != '[TO BE CONFIRMED]' else '',
+        'checklist': action_p[:8],
+        'what_happens_next': (explain_p[0] if explain_p else ''),
+        'how_to_submit': next((p for p in action_p + explain_p if any(k in p.lower() for k in ('portal', 'submit', 'relationship manager', 'channel', 'upload'))), ''),
+        'need_help': (support_p[0] if support_p else ''),
         'status_summary': {
             'outcome': structured_doc.get('document_type') or 'Customer Communication',
             'key_figures': (fin.get('monetary_amounts') or [])[:3] + (fin.get('rates_and_percentages') or [])[:2],
@@ -225,10 +221,10 @@ def _deterministic_redesign(
         },
         'options': [],
         'timeline': [],
-        'mandatory_disclosures': disclosures,
+        'mandatory_disclosures': disclosures or conseq_p[:4],
         'tbc_placeholders': tbc_list,
         'closing': (support_p[0] if support_p else 'Contact details: [TO BE CONFIRMED]'),
-        'design_notes': f"Reorganised source content into Reassure -> Explain -> Action -> Consequences -> Support ({tone_info['tone_label']} tone).",
+        'design_notes': f"Restructured source communication into customer-friendly sections with prominent deadline, checklist, and preserved disclosures ({tone_info['tone_label']} tone).",
     }
 
 

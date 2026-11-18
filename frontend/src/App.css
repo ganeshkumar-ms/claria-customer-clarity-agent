@@ -2553,6 +2553,164 @@ html, body {
   padding-left: 4px;
 }
 
+/* === CLARIA 4-DELIVERABLE REDESIGN VIEW === */
+.claria-redesign-body {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #e2e8f0;
+}
+
+.claria-rd-headline {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.claria-rd-intro {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #cbd5e1;
+}
+
+.claria-rd-deadline-card {
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.claria-rd-deadline-label {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  color: #fde68a;
+}
+
+.claria-rd-deadline-val {
+  font-size: 20px;
+  color: #ffffff;
+}
+
+.claria-rd-deadline-sub {
+  font-size: 12px;
+  color: #fde68a;
+}
+
+.claria-rd-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.claria-rd-block h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #7dd3fc;
+}
+
+.claria-rd-block p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #e2e8f0;
+}
+
+.claria-rd-checklist {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #e2e8f0;
+}
+
+.claria-rd-obligations {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(4, 18, 34, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.claria-rd-obligations h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: #bae6fd;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.claria-rd-obligations p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #cbd5e1;
+}
+
+.claria-redesign-compare {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.claria-rd-changes-box {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(4, 18, 34, 0.75);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.claria-rd-changes-box h4 {
+  margin: 0;
+  font-size: 13px;
+  color: #7dd3fc;
+}
+
+.claria-rd-change-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  color: #e2e8f0;
+}
+
+.claria-rd-change-cat {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.16);
+  color: #7dd3fc;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.claria-rd-val-summary {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: #a7f3d0;
+  font-size: 13px;
+}
+
 .claria-viewer-actions {
   display: flex;
   flex-wrap: wrap;

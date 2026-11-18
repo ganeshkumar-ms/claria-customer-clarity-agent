@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react'
-import ClariaEnterpriseWorkspace from './ClariaEnterpriseWorkspace'
+import { absApiUrl } from '../services/api'
 
 const CLARITY_LENSES = {
   all: {
@@ -385,6 +385,7 @@ function buildInteractiveStandaloneHtml(title, subtitle, originalHtml, highlight
 }
 
 export default function ClariaResultCard({ data, documentMetadata, onOpenDocument }) {
+  const [deliverableTab, setDeliverableTab] = useState('redesigned') // 'redesigned' | 'original' | 'compare' | 'validation'
   const [activeLens, setActiveLens] = useState('all')
   const [showCompare, setShowCompare] = useState(false)
   const [compareLeftMode, setCompareLeftMode] = useState('verbatim')
@@ -531,19 +532,39 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           </div>
 
           <div className="claria-viewer-actions">
-            <button
-              type="button"
-              className="claria-tool-btn primary"
-              onClick={handleDownloadHighlighted}
-              title="Download highlighted output file"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span>Download Output</span>
-            </button>
+            {data.downloads?.clean_pdf?.download_url ? (
+              <a
+                className="claria-tool-btn primary"
+                href={absApiUrl(data.downloads.clean_pdf.download_url)}
+                download={data.downloads.clean_pdf.filename || `${sourceFilename}_Redesigned.pdf`}
+                style={{ textDecoration: 'none' }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+                <span>Download Redesigned PDF</span>
+              </a>
+            ) : (
+              <button
+                type="button"
+                className="claria-tool-btn primary"
+                onClick={handleDownloadHighlighted}
+              >
+                <span>Download Output</span>
+              </button>
+            )}
+            {data.downloads?.clean_docx?.download_url && (
+              <a
+                className="claria-tool-btn"
+                href={absApiUrl(data.downloads.clean_docx.download_url)}
+                download={data.downloads.clean_docx.filename || `${sourceFilename}_Redesigned.docx`}
+                style={{ textDecoration: 'none' }}
+              >
+                <span>Download DOCX</span>
+              </a>
+            )}
             {onOpenDocument && (
               <button
                 type="button"
@@ -562,172 +583,186 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           </div>
         </div>
 
-        {/* 1B. CLEAN STRUCTURED SUMMARY & EXPLANATION PANEL */}
-        {subtitleText && (
-          <div className="claria-summary-panel">
-            {renderFormattedSummary(subtitleText)}
-          </div>
-        )}
-
-        {/* 2. INTERACTIVE FILTER BAR */}
+        {/* 4 CLEAN DELIVERABLE TABS (Redesigned | Original | Compare | Validation) */}
         <div className="claria-watchout-filter-bar">
-          <span className="claria-filter-label">FILTER HIGHLIGHTS:</span>
-          {Object.values(CLARITY_LENSES).map((cfg) => {
-            const count = counts[cfg.key] || 0
-            if (cfg.key !== 'all' && count === 0) return null
-            const isActive = activeLens === cfg.key
-            return (
-              <button
-                key={cfg.key}
-                type="button"
-                className={`claria-filter-pill ${isActive ? 'active' : ''}`}
-                onClick={() => setActiveLens(cfg.key)}
-              >
-                <span className="claria-filter-dot" style={{ background: cfg.dot }} />
-                <span>{cfg.label}</span>
-                <span className="claria-filter-count">{count}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* 3. PLAIN-ENGLISH CLARITY MEANING BAR */}
-        {activeInsight && (
-          <div className={`claria-watchout-inspector cat-${activeInsight.category || 'core_message'}`}>
-            <div className="claria-inspector-head">
-              <span className="claria-inspector-badge">
-                {activeInsight.label || 'Key Sentence'}
-              </span>
-              <span className="claria-inspector-hint">
-                Click any highlighted sentence below to view its plain-English meaning
-              </span>
-            </div>
-            <div className="claria-inspector-note">
-              <strong>Plain-English Meaning:</strong> {activeInsight.note}
-            </div>
-          </div>
-        )}
-
-        {/* 4. VIEWED DOCUMENT SHEET */}
-        <div
-          className="claria-document-viewport"
-          onClick={handleDocumentClick}
-          dangerouslySetInnerHTML={{ __html: normalizedHl.html }}
-        />
-
-        {/* ENTERPRISE TRANSFORMATION, COMPARISON, FACT VERIFICATION & GOVERNANCE WORKSPACE */}
-        {data.document_id && (
-          <ClariaEnterpriseWorkspace
-            initialData={data}
-            originalTextFallback={highlightedDoc.raw_text || ''}
-          />
-        )}
-
-        {/* 5. COMPARE OPTION LASTLY */}
-        <div className="claria-compare-footer-bar">
-          <div className="claria-compare-footer-left">
-            <span className="claria-compare-icon" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" />
-                <line x1="12" y1="3" x2="12" y2="21" />
-              </svg>
-            </span>
-            <div>
-              <strong>Compare Uploaded File &amp; Highlighted Output</strong>
-              <div className="claria-compare-sub">
-                Compare your original uploaded document side-by-side with the highlighted output
-              </div>
-            </div>
-          </div>
-
-          <div className="claria-compare-footer-actions">
-            {showCompare && (
-              <button
-                type="button"
-                className={`claria-tool-btn ${syncScroll ? 'active' : ''}`}
-                onClick={() => setSyncScroll(!syncScroll)}
-              >
-                <span>{syncScroll ? 'Sync Scroll: ON' : 'Sync Scroll: OFF'}</span>
-              </button>
-            )}
+          {[
+            ['redesigned', '1. Redesigned Communication'],
+            ['original', '2. Original Document'],
+            ['compare', '3. Original vs. Redesigned'],
+            ['validation', '4. Validation Report'],
+          ].map(([k, lbl]) => (
             <button
+              key={k}
               type="button"
-              className={`claria-compare-toggle-btn ${showCompare ? 'open' : ''}`}
-              onClick={() => setShowCompare(!showCompare)}
+              className={`claria-filter-pill ${deliverableTab === k ? 'active' : ''}`}
+              onClick={() => setDeliverableTab(k)}
             >
-              {showCompare ? 'Hide Compare View' : 'Compare Input & Output'}
+              <span>{lbl}</span>
             </button>
-          </div>
+          ))}
         </div>
 
-        {/* SIDE-BY-SIDE COMPARE SPLIT VIEW */}
-        {showCompare && (
-          <div className="claria-compare-split-container">
-            <div className="claria-compare-grid">
-              {/* LEFT: UPLOADED FILE */}
-              <div className="claria-compare-pane">
-                <div className="claria-compare-pane-header">
-                  <div className="claria-pane-title">
-                    <span className="claria-pane-dot orig" />
-                    <strong>UPLOADED FILE (INPUT)</strong>
-                  </div>
-                  {originalViewUrl && (
-                    <div className="claria-pane-tabs">
-                      <button
-                        type="button"
-                        className={`claria-mini-tab ${compareLeftMode === 'verbatim' ? 'active' : ''}`}
-                        onClick={() => setCompareLeftMode('verbatim')}
-                      >
-                        Document Text
-                      </button>
-                      <button
-                        type="button"
-                        className={`claria-mini-tab ${compareLeftMode === 'native' ? 'active' : ''}`}
-                        onClick={() => setCompareLeftMode('native')}
-                      >
-                        Original File
-                      </button>
-                    </div>
+        {/* TAB 1: REDESIGNED CUSTOMER-FRIENDLY COMMUNICATION */}
+        {deliverableTab === 'redesigned' && (() => {
+          const rd = data.redesigned_document || {}
+          const deadlineVal = rd.deadline || rd.call_to_action?.deadline
+          const checklistItems = (rd.checklist && rd.checklist.length > 0)
+            ? rd.checklist
+            : (rd.sections || []).filter(s => (s.stage || '').toLowerCase() === 'action').flatMap(s => s.bullets || s.paragraphs || [])
+          const obligations = rd.mandatory_disclosures || []
+          return (
+            <div className="claria-redesign-body">
+              <h2 className="claria-rd-headline">{rd.title || sourceFilename}</h2>
+              {rd.introduction && <p className="claria-rd-intro">{rd.introduction}</p>}
+
+              {deadlineVal && deadlineVal !== '[TO BE CONFIRMED]' && (
+                <div className="claria-rd-deadline-card">
+                  <span className="claria-rd-deadline-label">YOUR SUBMISSION DEADLINE</span>
+                  <strong className="claria-rd-deadline-val">{deadlineVal}</strong>
+                  <span className="claria-rd-deadline-sub">Please complete your submission on or before this date.</span>
+                </div>
+              )}
+
+              {checklistItems.length > 0 && (
+                <div className="claria-rd-block">
+                  <h3>Your document / action checklist</h3>
+                  <ul className="claria-rd-checklist">
+                    {checklistItems.map((item, i) => <li key={i}>{item}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {rd.what_happens_next && (
+                <div className="claria-rd-block">
+                  <h3>What happens next?</h3>
+                  <p>{rd.what_happens_next}</p>
+                </div>
+              )}
+
+              {rd.how_to_submit && (
+                <div className="claria-rd-block">
+                  <h3>How to submit</h3>
+                  <p>{rd.how_to_submit}</p>
+                </div>
+              )}
+
+              {(rd.sections || []).map((sec, idx) => (
+                <div key={idx} className="claria-rd-block">
+                  <h3>{sec.heading}</h3>
+                  {(sec.paragraphs || []).map((p, pi) => <p key={pi}>{p}</p>)}
+                  {(sec.bullets || []).length > 0 && (
+                    <ul className="claria-rd-checklist">
+                      {sec.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
+                    </ul>
                   )}
                 </div>
+              ))}
 
-                {compareLeftMode === 'native' && originalViewUrl ? (
-                  <div className="claria-compare-pane-body native-frame-wrap">
-                    <iframe
-                      src={originalViewUrl}
-                      title="Original Uploaded File"
-                      className="claria-native-compare-iframe"
-                    />
+              {(rd.need_help || rd.closing) && (
+                <div className="claria-rd-block">
+                  <h3>Need help?</h3>
+                  <p>{rd.need_help || rd.closing}</p>
+                </div>
+              )}
+
+              {obligations.length > 0 && (
+                <div className="claria-rd-obligations">
+                  <h3>Important Obligations &amp; Legal Disclosures (Preserved)</h3>
+                  {obligations.map((ob, oi) => <p key={oi}>{ob}</p>)}
+                </div>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* TAB 2: ORIGINAL PRESERVED DOCUMENT */}
+        {deliverableTab === 'original' && (
+          <div className="claria-document-viewport" dangerouslySetInnerHTML={{ __html: normalizedOrig.html || `<pre style="white-space:pre-wrap">${highlightedDoc.raw_text || ''}</pre>` }} />
+        )}
+
+        {/* TAB 3: ORIGINAL VS REDESIGNED COMPARISON */}
+        {deliverableTab === 'compare' && (() => {
+          const rd = data.redesigned_document || {}
+          const changes = data.comparison?.changes || []
+          return (
+            <div className="claria-redesign-compare">
+              <div className="claria-compare-grid">
+                <div className="claria-compare-pane">
+                  <div className="claria-compare-pane-header">
+                    <div className="claria-pane-title">
+                      <span className="claria-pane-dot orig" />
+                      <strong>ORIGINAL FORMAL COMMUNICATION</strong>
+                    </div>
                   </div>
-                ) : (
-                  <div
-                    className="claria-compare-pane-body"
-                    ref={leftScrollRef}
-                    onScroll={handleLeftScroll}
-                    dangerouslySetInnerHTML={{ __html: normalizedOrig.html }}
-                  />
-                )}
-              </div>
-
-              {/* RIGHT: HIGHLIGHTED OUTPUT */}
-              <div className="claria-compare-pane">
-                <div className="claria-compare-pane-header">
-                  <div className="claria-pane-title">
-                    <span className="claria-pane-dot hl" />
-                    <strong>HIGHLIGHTED OUTPUT</strong>
+                  <div className="claria-compare-pane-body" dangerouslySetInnerHTML={{ __html: normalizedOrig.html || `<pre style="white-space:pre-wrap">${highlightedDoc.raw_text || ''}</pre>` }} />
+                </div>
+                <div className="claria-compare-pane">
+                  <div className="claria-compare-pane-header">
+                    <div className="claria-pane-title">
+                      <span className="claria-pane-dot hl" />
+                      <strong>REDESIGNED CUSTOMER-FRIENDLY VERSION</strong>
+                    </div>
+                  </div>
+                  <div className="claria-compare-pane-body">
+                    <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', margin: 0, lineHeight: 1.6 }}>
+                      {rd.plain_text || rd.introduction || ''}
+                    </pre>
                   </div>
                 </div>
-                <div
-                  className="claria-compare-pane-body"
-                  ref={rightScrollRef}
-                  onScroll={handleRightScroll}
-                  onClick={handleDocumentClick}
-                  dangerouslySetInnerHTML={{ __html: normalizedHl.html }}
-                />
               </div>
+              {changes.length > 0 && (
+                <div className="claria-rd-changes-box">
+                  <h4>What Changed, What Was Retained &amp; Why</h4>
+                  {changes.slice(0, 8).map((ch, ci) => (
+                    <div key={ci} className="claria-rd-change-row">
+                      <span className="claria-rd-change-cat">{ch.category || ch.change_type || 'Restructured'}</span>
+                      <div>{ch.reason || ch.explanation || ch.new_content || ch.original_content}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )
+        })()}
+
+        {/* TAB 4: VALIDATION REPORT */}
+        {deliverableTab === 'validation' && (() => {
+          const fv = data.fact_verification || {}
+          const verifiedFacts = fv.verified_facts || fv.facts || []
+          const discrepancies = fv.discrepancies || []
+          const tbc = data.redesigned_document?.tbc_placeholders || []
+          return (
+            <div className="claria-redesign-body">
+              <div className="claria-rd-val-summary">
+                <strong>Fact &amp; Clause Preservation:</strong> {fv.status || (discrepancies.length === 0 ? 'VERIFIED' : 'REVIEW REQUIRED')} · {verifiedFacts.length} source fact(s) checked · {discrepancies.length} discrepancy(ies)
+              </div>
+              {discrepancies.length > 0 && (
+                <div className="claria-rd-obligations">
+                  <h3>Flagged Discrepancies</h3>
+                  {discrepancies.map((d, di) => (
+                    <p key={di}><strong>{d.fact_type || 'Fact'}:</strong> Original `{d.original_value}` vs Output `{d.output_value}`</p>
+                  ))}
+                </div>
+              )}
+              {tbc.length > 0 && (
+                <div className="claria-rd-obligations">
+                  <h3>Missing Information ([TO BE CONFIRMED])</h3>
+                  {tbc.map((t, ti) => <p key={ti}>{t}</p>)}
+                </div>
+              )}
+              {verifiedFacts.length > 0 && (
+                <div className="claria-rd-block">
+                  <h3>Verified Source Figures, Dates &amp; Identifiers</h3>
+                  <ul className="claria-rd-checklist">
+                    {verifiedFacts.slice(0, 12).map((f, fi) => (
+                      <li key={fi}><strong>{f.fact_type || 'Fact'}:</strong> {f.value || f.original_value} — {f.status || 'PRESERVED'}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )
+        })()}
       </div>
     </div>
   )
