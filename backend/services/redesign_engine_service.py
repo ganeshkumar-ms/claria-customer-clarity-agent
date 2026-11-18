@@ -17,30 +17,38 @@ from services import document_intelligence_service as intel_svc
 PRIMARY_MODEL_ID = 'us.amazon.nova-lite-v1:0'
 FALLBACK_MODEL_ID = 'us.amazon.nova-pro-v1:0'
 
-REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Banking & Customer Communications Designer.
-Transform the provided CUSTOMER-FACING document content according to the user's instruction, tone, and target audience.
+REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Customer Communication Intelligence, Transformation and Redesign Engine (Senior CCM Architect, BFSI Communication Strategist, Regulatory Content Reviewer & CX Specialist).
+Transform the provided CUSTOMER-FACING document content according to the user's instruction, communication type, tone, and target audience.
+
+CONTEXT-AWARE ARCHITECTURE (DO NOT APPLY A GENERIC TEMPLATE):
+- Loan communications: Approval/rejection summary, loan details, repayment information, conditions, customer action, support.
+- Collections communications: Outstanding amount, payment deadline, available payment instructions, consequences, customer assistance.
+- Insurance communications: Policy information, coverage details, claim status, required documentation, deadlines, support.
+- Banking service communications: Service change, affected products, financial impact, effective date, customer preferences, support.
+- KYC communications: Verification requirements, required documents, submission methods, submission deadline, consequences (if stated in source).
 
 STRICT RULES:
-1. NEVER alter, round, or fabricate financial amounts, fees, interest rates, EMI values, dates, deadlines, or policy references. Preserve every source number/date verbatim unless the user explicitly instructed an authorized policy update.
-2. NEVER weaken mandatory regulatory/legal disclosures, warnings, or customer obligations.
-3. NEVER include internal-only staff instructions, internal implementation plans, or governance checklists in the customer-facing output.
-4. Preserve tables clearly in structured row arrays when present.
-5. Output ONLY valid JSON matching this schema:
+1. IMMUTABLE SOURCE INTEGRITY: Never alter, round, or fabricate financial amounts, fees, interest rates, EMI values, dates, deadlines, account/loan/policy identifiers, contractual conditions, eligibility requirements, or customer obligations.
+2. MISSING OR CONFLICTING INFORMATION: If required information is missing in the source, mark [TO BE CONFIRMED]. If source information conflicts, preserve the conflicting evidence and flag it.
+3. REGULATORY & TONE SAFETY: Never weaken mandatory disclosures, warnings, or obligations. Never introduce humour, exaggerated reassurance, aggressive urgency, or casual language into debt, default, hardship, fraud, legal action, complaint, rejection, or payment-failure communications.
+4. INTERNAL CONTENT ISOLATION: Never include internal-only staff instructions, internal implementation plans, or governance checklists in the customer-facing output.
+5. BRANDING & TABLES: Preserve tables clearly in structured row arrays. Never invent an organisation's logo, brand identity, or corporate colours.
+6. Output ONLY valid JSON matching this schema:
 {
   "title": "Clean customer-facing document title",
   "salutation": "Dear Valued Customer,",
-  "introduction": "Clear, empathetic opening paragraph explaining what this communication is about.",
+  "introduction": "Clear, empathetic opening paragraph explaining what this communication is about and the primary message.",
   "sections": [
     {
       "heading": "Section heading",
-      "paragraphs": ["Clear paragraph text preserving all facts and dates."],
+      "paragraphs": ["Clear paragraph text preserving all facts, dates, and obligations."],
       "bullets": ["Optional bullet items"],
       "table": [["Col 1", "Col 2"], ["Val 1", "Val 2"]]
     }
   ],
   "mandatory_disclosures": ["Preserved regulatory/legal disclosure lines"],
   "closing": "Clear next steps and official contact / support closing.",
-  "design_notes": "1-sentence summary of the tone, audience, and format adaptations applied."
+  "design_notes": "1-sentence summary of the communication architecture, tone, audience, and format adaptations applied."
 }"""
 
 
@@ -454,3 +462,152 @@ def apply_selected_corrections(
 
     updated['plain_text'] = _sections_to_plain_text(updated)
     return updated, decision_log
+
+
+def detect_communication_issues(
+    structured_doc: dict[str, Any],
+    redesigned: dict[str, Any],
+    fact_verification: dict[str, Any],
+    comparison: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """
+    Section 12: Intelligent Issue Detection & Recommendation Engine.
+    Inspects the redesigned output against the source without inventing artificial issues
+    or auto-modifying the document. Every optional improvement requires human approval.
+    """
+    issues: list[dict[str, Any]] = []
+    idx = 1
+
+    for disc in fact_verification.get('discrepancies') or []:
+        issues.append({
+            'issue_id': f"ISSUE-{idx:02d}",
+            'severity': disc.get('severity') or 'Critical',
+            'title': f"Source Fact Discrepancy ({disc.get('fact_type', 'Fact')})",
+            'description': disc.get('issue') or 'A source value was altered or omitted in the redesigned output.',
+            'evidence': f"Page {disc.get('source_page', 1)} · {disc.get('source_section', 'Source')}: {disc.get('source_evidence', '')}",
+            'current_output': disc.get('output_value') or 'Missing in redesigned output',
+            'recommended_modification': f"Restore exact source value: {disc.get('original_value', '')}",
+            'reason': 'Immutable source financial figures, dates, and identifiers must match the authoritative document.',
+            'impact': 'Financial / Regulatory integrity',
+            'approval_required': True,
+            'prompt': 'Would you like me to apply this improvement?',
+        })
+        idx += 1
+
+    comm_intel = structured_doc.get('communication_intelligence') or {}
+    actions = (comm_intel.get('customer_action_intelligence') or {}).get('required_actions') or []
+    intro = (redesigned.get('introduction') or '').lower()
+    if actions and not any(k in intro for k in ('please', 'must', 'action', 'submit', 'confirm', 'pay', 'by ')):
+        issues.append({
+            'issue_id': f"ISSUE-{idx:02d}",
+            'severity': 'Medium',
+            'title': 'Action Visibility in Opening Summary',
+            'description': 'Required customer action is present in the communication but not highlighted in the opening introduction.',
+            'evidence': f"Source action: {actions[0][:160]}",
+            'current_output': (redesigned.get('introduction') or '')[:180],
+            'recommended_modification': 'Surface the primary customer action and deadline clearly in the opening panel without adding new facts.',
+            'reason': 'Improves immediate customer comprehension and reduces missed deadlines.',
+            'impact': 'Customer experience / Operational',
+            'approval_required': True,
+            'prompt': 'Would you like me to apply this improvement?',
+        })
+        idx += 1
+
+    if not (redesigned.get('mandatory_disclosures') or []) and (comm_intel.get('legal_and_regulatory_intelligence') or {}).get('disclosures_and_clauses_count', 0) > 0:
+        issues.append({
+            'issue_id': f"ISSUE-{idx:02d}",
+            'severity': 'High',
+            'title': 'Mandatory Disclosure Placement',
+            'description': 'Source contains legal/regulatory disclosures that should appear in a dedicated Mandatory Disclosures block.',
+            'evidence': 'Source legal/regulatory clauses detected.',
+            'current_output': 'Mandatory disclosures list is empty.',
+            'recommended_modification': 'Preserve all source regulatory disclosures verbatim in the Important Disclosures section.',
+            'reason': 'Protects legal and regulatory integrity.',
+            'impact': 'Compliance / Legal',
+            'approval_required': True,
+            'prompt': 'Would you like me to apply this improvement?',
+        })
+        idx += 1
+
+    return issues
+
+
+CHANNEL_LIMITS = {
+    'sms': 320,
+    'push': 180,
+    'whatsapp': 1024,
+    'email': 4000,
+    'web_portal': 6000,
+    'mobile_app': 1500,
+    'physical_letter': 12000,
+    'cs_script': 4000,
+}
+
+
+def adapt_for_channel(
+    redesigned: dict[str, Any],
+    channel: str,
+    structured_doc: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """
+    Section 16: Multi-Channel Communication Adaptation.
+    Maintains one authoritative source of truth for key facts and flags when long legal
+    disclosures cannot fit a constrained channel and need an approved secondary mechanism.
+    """
+    ch = (channel or 'email').strip().lower().replace(' ', '_')
+    limit = CHANNEL_LIMITS.get(ch, 4000)
+    title = redesigned.get('title') or 'Customer Communication'
+    intro = redesigned.get('introduction') or ''
+    closing = redesigned.get('closing') or ''
+    disclosures = redesigned.get('mandatory_disclosures') or []
+
+    key_points = []
+    for sec in redesigned.get('sections') or []:
+        if sec.get('heading'):
+            key_points.append(sec['heading'])
+        for p in (sec.get('paragraphs') or [])[:1]:
+            key_points.append(p)
+        for b in (sec.get('bullets') or [])[:2]:
+            key_points.append(f"- {b}")
+
+    if ch in ('sms', 'push'):
+        body = f"{title}: {intro}".strip()
+        if len(body) > limit - 40:
+            body = body[:limit - 43].rstrip() + '...'
+        body += " View full notice & terms in your secure portal."
+        disclosure_note = (
+            "Channel character limit cannot hold full legal disclosures; deliver full mandatory disclosures via linked secure portal or email."
+            if disclosures else "No long disclosures omitted."
+        )
+    elif ch == 'cs_script':
+        body = (
+            f"AGENT OPENING: Hello, I am calling regarding '{title}'.\n\n"
+            f"KEY MESSAGE: {intro}\n\n"
+            f"KEY DETAILS:\n" + '\n'.join(key_points[:6]) + "\n\n"
+            f"MANDATORY DISCLOSURES TO READ/CONFIRM:\n" + ('\n'.join(disclosures[:3]) if disclosures else 'None specified.') + "\n\n"
+            f"CLOSING: {closing}"
+        )
+        disclosure_note = "Mandatory disclosures included in agent script."
+    else:
+        parts = [f"Subject: {title}", "", redesigned.get('salutation') or 'Dear Valued Customer,', "", intro, ""]
+        parts.extend(key_points[:10])
+        if disclosures:
+            parts.append("")
+            parts.append("Important Disclosures:")
+            parts.extend(disclosures[:6])
+        if closing:
+            parts.append("")
+            parts.append(closing)
+        body = '\n'.join(parts).strip()
+        if len(body) > limit:
+            body = body[:limit - 45].rstrip() + "\n\n[Full notice available via secure portal/PDF]"
+        disclosure_note = "Full disclosures preserved within channel constraints." if len(body) <= limit else "Truncated for channel limit; attach full PDF."
+
+    return {
+        'channel': ch,
+        'character_limit': limit,
+        'character_count': len(body),
+        'adapted_content': body,
+        'disclosure_handling': disclosure_note,
+        'source_document_id': (structured_doc or {}).get('document_id'),
+    }

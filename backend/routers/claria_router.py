@@ -42,7 +42,7 @@ def _display_name(stored: str) -> str:
 
 @router.get('/health')
 def health():
-    return {"status": "ok", "agent": "CLARIA", "service": "Customer Communications Redesign"}
+    return {"status": "ok", "agent": "CLARIA", "service": "Customer Communication Intelligence & Redesign Engine"}
 
 
 @router.get('/document/{filename}/view')
@@ -94,6 +94,7 @@ def _run_enterprise_pipeline(
         redesigned.get('plain_text') or '',
     )
     comparison = redesign_engine_service.compare_original_vs_redesigned(structured, redesigned, fact_ver)
+    detected_issues = redesign_engine_service.detect_communication_issues(structured, redesigned, fact_ver, comparison)
 
     ver_hint = 1
     existing_rec = governance_store_service.get_document_record(used_doc_id)
@@ -140,10 +141,12 @@ def _run_enterprise_pipeline(
             ],
             'headings': structured['headings'][:20],
             'audience_clarification_needed': structured['audience_clarification_needed'],
+            'communication_intelligence': structured.get('communication_intelligence') or {},
         },
         'redesigned_document': redesigned,
         'fact_verification': fact_ver,
         'comparison': comparison,
+        'issues': detected_issues,
         'downloads': exports['downloads'],
         'quality_validation': exports['quality_validation'],
         'governance': gov,
@@ -449,6 +452,32 @@ def get_document_details(doc_id: str):
     if not rec:
         raise HTTPException(status_code=404, detail='Document not found.')
     return rec
+
+
+@router.post('/documents/{doc_id}/adapt-channel')
+def adapt_document_channel(doc_id: str, payload: dict = Body(...)):
+    """Adapts an active redesigned communication to a specific delivery channel (Email, SMS, Push, WhatsApp, CS Script)."""
+    rec = governance_store_service.get_document_record(doc_id)
+    if not rec:
+        raise HTTPException(status_code=404, detail='Document not found.')
+    latest = (rec.get('versions') or [])[-1] if rec.get('versions') else None
+    if not latest:
+        raise HTTPException(status_code=400, detail='No redesigned version found.')
+    channel = str(payload.get('channel') or 'email').strip()
+    adapted = redesign_engine_service.adapt_for_channel(
+        latest['redesigned_document'],
+        channel=channel,
+        structured_doc=rec.get('structured_doc'),
+    )
+    governance_store_service.append_audit_event(
+        doc_id=doc_id,
+        action='Multi-Channel Adaptation',
+        actor=str(payload.get('actor') or 'Editor'),
+        role='Editor',
+        details=f"Adapted Version {latest['version_number']} for channel: {adapted['channel']}.",
+        version_number=latest['version_number'],
+    )
+    return adapted
 
 
 @router.get('/dashboard')

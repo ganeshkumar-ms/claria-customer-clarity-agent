@@ -299,21 +299,34 @@ def parse_structured_document(raw_text: str, filename: str = 'document.txt', doc
     flush_para()
     flush_table()
 
-    # Infer document title & type
+    # Infer document title & communication architecture type (Section 4 & 6)
     doc_title = headings[0]['text'] if headings else Path_stem(filename)
     doc_lower = text.lower()
-    if any(k in doc_lower for k in ('fee schedule', 'tariff', 'account statement', 'billing')):
-        doc_type = 'Financial / Fee Notice'
-    elif any(k in doc_lower for k in ('loan', 'emi', 'repayment', 'mortgage')):
-        doc_type = 'Loan / Credit Communication'
-    elif any(k in doc_lower for k in ('privacy', 'disclosure', 'terms', 'policy')):
+    if any(k in doc_lower for k in ('overdue', 'past due', 'collections', 'delinquent', 'default notice', 'outstanding balance')):
+        doc_type = 'Collections Communication'
+    elif any(k in doc_lower for k in ('kyc', 'know your customer', 'identity verification', 're-kyc', 'pan', 'aadhaar', 'passport')):
+        doc_type = 'KYC Communication'
+    elif any(k in doc_lower for k in ('policy', 'claim', 'premium', 'coverage', 'sum assured', 'insurer', 'underwriting')):
+        doc_type = 'Insurance Communication'
+    elif any(k in doc_lower for k in ('loan', 'emi', 'repayment', 'mortgage', 'sanction', 'disbursement')):
+        doc_type = 'Loan Communication'
+    elif any(k in doc_lower for k in ('fee schedule', 'tariff', 'account statement', 'billing', 'service change', 'maintenance', 'interest rate change')):
+        doc_type = 'Banking Service Communication'
+    elif any(k in doc_lower for k in ('privacy', 'disclosure', 'terms and conditions', 'regulatory notice')):
         doc_type = 'Regulatory / Policy Disclosure'
-    elif any(k in doc_lower for k in ('study guide', 'blueprint', 'architecture')):
-        doc_type = 'Technical / Educational Guide'
     else:
         doc_type = 'Enterprise Customer Communication'
 
     source_facts = extract_source_facts(elements, doc_id)
+    comm_intel = extract_communication_intelligence(
+        text=text,
+        filename=filename,
+        elements=elements,
+        customer_elements=customer_elements,
+        source_facts=source_facts,
+        doc_title=doc_title,
+        doc_type=doc_type,
+    )
 
     return {
         'document_id': doc_id,
@@ -328,8 +341,84 @@ def parse_structured_document(raw_text: str, filename: str = 'document.txt', doc
         'headings': headings,
         'tables': tables,
         'source_facts': source_facts,
+        'communication_intelligence': comm_intel,
         'has_internal_content': len(internal_elements) > 0,
         'audience_clarification_needed': len(customer_elements) == 0 and len(elements) > 0,
+    }
+
+
+def extract_communication_intelligence(
+    text: str,
+    filename: str,
+    elements: list[dict],
+    customer_elements: list[dict],
+    source_facts: list[dict],
+    doc_title: str,
+    doc_type: str,
+) -> dict[str, Any]:
+    """
+    Builds Section 4 Advanced Document Intelligence report from extracted source evidence.
+    Never infers missing facts; uses [TO BE CONFIRMED] when absent in the source.
+    """
+    ref_match = re.search(r'(?:Ref(?:erence)?\s*(?:No\.?|ID|#)?\s*[:\-]\s*)([A-Z0-9\-\/]+)', text, re.I)
+    date_facts = [f['value'] for f in source_facts if f.get('fact_type') == 'date']
+    currency_facts = [f['value'] for f in source_facts if f.get('fact_type') == 'currency']
+    rate_facts = [f['value'] for f in source_facts if f.get('fact_type') == 'percentage']
+    id_facts = [f['value'] for f in source_facts if f.get('fact_type') == 'identifier']
+
+    action_lines = []
+    deadline_lines = []
+    legal_lines = []
+    contact_lines = []
+    for el in customer_elements:
+        t = el.get('text') or ''
+        tl = t.lower()
+        if any(k in tl for k in ('must ', 'please ', 'required to', 'submit', 'confirm', 'pay ', 'complete ', 'action required')):
+            action_lines.append(t[:240])
+        if any(k in tl for k in ('by ', 'deadline', 'due date', 'before ', 'within ', 'effective ')):
+            deadline_lines.append(t[:200])
+        if el.get('classification') == 'mandatory_disclosure' or any(k in tl for k in ('disclosure', 'terms', 'regulatory', 'ombudsman', 'grievance', 'rights')):
+            legal_lines.append(t[:240])
+        if any(k in tl for k in ('helpline', 'toll-free', 'support@', 'customer care', 'contact us', '1800', 'branch')):
+            contact_lines.append(t[:200])
+
+    missing_gaps = []
+    if not date_facts:
+        missing_gaps.append('Effective date or action deadline not explicitly found — mark [TO BE CONFIRMED] if required.')
+    if not contact_lines:
+        missing_gaps.append('Customer support / response channel not explicitly stated — mark [TO BE CONFIRMED] if required.')
+
+    return {
+        'document_identity': {
+            'document_title': doc_title,
+            'document_type': doc_type,
+            'source_filename': filename,
+            'document_reference': ref_match.group(1) if ref_match else '[TO BE CONFIRMED]',
+            'issue_date': date_facts[0] if date_facts else '[TO BE CONFIRMED]',
+            'intended_audience': 'Customer / Recipient',
+            'communication_channel': 'Digital / Print Customer Communication',
+        },
+        'business_context': {
+            'communication_purpose': f"{doc_type} — {doc_title}",
+            'main_message': (customer_elements[0]['text'][:260] if customer_elements else '[TO BE CONFIRMED]'),
+            'action_required': len(action_lines) > 0,
+        },
+        'financial_intelligence': {
+            'monetary_amounts': currency_facts[:15],
+            'rates_and_percentages': rate_facts[:10],
+            'identifiers': id_facts[:10],
+            'payment_or_effective_dates': date_facts[:10],
+        },
+        'legal_and_regulatory_intelligence': {
+            'disclosures_and_clauses_count': len(legal_lines),
+            'key_disclosures': legal_lines[:8],
+        },
+        'customer_action_intelligence': {
+            'required_actions': action_lines[:6],
+            'deadlines': deadline_lines[:5],
+            'support_channels': contact_lines[:4],
+        },
+        'missing_or_conflicting': missing_gaps,
     }
 
 
