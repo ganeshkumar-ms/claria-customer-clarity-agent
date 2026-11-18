@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { absApiUrl } from '../services/api'
 
 function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
@@ -445,6 +445,24 @@ function ExecutiveRedesignedSheet({ rd }) {
 
 export default function ClariaResultCard({ data, documentMetadata, onApplyTone }) {
   const [deliverableTab, setDeliverableTab] = useState('redesigned') // 'redesigned' | 'compare' | 'original' | 'validation'
+  const leftCompareRef = useRef(null)
+  const rightCompareRef = useRef(null)
+  const syncingScrollRef = useRef(null)
+
+  const handleSyncScroll = (sourceSide) => {
+    if (syncingScrollRef.current && syncingScrollRef.current !== sourceSide) return
+    const srcEl = sourceSide === 'left' ? leftCompareRef.current : rightCompareRef.current
+    const dstEl = sourceSide === 'left' ? rightCompareRef.current : leftCompareRef.current
+    if (!srcEl || !dstEl) return
+    const srcMax = srcEl.scrollHeight - srcEl.clientHeight
+    const dstMax = dstEl.scrollHeight - dstEl.clientHeight
+    if (srcMax <= 0 || dstMax <= 0) return
+    syncingScrollRef.current = sourceSide
+    dstEl.scrollTop = (srcEl.scrollTop / srcMax) * dstMax
+    requestAnimationFrame(() => {
+      syncingScrollRef.current = null
+    })
+  }
 
   const highlightedDoc = data?.highlighted_document || {}
   const rawText = highlightedDoc.raw_text || ''
@@ -665,7 +683,12 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
                     <strong>ORIGINAL INPUT DOCUMENT</strong>
                   </div>
                 </div>
-                <div className="claria-compare-pane-body" style={{ padding: '14px' }}>
+                <div
+                  ref={leftCompareRef}
+                  className="claria-compare-pane-body"
+                  style={{ padding: '14px' }}
+                  onScroll={() => handleSyncScroll('left')}
+                >
                   {renderOriginalDocumentView()}
                 </div>
               </div>
@@ -676,7 +699,12 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
                     <strong>REDESIGNED CUSTOMER-FRIENDLY DOCUMENT</strong>
                   </div>
                 </div>
-                <div className="claria-compare-pane-body" style={{ padding: '14px' }}>
+                <div
+                  ref={rightCompareRef}
+                  className="claria-compare-pane-body"
+                  style={{ padding: '14px' }}
+                  onScroll={() => handleSyncScroll('right')}
+                >
                   <ExecutiveRedesignedSheet rd={rd} />
                 </div>
               </div>
