@@ -387,7 +387,12 @@ def parse_structured_document(raw_text: str, filename: str = 'document.txt', doc
     flush_table()
 
     # Infer document title & communication architecture type (Section 4 & 6)
-    doc_title = headings[0]['text'] if headings else Path_stem(filename)
+    non_colon_headings = [h['text'] for h in headings if not h['text'].rstrip().endswith(':')]
+    first_line_cand = next(
+        (ln.strip() for ln in text.splitlines() if ln.strip() and len(ln.strip()) <= 95 and not ln.strip().endswith(':')),
+        ''
+    )
+    doc_title = (non_colon_headings[0] if non_colon_headings else first_line_cand) or Path_stem(filename)
     doc_lower = text.lower()
     if any(k in doc_lower for k in ('overdue', 'past due', 'collections', 'delinquent', 'default notice', 'outstanding balance')):
         doc_type = 'Collections Communication'

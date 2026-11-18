@@ -47,40 +47,39 @@ TONE & EMPATHY ADAPTATION RULES:
 - When the user asks for an EMPATHETIC / REASSURING / LESS HARSH tone (e.g., "make it empathy", "this document is very harsh"):
   - Make `title`, `introduction`, `what_we_need_intro`, `what_happens_next`, `need_help`, and `closing_text` warm, supportive, reassuring, and collaborative (e.g., thanking the customer for their partnership, offering proactive support from their Relationship Manager if they need extra guidance), while keeping `account_details`, `checklist`, `preparation_requirement`, and `mandatory_disclosures` 100% factual and compliant.
 
-Output ONLY valid JSON matching this schema:
+Output ONLY valid JSON matching this schema (CRITICAL: derive EVERY value strictly from the uploaded document — NEVER copy placeholder text or invent bank/loan details that are not in the uploaded document):
 {
-  "title": "Your annual financial review",
+  "title": "<Clear, customer-friendly title derived strictly from the uploaded document>",
   "deadline_label": "PLEASE SUBMIT BY",
-  "deadline": "15 December 2026",
-  "introduction": "Please send us your latest financial information by 15 December 2026 so we can complete the annual review of your commercial loan.",
-  "details_heading": "Your loan details",
+  "deadline": "<Exact deadline/due date from source, or empty string if none>",
+  "introduction": "<1-2 sentence plain-English summary of the uploaded document>",
+  "details_heading": "<Appropriate heading such as 'Your account details' or 'Key document details'>",
   "account_details": [
-    {"label": "Customer", "value": "Exact customer name from source"},
-    {"label": "Loan account", "value": "Exact loan/account ID from source"},
-    {"label": "Reference", "value": "Exact reference ID from source"},
-    {"label": "Notice date", "value": "Exact notice date from source"}
+    {"label": "<Field label from source>", "value": "<Exact value from source>"}
   ],
-  "what_we_need_heading": "What we need from you",
-  "what_we_need_intro": "Please provide the following documents for your most recently completed financial year. Use this checklist to make sure your submission is complete:",
-  "checklist": ["Item 1", "Item 2"],
-  "preparation_requirement": "All financial statements must follow the accounting standards applicable to your organisation and must be certified by the authorised auditor wherever the loan agreement requires it.",
-  "why_we_need_heading": "Why we need these documents",
-  "what_happens_next": "Plain-English explanation of why the documents are needed and what happens next.",
-  "how_to_send_heading": "How to send your documents",
-  "how_to_submit_intro": "Please send the complete, legible documents using either of these approved routes:",
-  "submission_routes": ["Route 1", "Route 2"],
-  "how_to_submit": "Combined submission summary",
-  "need_help": "If you have questions about the documents or how to submit them, contact your assigned Relationship Manager.",
-  "obligations_heading": "Important information about your loan obligations",
+  "what_we_need_heading": "<Heading for required items or key points>",
+  "what_we_need_intro": "<1-sentence intro if applicable, else empty string>",
+  "checklist": ["<Actionable item or key point from source>"],
+  "preparation_requirement": "<Any preparation/certification requirement from source, or empty string>",
+  "why_we_need_heading": "<Heading explaining why this matters>",
+  "what_happens_next": "<Plain-English explanation from source of why this matters and what happens next>",
+  "how_to_send_heading": "<Heading for submission/next steps>",
+  "how_to_submit_intro": "<1-sentence intro if applicable, else empty string>",
+  "submission_routes": ["<Submission channel or next step from source>"],
+  "how_to_submit": "<Combined submission/next-step summary>",
+  "need_help": "<Support/contact instructions from source>",
+  "sections": [
+    {"heading": "<Section heading from source>", "paragraphs": ["<Redesigned paragraph>"], "bullets": ["<Bullet>"], "table": [["Col1", "Col2"]]}
+  ],
+  "obligations_heading": "<Heading for mandatory disclosures/warnings>",
   "mandatory_disclosures": [
-    "Incomplete submission warning paragraph preserved from source.",
-    "Contractual reporting obligation paragraph preserved from source."
+    "<Mandatory disclosure, warning, or contractual clause preserved from source>"
   ],
-  "closing_heading": "Thank you for your cooperation",
-  "closing_text": "We appreciate your continued relationship with [Bank Name] and your help in completing the annual credit review.",
-  "sign_off_division": "Commercial Banking Division",
-  "sign_off_institution": "Northridge Commercial Bank",
-  "footer_note": "Customer-friendly redesign of the supplied notice. The original facts, deadline, document requirements, submission routes and contractual qualifications have been retained.",
+  "closing_heading": "<Warm closing heading>",
+  "closing_text": "<Closing message aligned with the requested tone and actual sender from source>",
+  "sign_off_division": "<Actual division/department from source, or empty string if none>",
+  "sign_off_institution": "<Actual organization/bank/company name from source, or empty string if none>",
+  "footer_note": "Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions.",
   "design_notes": "1-sentence summary of what was restructured and how the requested tone was applied."
 }"""
 
