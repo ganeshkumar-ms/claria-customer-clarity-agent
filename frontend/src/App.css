@@ -3192,7 +3192,14 @@ html, body {
 .claria-compare-pane-body {
   max-height: 460px;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.claria-compare-pane-body::-webkit-scrollbar {
+  display: none;
 }
 
 .claria-compare-pane-body.native-frame-wrap {
@@ -3583,8 +3590,9 @@ html, body {
 
 /* ORIGINAL DOCUMENT IFRAME & FORMAL DOCUMENT SHEET */
 .claria-orig-doc-iframe {
-  width: 100%;
-  height: 760px;
+  width: calc(100% + 18px);
+  margin-right: -18px;
+  height: 1100px;
   border: 0;
   border-radius: 6px;
   background: #ffffff;
@@ -3592,7 +3600,9 @@ html, body {
 }
 
 .claria-compare-pane-body .claria-orig-doc-iframe {
-  height: 458px;
+  width: calc(100% + 18px);
+  margin-right: -18px;
+  height: 1080px;
   border-radius: 0;
 }
 
@@ -4279,8 +4289,9 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
 
 /* ORIGINAL DOCUMENT IFRAME & FORMAL DOCUMENT SHEET */
 .claria-orig-doc-iframe {
-  width: 100%;
-  height: 760px;
+  width: calc(100% + 18px);
+  margin-right: -18px;
+  height: 1100px;
   border: 0;
   border-radius: 6px;
   background: #ffffff;
@@ -4288,7 +4299,9 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
 }
 
 .claria-compare-pane-body .claria-orig-doc-iframe {
-  height: 458px;
+  width: calc(100% + 18px);
+  margin-right: -18px;
+  height: 1080px;
   border-radius: 0;
 }
 
