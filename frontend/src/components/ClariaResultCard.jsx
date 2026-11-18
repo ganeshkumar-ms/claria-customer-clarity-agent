@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { absApiUrl } from '../services/api'
 
 function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
@@ -454,24 +454,6 @@ function ExecutiveRedesignedSheet({ rd }) {
 
 export default function ClariaResultCard({ data, documentMetadata, onApplyTone }) {
   const [deliverableTab, setDeliverableTab] = useState('redesigned') // 'redesigned' | 'compare' | 'original' | 'validation'
-  const leftCompareRef = useRef(null)
-  const rightCompareRef = useRef(null)
-  const syncingScrollRef = useRef(null)
-
-  const handleSyncScroll = (sourceSide) => {
-    if (syncingScrollRef.current && syncingScrollRef.current !== sourceSide) return
-    const srcEl = sourceSide === 'left' ? leftCompareRef.current : rightCompareRef.current
-    const dstEl = sourceSide === 'left' ? rightCompareRef.current : leftCompareRef.current
-    if (!srcEl || !dstEl) return
-    const srcMax = srcEl.scrollHeight - srcEl.clientHeight
-    const dstMax = dstEl.scrollHeight - dstEl.clientHeight
-    if (srcMax <= 0 || dstMax <= 0) return
-    syncingScrollRef.current = sourceSide
-    dstEl.scrollTop = (srcEl.scrollTop / srcMax) * dstMax
-    requestAnimationFrame(() => {
-      syncingScrollRef.current = null
-    })
-  }
 
   const highlightedDoc = data?.highlighted_document || {}
   const rawText = highlightedDoc.raw_text || ''
@@ -595,7 +577,24 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
   }
 
   const renderOriginalDocumentView = () => {
-    return <OriginalFormalDocumentSheet rawText={rawText} rd={rd} sourceFilename={sourceFilename} />
+    if (originalViewUrl && inputExt === 'pdf') {
+      return (
+        <iframe
+          src={`${originalViewUrl}#toolbar=0&navpanes=0&view=FitH`}
+          title={sourceFilename}
+          className="claria-orig-doc-iframe"
+        />
+      )
+    }
+    const cleaned = String(rawText || '')
+      .replace(/\[FULL-DOCUMENT ANALYSIS METADATA\][\s\S]*?={6,}\s*/gi, '')
+      .replace(/\(cid:127\)/g, '• ')
+      .trim()
+    return (
+      <div className="claria-exec-paper" style={{ whiteSpace: 'pre-wrap', fontSize: '13.5px', lineHeight: 1.65 }}>
+        {cleaned || `Source communication: ${sourceFilename}`}
+      </div>
+    )
   }
 
   return (
@@ -692,12 +691,7 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
                     <strong>ORIGINAL INPUT DOCUMENT</strong>
                   </div>
                 </div>
-                <div
-                  ref={leftCompareRef}
-                  className="claria-compare-pane-body"
-                  style={{ padding: '14px' }}
-                  onScroll={() => handleSyncScroll('left')}
-                >
+                <div className="claria-compare-pane-body" style={{ padding: originalViewUrl && inputExt === 'pdf' ? 0 : '14px' }}>
                   {renderOriginalDocumentView()}
                 </div>
               </div>
@@ -708,12 +702,7 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
                     <strong>REDESIGNED CUSTOMER-FRIENDLY DOCUMENT</strong>
                   </div>
                 </div>
-                <div
-                  ref={rightCompareRef}
-                  className="claria-compare-pane-body"
-                  style={{ padding: '14px' }}
-                  onScroll={() => handleSyncScroll('right')}
-                >
+                <div className="claria-compare-pane-body" style={{ padding: '14px' }}>
                   <ExecutiveRedesignedSheet rd={rd} />
                 </div>
               </div>
@@ -723,7 +712,7 @@ export default function ClariaResultCard({ data, documentMetadata, onApplyTone }
 
         {/* TAB 3: ORIGINAL INPUT DOCUMENT */}
         {deliverableTab === 'original' && (
-          <div className="claria-redesign-body">
+          <div className="claria-redesign-body" style={{ padding: originalViewUrl && inputExt === 'pdf' ? 0 : undefined }}>
             {renderOriginalDocumentView()}
           </div>
         )}

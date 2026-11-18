@@ -3589,6 +3589,11 @@ html, body {
   display: block;
 }
 
+.claria-compare-pane-body .claria-orig-doc-iframe {
+  height: 458px;
+  border-radius: 0;
+}
+
 .claria-orig-formal-header {
   text-align: center;
   margin-bottom: 18px;
@@ -4276,6 +4281,11 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
   border-radius: 6px;
   background: #ffffff;
   display: block;
+}
+
+.claria-compare-pane-body .claria-orig-doc-iframe {
+  height: 458px;
+  border-radius: 0;
 }
 
 .claria-orig-formal-header {
