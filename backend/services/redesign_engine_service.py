@@ -428,48 +428,57 @@ def _deterministic_redesign(
     elif is_friendly and not help_text:
         help_text = "Have questions? Feel free to reach out to your assigned Relationship Manager — we're always happy to help!"
 
-    primary_action = _soften_text_for_tone((act.get('required_actions') or ['Submit the required documents by the deadline'])[0][:180], tones)
-    institution = meta.get('institution') or 'Northridge Commercial Bank'
-    division = meta.get('division') or 'Commercial Banking Division'
+    primary_action = _soften_text_for_tone((act.get('required_actions') or ['Review the details below'])[0][:180], tones)
+    institution = meta.get('institution') or ''
+    division = meta.get('division') or ''
+
+    default_closing = (
+        f"Thank you for your continued partnership with {institution}!"
+        if (is_friendly and institution)
+        else (
+            f"We appreciate your continued relationship with {institution} and your help in completing the annual credit review."
+            if (is_annual_review and institution)
+            else (
+                f"Thank you for your continued relationship with {institution}."
+                if institution
+                else "Please reach out if you have any questions or need further clarification."
+            )
+        )
+    )
 
     return {
         'title': title,
         'deadline_label': 'PLEASE SUBMIT BY',
         'deadline': deadline_val,
         'introduction': intro,
-        'details_heading': 'Your loan details' if (meta.get('loan_account') or is_annual_review) else 'Your account details',
+        'details_heading': 'Your loan details' if (meta.get('loan_account') or is_annual_review) else 'Key document details',
         'account_details': account_details,
-        'what_we_need_heading': 'What we need from you',
+        'what_we_need_heading': 'What we need from you' if is_annual_review else 'Key items & checklist',
         'what_we_need_intro': (
             'Please provide the following documents for your most recently completed financial year. '
             'Use this checklist to make sure your submission is complete:'
-            if checklist_bullets else ''
+            if (is_annual_review and checklist_bullets) else ''
         ),
         'checklist': checklist_bullets[:10],
         'preparation_requirement': prep_req,
-        'why_we_need_heading': 'Why we need these documents',
+        'why_we_need_heading': 'Why we need these documents' if is_annual_review else 'Why this matters',
         'what_happens_next': why_text,
-        'how_to_send_heading': 'How to send your documents',
+        'how_to_send_heading': 'How to send your documents' if (routes or is_annual_review) else 'Next steps',
         'how_to_submit_intro': 'Please send the complete, legible documents using either of these approved routes:' if routes else '',
         'submission_routes': routes,
         'how_to_submit': ' / '.join(routes) if routes else '',
         'need_help': help_text,
-        'obligations_heading': 'Important information about your loan obligations',
+        'sections': grouped if not is_annual_review else [],
+        'obligations_heading': 'Important information about your loan obligations' if is_annual_review else 'Important information & obligations',
         'mandatory_disclosures': disclosures,
-        'closing_heading': 'Thank you for banking with us' if is_friendly else 'Thank you for your cooperation',
-        'closing_text': (
-            f"Thank you for your continued partnership with {institution}! We truly appreciate your business and your help in completing the annual credit review."
-            if is_friendly
-            else (coop_text or f"We appreciate your continued relationship with {institution} and your help in completing the annual credit review.")
-        ),
+        'closing_heading': 'Thank you' if not is_annual_review else ('Thank you for banking with us' if is_friendly else 'Thank you for your cooperation'),
+        'closing_text': coop_text or default_closing,
         'sign_off_division': division,
         'sign_off_institution': institution,
         'footer_note': (
-            'Customer-friendly redesign of the supplied demonstration notice. The original facts, deadline, document requirements, '
-            'submission routes and contractual qualifications have been retained. All names, account references, dates and banking '
-            'details are fictional and illustrative.'
+            'Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions.'
         ),
-        'page_footer_left': f"{institution} | Demonstration document — fictional details",
+        'page_footer_left': institution or (structured_doc.get('filename') or 'Customer Communication Redesign'),
         'status_summary': {
             'outcome': structured_doc.get('document_type') or 'Customer Communication',
             'key_figures': (fin.get('monetary_amounts') or [])[:3] + (fin.get('rates_and_percentages') or [])[:2],

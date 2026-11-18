@@ -27,10 +27,10 @@ function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
     .map(l => l.replace(/^(?:[•\-*▪▸]|\d+[.)])\s*/, '').replace(/\.$/, '').trim())
     .filter(l => l.length > 3)
 
-  const isAnnualReview = /annual financial|credit review|financial statements/i.test(flat)
+  const isAnnualReview = /annual financial|credit review|financial statements/i.test(flat) && /loan/i.test(flat)
   const deadline = existing.deadline || (dlM ? dlM[1].trim() : '')
-  const institution = existing.sign_off_institution || (bankM ? bankM[1].replace(/\s+/g, ' ').trim() : 'Northridge Commercial Bank')
-  const division = existing.sign_off_division || (divM ? divM[1].replace(/\s+/g, ' ').trim() : 'Commercial Banking Division')
+  const institution = existing.sign_off_institution || (bankM ? bankM[1].replace(/\s+/g, ' ').trim() : '')
+  const division = existing.sign_off_division || (divM ? divM[1].replace(/\s+/g, ' ').trim() : '')
 
   const defaultChecklist = bulletLines.length > 0 ? bulletLines : (existing.checklist || [])
   const hasPrep = /accounting standard/i.test(flat) && /auditor/i.test(flat)
@@ -103,18 +103,21 @@ function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
       (existing.mandatory_disclosures && existing.mandatory_disclosures.length > 0)
         ? existing.mandatory_disclosures
         : defaultDisclosures,
-    closing_heading: existing.closing_heading || 'Thank you for your cooperation',
+    closing_heading: existing.closing_heading || (isAnnualReview ? 'Thank you for your cooperation' : 'Thank you'),
     closing_text:
       existing.closing_text ||
-      `We appreciate your continued relationship with ${institution} and your help in completing the annual credit review.`,
+      (isAnnualReview && institution
+        ? `We appreciate your continued relationship with ${institution} and your help in completing the annual credit review.`
+        : (institution ? `Thank you for your continued relationship with ${institution}.` : 'Please reach out if you have any questions or need assistance.')),
     sign_off_division: division,
     sign_off_institution: institution,
     footer_note:
       existing.footer_note ||
-      'Customer-friendly redesign of the supplied demonstration notice. The original facts, deadline, document requirements, submission routes and contractual qualifications have been retained. All names, account references, dates and banking details are fictional and illustrative.',
-    page_footer_left: existing.page_footer_left || `${institution} | Demonstration document — fictional details`,
+      'Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions.',
+    page_footer_left: existing.page_footer_left || (institution ? `${institution}` : sourceFilename),
     tone_applied: existing.tone_applied || 'Customer-Friendly & Clear',
     user_instruction: existing.user_instruction || '',
+    brand_color: existing.brand_color || '#163a5f',
   }
 }
 
@@ -414,12 +417,30 @@ function ExecutiveRedesignedSheet({ rd }) {
 
       {(rd.sections || []).map((sec, idx) => (
         <div key={idx} className="claria-exec-section">
-          <h2 className="claria-exec-h2">{sec.heading}</h2>
+          {sec.heading && <h2 className="claria-exec-h2">{sec.heading}</h2>}
           {(sec.paragraphs || []).map((p, pi) => <p key={pi} className="claria-exec-p">{p}</p>)}
           {(sec.bullets || []).length > 0 && (
-            <ul className="claria-exec-routes">
-              {sec.bullets.map((b, bi) => <li key={bi}>{b}</li>)}
+            <ul className="claria-exec-checklist">
+              {sec.bullets.map((b, bi) => (
+                <li key={bi}>
+                  <span className="claria-exec-sq" aria-hidden="true">■</span>
+                  <span>{b}</span>
+                </li>
+              ))}
             </ul>
+          )}
+          {(sec.table || []).length > 0 && (
+            <table className="claria-exec-table" style={{ marginTop: '10px' }}>
+              <tbody>
+                {sec.table.map((row, ri) => (
+                  <tr key={ri}>
+                    {Array.isArray(row) && row.map((cell, ci) => (
+                      ri === 0 ? <th key={ci}>{cell}</th> : <td key={ci}>{cell}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
       ))}
@@ -434,12 +455,14 @@ function ExecutiveRedesignedSheet({ rd }) {
       <hr className="claria-exec-hr" />
 
       <div className="claria-exec-section">
-        <h2 className="claria-exec-h2">{rd.closing_heading || 'Thank you for your cooperation'}</h2>
+        <h2 className="claria-exec-h2">{rd.closing_heading || 'Thank you'}</h2>
         {rd.closing_text && <p className="claria-exec-p">{rd.closing_text}</p>}
-        <div className="claria-exec-signoff">
-          <strong>{rd.sign_off_division || 'Commercial Banking Division'}</strong>
-          <span>{rd.sign_off_institution || 'Northridge Commercial Bank'}</span>
-        </div>
+        {(rd.sign_off_division || rd.sign_off_institution) && (
+          <div className="claria-exec-signoff">
+            {rd.sign_off_division && <strong>{rd.sign_off_division}</strong>}
+            {rd.sign_off_institution && <span>{rd.sign_off_institution}</span>}
+          </div>
+        )}
       </div>
 
       {rd.footer_note && <p className="claria-exec-footnote">{rd.footer_note}</p>}
