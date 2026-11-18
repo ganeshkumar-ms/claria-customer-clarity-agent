@@ -3505,7 +3505,9 @@ html, body {
 }
 
 .claria-compare-pane-body .claria-exec-paper {
-  padding: 22px 20px 18px;
+  padding: 28px 30px 22px;
+  zoom: 0.58;
+  border-radius: 4px;
 }
 
 .claria-exec-checklist {
@@ -4199,7 +4201,9 @@ mark.cmp-red { background: rgba(239, 68, 68, 0.22); color: #fecaca; padding: 1px
 }
 
 .claria-compare-pane-body .claria-exec-paper {
-  padding: 22px 20px 18px;
+  padding: 28px 30px 22px;
+  zoom: 0.58;
+  border-radius: 4px;
 }
 
 .claria-exec-checklist {
