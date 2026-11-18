@@ -72,12 +72,49 @@ SUPPORTED_AUDIENCES = (
 )
 
 
+TONE_SYNONYM_GROUPS = (
+    ('empathetic', (
+        'empathy', 'empathetic', 'empathize', 'empathise', 'harsh', 'less harsh', 'not harsh',
+        'too harsh', 'very harsh', 'soft', 'soften', 'softer', 'gentle', 'gentler', 'warm',
+        'warmer', 'compassionate', 'compassion', 'caring', 'kind', 'kinder', 'supportive',
+        'understanding', 'human', 'polite', 'respectful', 'calm', 'comforting',
+        'intimidating', 'threatening', 'cold', 'strict', 'punitive', 'rude',
+    )),
+    ('reassuring', (
+        'reassure', 'reassuring', 'reassurance', 'empathy', 'empathetic', 'harsh', 'soften',
+        'softer', 'supportive', 'comforting', 'calm', 'warm', 'compassionate',
+    )),
+    ('friendly', (
+        'friendly', 'friendlier', 'conversational', 'approachable', 'welcoming', 'casual',
+    )),
+    ('simple', (
+        'simple', 'simplify', 'simpler', 'simplified', 'plain', 'plain english', 'easy',
+        'easier', 'jargon-free', 'no jargon', 'layman', 'clearer', 'understandable',
+    )),
+    ('concise', (
+        'concise', 'short', 'shorter', 'brief', 'compact', 'direct', 'quick', 'summarize',
+    )),
+    ('formal', (
+        'formal', 'official', 'corporate', 'executive', 'institutional',
+    )),
+)
+
+
 def parse_tone_and_audience(instruction: str, doc_text: str) -> dict[str, Any]:
-    """Extracts requested tone, audience, design mode, and evaluates tone safety."""
+    """Extracts requested tone, audience, design mode, tone directive, and evaluates tone safety."""
     inst = (instruction or '').lower()
     doc_lower = (doc_text or '').lower()
 
-    requested_tones = [t for t in SUPPORTED_TONES if re.search(rf'\b{re.escape(t)}\b', inst)]
+    requested_tones: list[str] = []
+    for canonical, keywords in TONE_SYNONYM_GROUPS:
+        if any(re.search(rf'\b{re.escape(kw)}\b', inst) for kw in keywords):
+            if canonical not in requested_tones:
+                requested_tones.append(canonical)
+
+    for t in SUPPORTED_TONES:
+        if re.search(rf'\b{re.escape(t)}\b', inst) and t not in requested_tones:
+            requested_tones.append(t)
+
     if not requested_tones:
         requested_tones = ['professional', 'clear']
 
@@ -118,13 +155,50 @@ def parse_tone_and_audience(instruction: str, doc_text: str) -> dict[str, Any]:
         )
         requested_tones = [t for t in requested_tones if t not in ('humorous', 'funny')]
         if not requested_tones:
-            requested_tones = ['empathetic', 'professional']
+            requested_tones = ['empathetic', 'reassuring']
+
+    tone_directive = (
+        "Redesign this communication in a clear, structured, professional customer-first voice "
+        "while preserving 100% of dates, financial figures, accounting standards, and legal obligations."
+    )
+    if 'empathetic' in requested_tones or 'reassuring' in requested_tones:
+        tone_directive = (
+            "EMPATHETIC & REASSURING REDESIGN REQUIRED: The user wants to soften a harsh/strict communication "
+            "and make it genuinely empathetic, warm, supportive, and reassuring. "
+            "1) Replace harsh, cold, punitive, or demanding phrasing (e.g., 'You are hereby required', 'Failure to comply', "
+            "'You must immediately') with warm, collaborative, customer-supportive phrasing (e.g., 'We are here to help you complete...', "
+            "'Thank you for your continued partnership...', 'To keep your account/facility running smoothly, please share...'). "
+            "2) Open with a caring, appreciative introduction that reassures the customer. "
+            "3) Frame the checklist, 'What happens next?', and 'Need help?' sections with warmth and offer proactive support if they experience any difficulty or delay. "
+            "4) STRICT RULE: Still preserve 100% of factual dates, financial amounts, accounting standards, auditor requirements, and mandatory legal disclosures in 'mandatory_disclosures'."
+        )
+    elif 'friendly' in requested_tones:
+        tone_directive = (
+            "FRIENDLY & CONVERSATIONAL REDESIGN REQUIRED: Use an approachable, warm, welcoming conversational voice "
+            "with simple everyday phrasing while preserving every date, financial figure, and mandatory legal disclosure."
+        )
+    elif 'simple' in requested_tones:
+        tone_directive = (
+            "PLAIN-ENGLISH SIMPLIFICATION REQUIRED: Translate complex banking and legal jargon into crystal-clear, "
+            "easy-to-understand everyday sentences while keeping all exact dates, figures, and mandatory legal disclosures intact."
+        )
+    elif 'concise' in requested_tones:
+        tone_directive = (
+            "CONCISE & DIRECT REDESIGN REQUIRED: Make every paragraph and bullet tight, scannable, and brief "
+            "while preserving all factual dates, figures, and mandatory disclosures."
+        )
+    elif 'formal' in requested_tones:
+        tone_directive = (
+            "FORMAL EXECUTIVE BANKING REDESIGN REQUIRED: Use a polished, dignified institutional banking tone "
+            "with clear structure while preserving all facts, dates, and mandatory disclosures."
+        )
 
     preserve_fee_table = any(k in inst for k in ('preserve the original fee', 'keep fee table', 'preserve fee table', 'same format'))
 
     return {
         'tones': requested_tones,
         'tone_label': ' & '.join(t.title() for t in requested_tones[:2]),
+        'tone_directive': tone_directive,
         'audience': requested_audience,
         'design_mode': design_mode,
         'preserve_fee_table': preserve_fee_table,

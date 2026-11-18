@@ -322,6 +322,22 @@ def _redesigned_to_blocks(redesigned: dict[str, Any]) -> list[dict[str, Any]]:
         blocks.append({'type': 'para', 'text': redesigned['salutation']})
     if redesigned.get('introduction'):
         blocks.append({'type': 'para', 'text': redesigned['introduction']})
+    if redesigned.get('deadline') and redesigned.get('deadline') != '[TO BE CONFIRMED]':
+        blocks.append({'type': 'heading', 'text': f"Your Submission Deadline: {redesigned['deadline']}"})
+    if redesigned.get('checklist'):
+        blocks.append({'type': 'heading', 'text': 'Your Document & Action Checklist'})
+        for item in redesigned['checklist']:
+            if item:
+                blocks.append({'type': 'para', 'text': f"• {item}"})
+    if redesigned.get('what_happens_next'):
+        blocks.append({'type': 'heading', 'text': 'What happens next?'})
+        blocks.append({'type': 'para', 'text': redesigned['what_happens_next']})
+    if redesigned.get('how_to_submit'):
+        blocks.append({'type': 'heading', 'text': 'How to submit'})
+        blocks.append({'type': 'para', 'text': redesigned['how_to_submit']})
+    if redesigned.get('need_help'):
+        blocks.append({'type': 'heading', 'text': 'Need help?'})
+        blocks.append({'type': 'para', 'text': redesigned['need_help']})
     for sec in redesigned.get('sections') or []:
         if sec.get('heading'):
             blocks.append({'type': 'heading', 'text': sec['heading']})
@@ -332,7 +348,7 @@ def _redesigned_to_blocks(redesigned: dict[str, Any]) -> list[dict[str, Any]]:
         if sec.get('table'):
             blocks.append({'type': 'table', 'rows': sec['table'], 'text': ''})
     if redesigned.get('mandatory_disclosures'):
-        blocks.append({'type': 'heading', 'text': 'Important Disclosures'})
+        blocks.append({'type': 'heading', 'text': 'Important Obligations & Legal Disclosures'})
         for d in redesigned['mandatory_disclosures']:
             blocks.append({'type': 'para', 'text': d})
     if redesigned.get('closing'):

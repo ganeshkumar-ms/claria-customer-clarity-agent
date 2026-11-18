@@ -368,6 +368,16 @@ export default function App() {
       ? [...nextMessages].reverse().find(m => m.role === 'user' && typeof File !== 'undefined' && m.file instanceof File)
       : null
     const effectiveFile = file || priorFileMsg?.file || null
+    const lastRedesignMsg = !effectiveFile
+      ? [...nextMessages].reverse().find(m => m.role === 'ai' && m.content?.type === 'redesign')
+      : null
+    const activeDocumentId = lastRedesignMsg?.content?.document_id || ''
+    const activeDocumentText = lastRedesignMsg?.content?.highlighted_document?.raw_text || ''
+    const activeDocumentFilename =
+      lastRedesignMsg?.content?.highlighted_document?.source_filename ||
+      lastRedesignMsg?.document_metadata?.filename ||
+      lastRedesignMsg?.content?.document_metadata?.filename ||
+      ''
 
     // Build memory history
     const historyPayload = nextMessages
@@ -395,7 +405,10 @@ export default function App() {
         redesignCommunication({
           file: effectiveFile,
           text: content,
-          conversationHistory: historyPayload
+          conversationHistory: historyPayload,
+          activeDocumentId,
+          activeDocumentText,
+          activeDocumentFilename,
         }),
         new Promise(res => setTimeout(res, 900))
       ])
@@ -710,6 +723,7 @@ export default function App() {
                         data={m.content}
                         documentMetadata={m.document_metadata || m.content?.document_metadata}
                         onOpenDocument={openDocument}
+                        onApplyTone={(instruction) => handleSend(instruction, null)}
                       />
                     )}
                   </div>

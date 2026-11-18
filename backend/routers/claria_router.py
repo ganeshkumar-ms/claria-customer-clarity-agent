@@ -153,12 +153,25 @@ def _run_enterprise_pipeline(
     }
 
 
+REFINEMENT_INTENT_RE = (
+    r'\b(?:empath\w*|harsh\w*|soft\w*|warm\w*|gentl\w*|kind\w*|compassion\w*|reassur\w*|'
+    r'supportive|polite\w*|respectful|friendly|friendlier|conversational|simpl\w*|plain\s+english|'
+    r'easy|easier|clearer|concise|short\w*|brief|formal|corporate|professional|tone|rewrite|'
+    r'redesign|rephrase|reword|make\s+it|change\s+the|less\s+harsh|not\s+harsh|too\s+harsh|'
+    r'very\s+harsh|intimidating|threatening|strict|cold|senior\w*|audience|refine)\b'
+)
+
+
 @router.post('/redesign')
 async def redesign(
     file: Optional[UploadFile] = File(None),
     text: Optional[str] = Form(None),
-    conversation_history: Optional[str] = Form('[]')
+    conversation_history: Optional[str] = Form('[]'),
+    active_document_id: Optional[str] = Form(None),
+    active_document_text: Optional[str] = Form(None),
+    active_document_filename: Optional[str] = Form(None),
 ):
+    import re as _re
     try:
         history = json.loads(conversation_history or '[]')
     except json.JSONDecodeError:
@@ -168,6 +181,8 @@ async def redesign(
     stored_name = None
     raw_doc_text = None
     doc_filename = None
+    prior_redesigned = None
+    user_instruction = (text or '').strip()
     combined_text = text or ''
 
     if file:
@@ -197,8 +212,6 @@ async def redesign(
             doc_meta['url'] = f'/api/document/{q}'
             doc_meta['view_url'] = f'/api/document/{q}/view'
 
-        user_text = (text or '').strip()
-
         post_rej = file_validation.validate_file_post_extract(file_name, file_bytes, extracted.get('text', ''), meta=doc_meta)
         if post_rej or doc_meta.get('is_empty', False) or len(file_bytes) == 0:
             return {
@@ -217,11 +230,96 @@ async def redesign(
             f"{file_content}\n"
             f"===============================================================\n"
         )
-        if user_text:
-            combined_text += f"\nRecipient's Question / Note: {user_text}\n"
+        if user_instruction:
+            combined_text += f"\nRecipient's Question / Note: {user_instruction}\n"
 
-    if not combined_text.strip():
+    # If no new file was uploaded, check if the user is refining an active document in the conversation (e.g. "make it empathy")
+    if not file and user_instruction and len(user_instruction.split()) <= 60 and _re.search(REFINEMENT_INTENT_RE, user_instruction, _re.IGNORECASE):
+        rec = governance_store_service.get_document_record(active_document_id) if active_document_id else None
+        if rec:
+            structured_prev = rec.get('structured_doc') or {}
+            raw_doc_text = '\n'.join(el.get('text', '') for el in (structured_prev.get('elements') or []))
+            doc_filename = rec.get('filename') or active_document_filename or 'Customer_Communication.txt'
+            latest_ver = (rec.get('versions') or [])[-1] if rec.get('versions') else {}
+            prior_redesigned = latest_ver.get('redesigned_document')
+            doc_meta = {
+                'filename': doc_filename,
+                'stored_name': rec.get('stored_name'),
+                'view_url': rec.get('original_view_url'),
+                'url': rec.get('original_download_url'),
+            }
+        elif active_document_text and active_document_text.strip():
+            raw_doc_text = active_document_text.strip()
+            doc_filename = active_document_filename or 'Customer_Communication.txt'
+            doc_meta = {'filename': doc_filename}
+
+    if not combined_text.strip() and not (raw_doc_text and raw_doc_text.strip()):
         raise HTTPException(status_code=400, detail='Please provide a communication text or upload a document.')
+
+    # Fast single-LLM path when we have a document to redesign (avoids double Bedrock timeout on Lambda)
+    if raw_doc_text and raw_doc_text.strip():
+        guard = claria_service.guardrail_service.inspect_and_sanitize(raw_doc_text)
+        if guard.get('blocked'):
+            return {
+                'type': 'chat',
+                'message': guard.get('message', 'The submitted communication cannot be processed.'),
+                'guardrail_status': 'BLOCKED',
+                'guardrail_details': guard,
+            }
+        clean_source = claria_service._extract_clean_document_text(raw_doc_text, guard.get('sanitized_text', raw_doc_text))
+        effective_instruction = user_instruction or 'Redesign professionally for clarity while preserving all facts and disclosures.'
+
+        ent_bundle = _run_enterprise_pipeline(
+            raw_text=clean_source,
+            filename=doc_filename or 'customer_communication.txt',
+            instruction=effective_instruction,
+            doc_meta=doc_meta,
+            doc_id=active_document_id if prior_redesigned else None,
+            prior_redesigned=prior_redesigned,
+            version_reason=f"Tone/Redesign ({effective_instruction[:40]})" if user_instruction else 'Initial redesign',
+        )
+        rd = ent_bundle.get('redesigned_document') or {}
+        tone_label = rd.get('tone_applied') or 'Professional & Clear'
+        summary_line = f"Redesigned in {tone_label} tone"
+        if user_instruction:
+            summary_line += f" · Instruction applied: \"{user_instruction[:70]}\""
+
+        parsed_stub = {
+            'type': 'redesign',
+            'what_this_is_about': rd.get('introduction') or rd.get('design_notes') or 'Customer communication redesigned for clarity.',
+            'what_you_need_to_do': {
+                'action_required': bool(rd.get('checklist') or rd.get('deadline')),
+                'summary': summary_line,
+            },
+            'sentence_highlights': [],
+        }
+        hl_doc = claria_service.build_clarity_highlighted_document(
+            raw_text=clean_source,
+            parsed=parsed_stub,
+            filename=doc_filename or 'Customer_Communication.txt',
+        )
+        parsed_stub['highlighted_document'] = hl_doc
+        if doc_meta:
+            parsed_stub['document_metadata'] = doc_meta
+
+        hl_html = hl_doc.get('full_html') or ''
+        orig_disp = _display_name(stored_name) if stored_name else (doc_filename or 'notice.txt')
+        hl_name = f"highlighted_{stored_name or uuid.uuid4().hex[:8]}.html"
+        try:
+            (UPLOADS_DIR / hl_name).write_text(hl_html, encoding='utf-8')
+            q = quote(hl_name)
+            parsed_stub['highlighted_document']['source_filename'] = orig_disp
+            parsed_stub['highlighted_document']['filename'] = f"highlighted_{Path(orig_disp).stem}.html"
+            parsed_stub['highlighted_document']['download_url'] = f"/api/document/{q}"
+            parsed_stub['highlighted_document']['view_url'] = f"/api/document/{q}/view"
+            if doc_meta and doc_meta.get('view_url'):
+                parsed_stub['highlighted_document']['original_view_url'] = doc_meta['view_url']
+                parsed_stub['highlighted_document']['original_download_url'] = doc_meta.get('url')
+        except Exception:
+            pass
+
+        parsed_stub.update(ent_bundle)
+        return parsed_stub
 
     result = claria_service.redesign_communication(
         combined_text,

@@ -18,14 +18,22 @@ PRIMARY_MODEL_ID = 'us.amazon.nova-lite-v1:0'
 FALLBACK_MODEL_ID = 'us.amazon.nova-pro-v1:0'
 
 REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Customer Communication Redesign Engine (Senior CCM Designer & BFSI Content Strategist).
-Your job is to transform a dense, formal banking/enterprise letter into a clear, customer-friendly communication while preserving EVERY financial figure, date, deadline, accounting standard, auditor certification requirement, incomplete-submission warning, and contractual obligation.
+Your job is to transform a dense, formal, or harsh banking/enterprise letter into a clear, customer-friendly communication that strictly follows the USER INSTRUCTION and REQUESTED TONE while preserving EVERY financial figure, date, deadline, accounting standard, auditor certification requirement, incomplete-submission warning, and contractual obligation.
+
+TONE & EMPATHY ADAPTATION RULES:
+- Always obey the USER INSTRUCTION and TONE DIRECTIVE.
+- When the user says the document is harsh or asks for an EMPATHETIC / REASSURING / WARM / FRIENDLY tone (e.g. "make it empathy", "too harsh", "soften this"):
+  1. Rewrite harsh, demanding, threatening, or cold phrasing (such as "You are hereby required", "Failure to comply will result in immediate default", "You are requested to submit") into warm, empathetic, collaborative, customer-supportive language (such as "We're here to help you complete your review smoothly", "Thank you for your valued partnership with us", "To help keep your facility in good standing without any interruption, please share...").
+  2. Use a warm, reassuring headline (e.g., "We're here to help you complete your annual financial review") and an empathetic opening that acknowledges the customer relationship.
+  3. In "What happens next?" and "Need help?", reassure the customer that their Relationship Manager or support team is ready to assist if they have questions or need support preparing any item.
+  4. Preserve every exact date, financial figure, accounting standard, auditor certification requirement, incomplete-submission warning, and contractual reporting obligation inside `mandatory_disclosures` so compliance is 100% maintained.
 
 OUTPUT STRUCTURE:
-1. Clear customer-friendly headline (e.g., "Let's complete your annual financial review") + short plain-English opening.
-2. Prominent submission/action deadline (exact date from source, or [TO BE CONFIRMED] if absent).
-3. Actionable checklist (clear bullet items of what the customer must submit or do).
-4. Clear "What happens next?", "How to submit", and "Need help?" sections.
-5. Dedicated "Important Obligations & Regulatory Disclosures" preserving all contractual, legal, accounting, and warning clauses verbatim without weakening them.
+1. Clear customer-friendly headline matching the requested tone + short plain-English opening.
+2. Prominent submission/action deadline (exact date from source, or '' if absent).
+3. Actionable checklist (clear bullet items of what the customer needs to submit or do).
+4. Clear "What happens next?", "How to submit", and "Need help?" sections written in the requested tone.
+5. Dedicated "Important Obligations & Regulatory Disclosures" (`mandatory_disclosures`) preserving all contractual, legal, accounting, and warning clauses verbatim without weakening them.
 
 RULES:
 - NEVER invent facts, dates, amounts, phone numbers, or bank names not in the source.
@@ -33,25 +41,25 @@ RULES:
 - NEVER include internal-only staff instructions.
 - Output ONLY valid JSON matching this schema:
 {
-  "title": "Customer-friendly headline",
+  "title": "Customer-friendly headline matching the requested tone",
   "salutation": "Dear Valued Customer,",
-  "introduction": "Clear, empathetic opening explaining what is needed and why.",
+  "introduction": "Clear, empathetic opening explaining what is needed and why in the requested tone.",
   "deadline": "Exact deadline date from source (e.g. 15 December 2026) or '' if none",
   "checklist": ["Actionable checklist item 1", "Item 2"],
   "what_happens_next": "Plain-English explanation of what the bank/organisation will do next.",
   "how_to_submit": "Clear submission channel instructions from source.",
-  "need_help": "Contact / Relationship Manager help instructions from source.",
+  "need_help": "Warm, supportive contact / Relationship Manager help instructions from source.",
   "sections": [
     {
       "heading": "Section heading",
-      "paragraphs": ["Clear paragraph text preserving all facts and dates."],
+      "paragraphs": ["Clear paragraph text in the requested tone preserving all facts and dates."],
       "bullets": ["Optional bullet items"],
       "table": [["Col 1", "Col 2"], ["Val 1", "Val 2"]]
     }
   ],
   "mandatory_disclosures": ["Exact preserved accounting standards, auditor certification, incomplete-submission warnings, and contractual reporting obligations"],
   "closing": "Institutional sign-off from source.",
-  "design_notes": "1-sentence summary of what was restructured and why it improves customer clarity."
+  "design_notes": "1-sentence summary of what was restructured, how the requested tone was applied, and why it improves customer clarity."
 }"""
 
 
@@ -60,7 +68,7 @@ def _get_bedrock_client():
     return boto3.client(
         'bedrock-runtime',
         region_name=region,
-        config=Config(read_timeout=18, connect_timeout=3, retries={'max_attempts': 1}),
+        config=Config(read_timeout=20, connect_timeout=3, retries={'max_attempts': 1}),
     )
 
 
@@ -81,6 +89,19 @@ def _sections_to_plain_text(redesigned: dict[str, Any]) -> str:
         parts.append(redesigned['salutation'])
     if redesigned.get('introduction'):
         parts.append(redesigned['introduction'])
+    if redesigned.get('deadline') and redesigned.get('deadline') != '[TO BE CONFIRMED]':
+        parts.append(f"\nSubmission Deadline: {redesigned['deadline']}")
+    if redesigned.get('checklist'):
+        parts.append("\nYour Action & Document Checklist")
+        for item in redesigned['checklist']:
+            if item:
+                parts.append(f"• {item}")
+    if redesigned.get('what_happens_next'):
+        parts.append(f"\nWhat happens next?\n{redesigned['what_happens_next']}")
+    if redesigned.get('how_to_submit'):
+        parts.append(f"\nHow to submit\n{redesigned['how_to_submit']}")
+    if redesigned.get('need_help'):
+        parts.append(f"\nNeed help?\n{redesigned['need_help']}")
     for sec in redesigned.get('sections') or []:
         if sec.get('heading'):
             parts.append(f"\n{sec['heading']}")
@@ -94,7 +115,7 @@ def _sections_to_plain_text(redesigned: dict[str, Any]) -> str:
             if row:
                 parts.append(' | '.join(str(c) for c in row))
     if redesigned.get('mandatory_disclosures'):
-        parts.append("\nImportant Disclosures")
+        parts.append("\nImportant Obligations & Legal Disclosures")
         for d in redesigned['mandatory_disclosures']:
             parts.append(d)
     if redesigned.get('closing'):
@@ -102,12 +123,39 @@ def _sections_to_plain_text(redesigned: dict[str, Any]) -> str:
     return '\n'.join(parts).strip()
 
 
+def _soften_text_for_tone(text: str, tones: list[str]) -> str:
+    """Rewrites harsh/demanding phrasing into empathetic, supportive language while preserving facts."""
+    if not text:
+        return ''
+    out = text.strip()
+    if any(t in tones for t in ('empathetic', 'reassuring', 'friendly')):
+        replacements = [
+            (r'\bYou are hereby required to\b', 'To help us keep your account running smoothly, please'),
+            (r'\bYou are hereby notified that\b', 'We would like to share an important update with you:'),
+            (r'\bYou are requested to submit\b', 'We kindly ask you to share'),
+            (r'\bYou are required to submit\b', 'Please share'),
+            (r'\bYou must immediately\b', 'Please prioritize'),
+            (r'\bYou must submit\b', 'Please submit'),
+            (r'\bDemand is hereby made\b', 'We kindly request your attention'),
+            (r'\bFailure to comply will result in\b', 'To avoid any service interruption or'),
+            (r'\bFailure to submit\b', 'Please note that missing or delayed submissions may lead to'),
+            (r'\bNon-compliance will lead to\b', 'Completing this on time helps you avoid'),
+        ]
+        for pat, rep in replacements:
+            out = re.sub(pat, rep, out, flags=re.IGNORECASE)
+    return out
+
+
 def _deterministic_redesign(
     structured_doc: dict[str, Any],
     tone_info: dict[str, Any],
     instruction: str,
 ) -> dict[str, Any]:
-    """Produces a clean, fact-preserving structured redesign from customer_elements."""
+    """Produces a clean, fact-preserving structured redesign from customer_elements, honoring requested tone."""
+    tones = tone_info.get('tones') or ['professional']
+    is_empathetic = any(t in tones for t in ('empathetic', 'reassuring'))
+    is_friendly = 'friendly' in tones
+
     cust = structured_doc.get('customer_elements') or []
     grouped: list[dict[str, Any]] = []
     sec_map: dict[str, dict[str, Any]] = {}
@@ -138,20 +186,37 @@ def _deterministic_redesign(
 
     disclosures = [
         el['text'] for el in cust
-        if el.get('classification') == 'mandatory_disclosure' and el.get('element_type') != 'heading'
-    ][:6]
+        if el.get('classification') in ('mandatory_disclosure', 'legal_contractual') and el.get('element_type') != 'heading'
+    ][:8]
 
-    title = structured_doc.get('document_title') or 'Customer Communication'
+    raw_title = structured_doc.get('document_title') or 'Customer Communication'
+    if is_empathetic:
+        title = f"We're here to help you with your {raw_title}" if not raw_title.lower().startswith('we') else raw_title
+    elif is_friendly:
+        title = f"Let's complete your {raw_title}"
+    else:
+        title = raw_title
+
     comm_intel = structured_doc.get('communication_intelligence') or {}
     ident = comm_intel.get('document_identity') or {}
     fin = comm_intel.get('financial_intelligence') or {}
     act = comm_intel.get('customer_action_intelligence') or {}
 
-    intro = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else (
-        f"Summary of {structured_doc.get('document_type', 'Customer Communication')}: {title}."
+    base_intro = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else (
+        f"Summary of {structured_doc.get('document_type', 'Customer Communication')}: {raw_title}."
     )
     if grouped and grouped[0].get('paragraphs'):
         grouped[0]['paragraphs'] = grouped[0]['paragraphs'][1:]
+
+    if is_empathetic:
+        intro = (
+            "Thank you for your continued partnership with us. We want to make this process as smooth, transparent, "
+            "and stress-free as possible for you. " + _soften_text_for_tone(base_intro, tones)
+        )
+    elif is_friendly:
+        intro = "We've summarized everything you need in simple, clear steps below. " + _soften_text_for_tone(base_intro, tones)
+    else:
+        intro = base_intro
 
     # Build Reassure -> Explain -> Action -> Consequences -> Support sections from existing content
     reassure_p, explain_p, action_p, conseq_p, support_p = [], [], [], [], []
@@ -162,31 +227,29 @@ def _deterministic_redesign(
         for txt in (g.get('paragraphs') or []) + (g.get('bullets') or []):
             tl = txt.lower()
             if any(k in tl for k in ('thank you', 'valued', 'we appreciate', 'here to help', 'support you')):
-                reassure_p.append(txt)
-            elif any(k in tl for k in ('please ', 'must ', 'submit', 'confirm', 'complete ', 'pay ', 'required to')):
-                action_p.append(txt)
-            elif any(k in tl for k in ('if not', 'failure to', 'consequence', 'penalty', 'late fee', 'suspend', 'legal', 'disclosure', 'terms')):
+                reassure_p.append(_soften_text_for_tone(txt, tones))
+            elif any(k in tl for k in ('please ', 'must ', 'submit', 'confirm', 'complete ', 'pay ', 'required to', 'audited', 'statement', 'balance sheet')):
+                action_p.append(_soften_text_for_tone(txt, tones))
+            elif any(k in tl for k in ('if not', 'failure to', 'consequence', 'penalty', 'late fee', 'suspend', 'legal', 'disclosure', 'terms', 'accounting standard', 'covenant', 'incomplete')):
                 conseq_p.append(txt)
-            elif any(k in tl for k in ('helpline', 'support', 'contact', 'toll-free', 'email', 'branch', '1800')):
-                support_p.append(txt)
+            elif any(k in tl for k in ('helpline', 'support', 'contact', 'toll-free', 'email', 'branch', '1800', 'relationship manager')):
+                support_p.append(_soften_text_for_tone(txt, tones))
             else:
-                explain_p.append(txt)
+                explain_p.append(_soften_text_for_tone(txt, tones))
 
     flow_sections = []
     if reassure_p:
-        flow_sections.append({'stage': 'Reassure', 'heading': 'Reassure — Context & Support', 'paragraphs': reassure_p, 'bullets': [], 'table': []})
+        flow_sections.append({'stage': 'Reassure', 'heading': 'Our Commitment to Supporting You', 'paragraphs': reassure_p, 'bullets': [], 'table': []})
     if explain_p or tables_found:
-        flow_sections.append({'stage': 'Explain', 'heading': 'Explain — Key Details', 'paragraphs': explain_p, 'bullets': [], 'table': tables_found[0] if tables_found else []})
+        flow_sections.append({'stage': 'Explain', 'heading': 'Key Details & Overview', 'paragraphs': explain_p, 'bullets': [], 'table': tables_found[0] if tables_found else []})
     if action_p:
-        flow_sections.append({'stage': 'Action', 'heading': 'Action — What You Need To Do', 'paragraphs': [], 'bullets': action_p, 'table': []})
-    if conseq_p:
-        flow_sections.append({'stage': 'Consequences', 'heading': 'Consequences & Regulatory Terms', 'paragraphs': conseq_p, 'bullets': [], 'table': []})
+        flow_sections.append({'stage': 'Action', 'heading': 'Steps to Complete Together' if is_empathetic else 'What You Need To Do', 'paragraphs': [], 'bullets': action_p, 'table': []})
     if support_p:
-        flow_sections.append({'stage': 'Support', 'heading': 'Support & Contact Channels', 'paragraphs': support_p, 'bullets': [], 'table': []})
+        flow_sections.append({'stage': 'Support', 'heading': 'We Are Here to Help' if is_empathetic else 'Support & Contact Channels', 'paragraphs': support_p, 'bullets': [], 'table': []})
     if not flow_sections:
         flow_sections = [g for g in grouped if g['paragraphs'] or g['bullets'] or g['table']]
 
-    primary_action = (act.get('required_actions') or ['Review the details below'])[0][:180]
+    primary_action = _soften_text_for_tone((act.get('required_actions') or ['Review the details below'])[0][:180], tones)
     deadline_val = (fin.get('payment_or_effective_dates') or ['[TO BE CONFIRMED]'])[0]
     account_details = [
         {'label': 'Document Type', 'value': structured_doc.get('document_type') or 'Customer Communication'},
@@ -198,13 +261,19 @@ def _deterministic_redesign(
 
     tbc_list = [f"{a['label']}: [TO BE CONFIRMED]" for a in account_details if '[TO BE CONFIRMED]' in a['value']]
 
+    need_help_txt = support_p[0] if support_p else ''
+    if is_empathetic:
+        need_help_txt = (
+            (need_help_txt + " ") if need_help_txt else ""
+        ) + "We understand that gathering documents or meeting requirements can sometimes take extra coordination. Please reach out to us early if you have questions or need assistance — we are here to support you."
+
     return {
         'title': title,
         'deadline': deadline_val if deadline_val != '[TO BE CONFIRMED]' else '',
         'checklist': action_p[:8],
         'what_happens_next': (explain_p[0] if explain_p else ''),
-        'how_to_submit': next((p for p in action_p + explain_p if any(k in p.lower() for k in ('portal', 'submit', 'relationship manager', 'channel', 'upload'))), ''),
-        'need_help': (support_p[0] if support_p else ''),
+        'how_to_submit': next((p for p in action_p + explain_p + support_p if any(k in p.lower() for k in ('portal', 'submit', 'relationship manager', 'channel', 'upload'))), ''),
+        'need_help': need_help_txt,
         'status_summary': {
             'outcome': structured_doc.get('document_type') or 'Customer Communication',
             'key_figures': (fin.get('monetary_amounts') or [])[:3] + (fin.get('rates_and_percentages') or [])[:2],
@@ -221,10 +290,10 @@ def _deterministic_redesign(
         },
         'options': [],
         'timeline': [],
-        'mandatory_disclosures': disclosures or conseq_p[:4],
+        'mandatory_disclosures': disclosures or conseq_p[:6],
         'tbc_placeholders': tbc_list,
-        'closing': (support_p[0] if support_p else 'Contact details: [TO BE CONFIRMED]'),
-        'design_notes': f"Restructured source communication into customer-friendly sections with prominent deadline, checklist, and preserved disclosures ({tone_info['tone_label']} tone).",
+        'closing': (support_p[0] if support_p else 'Warm regards, Customer Support Team' if is_empathetic else 'Contact details: [TO BE CONFIRMED]'),
+        'design_notes': f"Restructured source communication into customer-friendly sections with prominent deadline, checklist, and preserved disclosures ({tone_info['tone_label']} tone applied).",
     }
 
 
@@ -247,6 +316,7 @@ def generate_redesigned_document(
     prompt_lines = [
         f"USER INSTRUCTION: {instruction or 'Redesign this customer communication professionally while preserving all facts, dates, fees, and mandatory disclosures.'}",
         f"REQUESTED TONE: {tone_info['tone_label']}",
+        f"TONE DIRECTIVE: {tone_info.get('tone_directive', '')}",
         f"TARGET AUDIENCE: {tone_info['audience']}",
         f"DESIGN MODE: {tone_info['design_mode']}",
     ]
@@ -269,11 +339,11 @@ def generate_redesigned_document(
                     modelId=mid,
                     system=[{'text': REDESIGN_SYSTEM_PROMPT}],
                     messages=[{'role': 'user', 'content': [{'text': user_prompt}]}],
-                    inferenceConfig={'maxTokens': 2800, 'temperature': 0.15},
+                    inferenceConfig={'maxTokens': 2800, 'temperature': 0.2},
                 )
                 raw = resp['output']['message']['content'][0]['text']
                 cand = json.loads(_strip_json_fences(raw))
-                if isinstance(cand, dict) and (cand.get('sections') or cand.get('introduction')):
+                if isinstance(cand, dict) and (cand.get('sections') or cand.get('introduction') or cand.get('checklist')):
                     parsed = cand
                     break
             except Exception:
@@ -292,6 +362,7 @@ def generate_redesigned_document(
     parsed.setdefault('mandatory_disclosures', [])
     parsed.setdefault('closing', '')
     parsed['tone_applied'] = tone_info['tone_label']
+    parsed['user_instruction'] = (instruction or '').strip()
     parsed['audience_applied'] = tone_info['audience']
     parsed['design_mode'] = tone_info['design_mode']
     parsed['tone_safety_warning'] = tone_info.get('tone_safety_warning')

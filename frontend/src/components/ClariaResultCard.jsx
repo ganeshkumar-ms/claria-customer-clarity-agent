@@ -384,7 +384,7 @@ function buildInteractiveStandaloneHtml(title, subtitle, originalHtml, highlight
 </html>`
 }
 
-export default function ClariaResultCard({ data, documentMetadata, onOpenDocument }) {
+export default function ClariaResultCard({ data, documentMetadata, onOpenDocument, onApplyTone }) {
   const [deliverableTab, setDeliverableTab] = useState('redesigned') // 'redesigned' | 'original' | 'compare' | 'validation'
   const [activeLens, setActiveLens] = useState('all')
   const [showCompare, setShowCompare] = useState(false)
@@ -610,8 +610,41 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
             ? rd.checklist
             : (rd.sections || []).filter(s => (s.stage || '').toLowerCase() === 'action').flatMap(s => s.bullets || s.paragraphs || [])
           const obligations = rd.mandatory_disclosures || []
+          const appliedTone = rd.tone_applied || 'Professional & Clear'
+          const userInst = rd.user_instruction || ''
+          const showCustomInst = userInst && !userInst.startsWith('Redesign professionally for clarity')
           return (
             <div className="claria-redesign-body">
+              <div className="claria-rd-tone-bar">
+                <div className="claria-rd-tone-status">
+                  <span className="claria-rd-tone-badge">Tone Applied: {appliedTone}</span>
+                  {showCustomInst && (
+                    <span className="claria-rd-inst-badge">Instruction: &ldquo;{userInst}&rdquo;</span>
+                  )}
+                </div>
+                {onApplyTone && (
+                  <div className="claria-rd-tone-actions">
+                    <span className="claria-rd-tone-label">Adapt Tone:</span>
+                    {[
+                      ['Empathetic & Less Harsh', 'This document feels harsh — make it empathetic, warm, and reassuring while preserving all facts and legal obligations.'],
+                      ['Friendly & Warm', 'Make this communication friendly, welcoming, and conversational while preserving all facts and disclosures.'],
+                      ['Simple Plain-English', 'Simplify this communication into plain, easy-to-understand everyday English while keeping all facts and legal obligations.'],
+                      ['Concise', 'Make this communication concise and scannable while preserving every fact, deadline, and disclosure.'],
+                      ['Formal Banking', 'Use a formal executive banking tone while keeping the clear checklist and deadline structure.'],
+                    ].map(([label, prompt]) => (
+                      <button
+                        key={label}
+                        type="button"
+                        className={`claria-rd-tone-btn ${appliedTone.toLowerCase().includes(label.split(' ')[0].toLowerCase()) ? 'active' : ''}`}
+                        onClick={() => onApplyTone(prompt)}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <h2 className="claria-rd-headline">{rd.title || sourceFilename}</h2>
               {rd.introduction && <p className="claria-rd-intro">{rd.introduction}</p>}
 

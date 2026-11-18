@@ -2,13 +2,29 @@ import axios from 'axios'
 
 const API_BASE = import.meta.env.VITE_API_BASE || ''
 
-export async function redesignCommunication({ file, text, conversationHistory = [] }) {
+export async function redesignCommunication({
+  file,
+  text,
+  conversationHistory = [],
+  activeDocumentId = '',
+  activeDocumentText = '',
+  activeDocumentFilename = '',
+}) {
   const formData = new FormData()
   if (file) {
     formData.append('file', file)
   }
   if (text) {
     formData.append('text', text)
+  }
+  if (activeDocumentId) {
+    formData.append('active_document_id', activeDocumentId)
+  }
+  if (activeDocumentText) {
+    formData.append('active_document_text', activeDocumentText)
+  }
+  if (activeDocumentFilename) {
+    formData.append('active_document_filename', activeDocumentFilename)
   }
   formData.append('conversation_history', JSON.stringify(conversationHistory))
 
