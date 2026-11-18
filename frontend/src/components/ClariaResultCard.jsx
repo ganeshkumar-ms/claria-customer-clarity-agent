@@ -711,6 +711,58 @@ export default function ClariaResultCard({ data, documentMetadata, onOpenDocumen
           )
         })()}
 
+        {/* 2B. DOWNLOADABLE DELIVERABLES RIGHT IN CHAT */}
+        {data.downloads && Object.keys(data.downloads).length > 0 && (
+          <div className="claria-inline-downloads">
+            <div className="claria-inline-dl-head">
+              <strong>Downloadable Deliverables (Letter · 1" Margins · Aptos 18/16/12)</strong>
+            </div>
+            <div className="claria-inline-dl-grid">
+              {[
+                ['clean_pdf', 'Redesigned Communication (PDF)'],
+                ['clean_docx', 'Redesigned Communication (DOCX)'],
+                ['highlighted_pdf', 'Highlighted Changes (PDF)'],
+                ['report_pdf', 'Comparison Report (PDF)'],
+              ].map(([k, label]) => {
+                const info = data.downloads[k]
+                if (!info || !info.download_url) return null
+                return (
+                  <div key={k} className="claria-inline-dl-chip">
+                    <div className="claria-inline-dl-info">
+                      <span className="claria-inline-dl-title">{label}</span>
+                      <span className="claria-inline-dl-meta">
+                        {info.format} · {(info.size_bytes / 1024).toFixed(1)} KB
+                        {info.page_count ? ` · ${info.page_count}p` : ''}
+                      </span>
+                    </div>
+                    <div className="claria-inline-dl-actions">
+                      <a
+                        className="claria-tool-btn primary"
+                        href={absApiUrl(info.download_url)}
+                        download={info.filename}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        Download
+                      </a>
+                      {info.format === 'PDF' && info.view_url && (
+                        <a
+                          className="claria-tool-btn"
+                          href={absApiUrl(info.view_url)}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ textDecoration: 'none' }}
+                        >
+                          Preview
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
         {/* 3. ORIGINAL VS REDESIGNED COMPARISON, FACT VERIFICATION & DOWNLOADS */}
         {data.document_id && (
           <ClariaEnterpriseWorkspace
