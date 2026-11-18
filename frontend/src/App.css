@@ -2345,14 +2345,14 @@ html, body {
 }
 
 .bubble.ai:has(.claria-doc-viewer-mode) {
-  width: min(100%, 1020px) !important;
-  max-width: 1020px !important;
+  width: 100% !important;
+  max-width: min(90%, 840px) !important;
   padding: 16px 18px !important;
 }
 
 .bubble.ai:has(.claria-compare-split-container) {
   width: 100% !important;
-  max-width: 100% !important;
+  max-width: min(90%, 840px) !important;
 }
 
 .claria-doc-viewer-mode {
