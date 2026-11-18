@@ -707,9 +707,9 @@ export default function App() {
                         <line x1="16" y1="17" x2="8" y2="17" />
                       </svg>
                     </div>
-                    <b style={{ display: 'block', color: '#fff', fontSize: '18px' }}>Ready to clarify customer communications</b>
+                    <b style={{ display: 'block', color: '#fff', fontSize: '18px' }}>Ready to redesign customer communications</b>
                     <p style={{ fontSize: '14.5px', lineHeight: '1.65', marginTop: '10px' }}>
-                      Upload a communication file (PDF, DOCX, HTML, TXT) or paste a customer notice below to highlight the key sentences and paragraphs and compare with the original.
+                      Upload a communication file (PDF, DOCX, HTML, TXT) or paste a customer notice below to transform it into a clear, customer-friendly redesigned document while preserving every fact, deadline, and contractual obligation.
                     </p>
                   </div>
                 )}
