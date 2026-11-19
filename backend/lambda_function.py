@@ -143,14 +143,17 @@ def _run_enterprise_pipeline(
     prior_redesigned: dict | None = None,
     version_reason: str = 'Initial redesign',
     creator: str = 'Document Creator',
+    design_profile: dict | None = None,
 ) -> dict:
     """Runs full-document intelligence, redesign, fact verification, comparison, export & S3 sync on Lambda."""
     structured = document_intelligence_service.parse_structured_document(raw_text, filename, doc_id=doc_id or '')
     used_doc_id = structured['document_id']
+    eff_design = design_profile or (doc_meta or {}).get('design_profile')
     redesigned = redesign_engine_service.generate_redesigned_document(
         structured,
         instruction=instruction,
         prior_redesigned=prior_redesigned,
+        design_profile=eff_design,
     )
     fact_ver = document_intelligence_service.verify_output_facts(
         structured.get('source_facts') or [],
@@ -333,6 +336,8 @@ def lambda_handler(event, context):
         active_document_filename = ''
         file_obj = None
 
+        active_design_profile = ''
+        active_document_stored_name = ''
         if 'multipart/form-data' in ct:
             parsed_mp = _parse_multipart(body_bytes, ct)
             text = parsed_mp['fields'].get('text', '')
@@ -340,6 +345,8 @@ def lambda_handler(event, context):
             active_document_id = parsed_mp['fields'].get('active_document_id', '')
             active_document_text = parsed_mp['fields'].get('active_document_text', '')
             active_document_filename = parsed_mp['fields'].get('active_document_filename', '')
+            active_design_profile = parsed_mp['fields'].get('active_design_profile', '')
+            active_document_stored_name = parsed_mp['fields'].get('active_document_stored_name', '')
             file_obj = parsed_mp['file']
         else:
             try:
@@ -350,6 +357,8 @@ def lambda_handler(event, context):
                 active_document_id = j.get('active_document_id', '')
                 active_document_text = j.get('active_document_text', '')
                 active_document_filename = j.get('active_document_filename', '')
+                active_design_profile = j.get('active_design_profile', '')
+                active_document_stored_name = j.get('active_document_stored_name', '')
             except Exception:
                 pass
 
@@ -424,95 +433,58 @@ def lambda_handler(event, context):
             if user_instruction:
                 combined_text += f"\nRecipient's Question / Note: {user_instruction}\n"
 
-        # If no new file was uploaded, check if user is refining an active document in the conversation (e.g. "make it empathy", "i want it in friednly tune")
-        if not file_obj and user_instruction and len(user_instruction.split()) <= 60 and _has_refinement_intent(user_instruction, has_active_doc=bool(active_document_id or active_document_text.strip())):
+        # If no new file was uploaded, check if user is refining an active/pending document in THIS conversation
+        is_pure_greeting = bool(
+            user_instruction
+            and re.match(
+                r'^(?:hi+|hello+|hey+|hlo|hola|ok|okay|thanks|thank\s+you|bye|good\s+(?:morning|afternoon|evening))[\s!.,?]*$',
+                user_instruction,
+                re.IGNORECASE,
+            )
+        )
+        has_active_doc = bool((active_document_id and active_document_id.strip()) or (active_document_text and active_document_text.strip()))
+        if not file_obj and user_instruction and not is_pure_greeting and (
+            has_active_doc
+            or (len(user_instruction.split()) <= 60 and _has_refinement_intent(user_instruction, has_active_doc=has_active_doc))
+        ):
             rec = (
-                governance_store_service.get_document_record(active_document_id)
-                if active_document_id
-                else governance_store_service.get_latest_document_record()
+                governance_store_service.get_document_record(active_document_id.strip())
+                if (active_document_id and active_document_id.strip())
+                else None
             )
             if rec:
                 structured_prev = rec.get('structured_doc') or {}
-                raw_doc_text = '\n'.join(el.get('text', '') for el in (structured_prev.get('elements') or []))
+                if active_document_text and active_document_text.strip():
+                    raw_doc_text = active_document_text.strip()
+                else:
+                    parts = []
+                    for el in (structured_prev.get('elements') or []):
+                        if el.get('element_type') == 'table' and el.get('rows'):
+                            parts.extend(' | '.join(str(c) for c in r) for r in el['rows'])
+                        elif el.get('text'):
+                            parts.append(el['text'])
+                    raw_doc_text = '\n'.join(parts)
                 doc_filename = rec.get('filename') or active_document_filename or 'Customer_Communication.pdf'
                 active_document_id = rec.get('document_id') or active_document_id
                 latest_ver = (rec.get('versions') or [])[-1] if rec.get('versions') else {}
                 prior_redesigned = latest_ver.get('redesigned_document')
                 doc_meta = {
                     'filename': doc_filename,
-                    'stored_name': rec.get('stored_name'),
-                    'view_url': rec.get('original_view_url'),
-                    'url': rec.get('original_download_url'),
+                    'stored_name': rec.get('stored_name') or active_document_stored_name or None,
+                    'view_url': rec.get('original_view_url') or (f"/api/document/{quote(active_document_stored_name)}/view" if active_document_stored_name else None),
+                    'url': rec.get('original_download_url') or (f"/api/document/{quote(active_document_stored_name)}" if active_document_stored_name else None),
+                    'design_profile': (rec.get('original_meta') or {}).get('design_profile'),
                 }
             elif active_document_text and active_document_text.strip():
                 raw_doc_text = active_document_text.strip()
                 doc_filename = active_document_filename or 'Customer_Communication.pdf'
                 doc_meta = {'filename': doc_filename}
-            else:
-                # Recover latest uploaded source document from TMP_UPLOADS or S3 uploads/
-                candidates = [
-                    p for p in TMP_UPLOADS.glob('*')
-                    if p.is_file()
-                    and not p.name.startswith('highlighted_')
-                    and not p.name.startswith('doc-')
-                ]
-                if candidates:
-                    candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-                    latest_p = candidates[0]
-                    stored_name = latest_p.name
-                    doc_filename = _display_name(stored_name)
-                    ext_res = document_service.extract_text(latest_p.read_bytes(), doc_filename)
-                    raw_doc_text = ext_res.get('text', '')
+                if active_document_stored_name:
+                    stored_name = active_document_stored_name
                     q = quote(stored_name)
-                    doc_meta = {
-                        'filename': doc_filename,
-                        'stored_name': stored_name,
-                        'url': f'/api/document/{q}',
-                        'view_url': f'/api/document/{q}/view',
-                    }
-                else:
-                    try:
-                        s3_objs = s3_client.list_objects_v2(Bucket=S3_BUCKET, Prefix='uploads/').get('Contents') or []
-                        src_objs = [
-                            o for o in s3_objs
-                            if not Path(o['Key']).name.startswith('highlighted_')
-                            and not Path(o['Key']).name.startswith('doc-')
-                            and o.get('Size', 0) > 20
-                        ]
-                        if src_objs:
-                            src_objs.sort(key=lambda o: o['LastModified'], reverse=True)
-                            latest_key = src_objs[0]['Key']
-                            stored_name = Path(latest_key).name
-                            doc_filename = _display_name(stored_name)
-                            f_bytes = s3_client.get_object(Bucket=S3_BUCKET, Key=latest_key)['Body'].read()
-                            ext_res = document_service.extract_text(f_bytes, doc_filename)
-                            raw_doc_text = ext_res.get('text', '')
-                            q = quote(stored_name)
-                            doc_meta = {
-                                'filename': doc_filename,
-                                'stored_name': stored_name,
-                                'url': f'/api/document/{q}',
-                                'view_url': f'/api/document/{q}/view',
-                            }
-                    except Exception:
-                        pass
-
-                # Last resort: reconstruct from conversation_history highlights if present
-                if not (raw_doc_text and raw_doc_text.strip()) and history:
-                    for h_msg in reversed(history):
-                        c_raw = h_msg.get('content')
-                        try:
-                            c_obj = json.loads(c_raw) if isinstance(c_raw, str) and c_raw.startswith('{') else (c_raw if isinstance(c_raw, dict) else None)
-                        except Exception:
-                            c_obj = None
-                        if isinstance(c_obj, dict) and c_obj.get('type') == 'redesign':
-                            hl_list = c_obj.get('highlights') or []
-                            hl_texts = [h.get('text') for h in hl_list if isinstance(h, dict) and h.get('text')]
-                            if hl_texts or c_obj.get('what_this_is_about'):
-                                raw_doc_text = '\n\n'.join([c_obj.get('what_this_is_about') or ''] + hl_texts).strip()
-                                doc_filename = active_document_filename or 'Customer_Communication.pdf'
-                                doc_meta = {'filename': doc_filename}
-                                break
+                    doc_meta['stored_name'] = stored_name
+                    doc_meta['url'] = f'/api/document/{q}'
+                    doc_meta['view_url'] = f'/api/document/{q}/view'
 
             if not (raw_doc_text and raw_doc_text.strip()):
                 return _json_response(200, {
@@ -537,6 +509,39 @@ def lambda_handler(event, context):
                     'guardrail_details': guard,
                 })
             clean_source = claria_service._extract_clean_document_text(raw_doc_text, guard.get('sanitized_text', raw_doc_text))
+
+            # If user uploaded ONLY a file without specifying a tone/instruction, ask what to do, which tone, and how to redesign (no preset options)
+            if file_obj and not user_instruction:
+                return _json_response(200, {
+                    'type': 'chat',
+                    'awaiting_tone': True,
+                    'message': (
+                        f"I've received {doc_filename or 'your document'}. "
+                        "What would you like me to do with this document — which tone should I use, and how would you like it redesigned?"
+                    ),
+                    'document_metadata': doc_meta,
+                    'pending_document': {
+                        'filename': doc_filename or 'customer_communication.txt',
+                        'raw_text': clean_source,
+                        'stored_name': stored_name,
+                        'design_profile': (doc_meta or {}).get('design_profile'),
+                    },
+                })
+
+            parsed_active_design = None
+            if active_design_profile:
+                try:
+                    parsed_active_design = json.loads(active_design_profile) if isinstance(active_design_profile, str) else active_design_profile
+                except Exception:
+                    parsed_active_design = None
+            eff_design_profile = (
+                (doc_meta or {}).get('design_profile')
+                or parsed_active_design
+                or (prior_redesigned or {}).get('source_design')
+            )
+            if eff_design_profile and isinstance(doc_meta, dict) and not doc_meta.get('design_profile'):
+                doc_meta['design_profile'] = eff_design_profile
+
             effective_instruction = user_instruction or 'Redesign professionally for clarity while preserving all facts and disclosures.'
 
             ent_bundle = _run_enterprise_pipeline(
@@ -547,6 +552,7 @@ def lambda_handler(event, context):
                 doc_id=active_document_id if prior_redesigned else None,
                 prior_redesigned=prior_redesigned,
                 version_reason=f"Tone/Redesign ({effective_instruction[:40]})" if user_instruction else 'Initial redesign',
+                design_profile=eff_design_profile,
             )
             rd = ent_bundle.get('redesigned_document') or {}
             tone_label = rd.get('tone_applied') or 'Professional & Clear'

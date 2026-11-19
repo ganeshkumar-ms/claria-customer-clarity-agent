@@ -7,12 +7,12 @@ function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
   const flat = rawText.replace(/\s+/g, ' ')
 
   // Extract metadata deterministically from rawText to backfill any missing fields
-  const refM = flat.match(/\bReference\b[\s:|]*([A-Z]{2,6}-\d{4}-\d{3,6}|\b[A-Z0-9-]{6,20}\b)/i)
-  const loanM = flat.match(/\bLoan\s*account\b[\s:|]*([A-Z]{2,6}-\d{4}-\d{3,6}|\b[A-Z0-9-]{6,20}\b)/i)
+  const refM = flat.match(/\b(?:Document\s+)?Reference\b[\s:|]+((?=[A-Z0-9-]*\d)[A-Z0-9-]{5,24})\b/)
+  const loanM = flat.match(/\bLoan\s*account\b[\s:|]+((?=[A-Z0-9-]*\d)[A-Z0-9-]{5,24})\b/i)
   const dateM = flat.match(/\bDate\b[\s:|]*(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})/i)
   const dlM = flat.match(/(?:DEADLINE|on or before|by|no later than)[\s:|]*(\d{1,2}\s+(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{4})/i)
-  const custM = rawText.match(/Custom\s*er(?![\s:|]*Communication\b)[\s:|]+([A-Z][A-Za-z0-9\s&.,()-]+?(?:Ltd\.?|Limited|Inc\.?|PLC|LLP|Corp\.?|Enterprises))(?=\s+Loan\b|\s+Account\b|\s+Subject\b|\n|$)/i)
-  const bankM = flat.match(/\b([A-Z][A-Za-z]+\s+Commercial\s+Bank|[A-Z][A-Za-z\s]+Bank)\b/)
+  const custM = rawText.match(/Custom\s*er(?![\s:|]*(?:Communication|Support|Service|Care|Relations)\b)[\s:|]+([A-Z][A-Za-z0-9\s&.,()-]+?(?:Ltd\.?|Limited|Inc\.?|PLC|LLP|Corp\.?|Enterprises))(?=\s+Loan\b|\s+Account\b|\s+Subject\b|\n|$)/i)
+  const bankM = flat.match(/\b([A-Z][A-Za-z0-9&.]*(?:\s+[A-Z][A-Za-z0-9&.]*){0,4}\s+Bank(?:\s+Ltd\.?|\s+Limited)?)\b/)
   const divM = flat.match(/\b(Commercial\s+Banking\s+Division|[A-Z][A-Za-z\s]+Division)\b/)
 
   const extractedDetails = []
@@ -27,97 +27,50 @@ function resolveRedesignedDoc(data, highlightedDoc, sourceFilename) {
     .map(l => l.replace(/^(?:[•\-*▪▸]|\d+[.)])\s*/, '').replace(/\.$/, '').trim())
     .filter(l => l.length > 3)
 
-  const isAnnualReview = /annual financial|credit review|financial statements/i.test(flat) && /loan/i.test(flat)
   const deadline = existing.deadline || (dlM ? dlM[1].trim() : '')
   const institution = existing.sign_off_institution || (bankM ? bankM[1].replace(/\s+/g, ' ').trim() : '')
   const division = existing.sign_off_division || (divM ? divM[1].replace(/\s+/g, ' ').trim() : '')
 
-  const defaultChecklist = bulletLines.length > 0 ? bulletLines : (existing.checklist || [])
-  const hasPrep = /accounting standard/i.test(flat) && /auditor/i.test(flat)
-  const defaultPrep = hasPrep
-    ? 'All financial statements must follow the accounting standards applicable to your organisation and must be certified by the authorised auditor wherever the loan agreement requires it.'
-    : ''
-  const defaultWhy = /repayment capacity|covenants/i.test(flat)
-    ? 'We use the information as part of our ongoing review of your financial position, ability to repay the loan and compliance with the financial and non-financial covenants that apply to your existing lending arrangement.'
-    : ''
-  const defaultRoutes = /designated relationship manager|approved secure document submission channel/i.test(flat)
-    ? [
-        'Your designated Relationship Manager; or',
-        "The Bank's approved secure document submission channel.",
-      ]
-    : []
-  const defaultHelp = /contact your assigned relationship manager|for clarification/i.test(flat)
-    ? 'If you have questions about the documents or how to submit them, contact your assigned Relationship Manager.'
-    : ''
-  const defaultDisclosures = []
-  if (/incomplete submissions/i.test(flat)) {
-    defaultDisclosures.push(
-      `Please submit all documents by ${deadline || '15 December 2026'}. Incomplete submissions may require additional clarification and could delay the Bank's annual credit review process.`
-    )
-  }
-  if (/failure to provide|reporting obligation issue/i.test(flat)) {
-    defaultDisclosures.push(
-      'Failure to provide the requested information within the stipulated timeframe may constitute a reporting obligation issue under the relevant loan documentation, subject to the applicable contractual provisions.'
-    )
-  }
-
   const isPlaceholder = (v) => !v || /^exact\s+/i.test(String(v).trim()) || String(v).trim() === '[TO BE CONFIRMED]'
   const existingDetails = (existing.account_details || []).filter(r => r && !isPlaceholder(r.value))
-  const finalDetails = extractedDetails.length >= existingDetails.length && extractedDetails.length > 0
-    ? extractedDetails
-    : existingDetails
+  const hasBodyTable = (existing.sections || []).some(s => (s.table || []).length > 0)
+  const finalDetails = existingDetails.length > 0 ? existingDetails : ((existing.email_headers || hasBodyTable) ? [] : extractedDetails)
 
   return {
-    title: existing.title || (isAnnualReview ? 'Your annual financial review' : sourceFilename.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' ')),
-    introduction:
-      existing.introduction ||
-      (isAnnualReview && deadline
-        ? `Please send us your latest financial information by ${deadline} so we can complete the annual review of your commercial loan.`
-        : data?.what_this_is_about || ''),
-    deadline_label: existing.deadline_label || 'PLEASE SUBMIT BY',
+    title: existing.title || sourceFilename.replace(/\.[^/.]+$/, '').replace(/[_-]+/g, ' '),
+    introduction: existing.introduction || data?.what_this_is_about || '',
+    deadline_label: existing.deadline_label || (deadline ? 'PLEASE SUBMIT BY' : ''),
     deadline,
-    details_heading: existing.details_heading || (loanM || isAnnualReview ? 'Your loan details' : 'Key details'),
+    details_heading: existing.details_heading || 'Key document details',
     account_details: finalDetails,
-    what_we_need_heading: existing.what_we_need_heading || (isAnnualReview ? 'What we need from you' : 'Key action items'),
-    what_we_need_intro:
-      existing.what_we_need_intro ||
-      (isAnnualReview && defaultChecklist.length > 0
-        ? 'Please provide the following documents for your most recently completed financial year. Use this checklist to make sure your submission is complete:'
-        : ''),
-    checklist: (existing.checklist && existing.checklist.length > 0) ? existing.checklist : (isAnnualReview ? defaultChecklist : []),
-    preparation_requirement: existing.preparation_requirement || defaultPrep,
-    why_we_need_heading: existing.why_we_need_heading || (isAnnualReview ? 'Why we need these documents' : 'Why this matters'),
-    what_happens_next: existing.what_happens_next || defaultWhy,
-    how_to_send_heading: existing.how_to_send_heading || (isAnnualReview ? 'How to send your documents' : 'Next steps'),
-    how_to_submit_intro:
-      existing.how_to_submit_intro ||
-      (isAnnualReview && (existing.submission_routes?.length || defaultRoutes.length)
-        ? 'Please send the complete, legible documents using either of these approved routes:'
-        : ''),
-    submission_routes: (existing.submission_routes && existing.submission_routes.length > 0) ? existing.submission_routes : defaultRoutes,
+    what_we_need_heading: existing.what_we_need_heading || '',
+    what_we_need_intro: existing.what_we_need_intro || '',
+    checklist: existing.checklist || [],
+    preparation_requirement: existing.preparation_requirement || '',
+    why_we_need_heading: existing.why_we_need_heading || '',
+    what_happens_next: existing.what_happens_next || '',
+    how_to_send_heading: existing.how_to_send_heading || '',
+    how_to_submit_intro: existing.how_to_submit_intro || '',
+    submission_routes: existing.submission_routes || [],
     how_to_submit: existing.how_to_submit || '',
-    need_help: existing.need_help || defaultHelp,
+    need_help: existing.need_help || '',
     sections: existing.sections || [],
-    obligations_heading: existing.obligations_heading || (isAnnualReview ? 'Important information about your loan obligations' : 'Important information'),
-    mandatory_disclosures:
-      (existing.mandatory_disclosures && existing.mandatory_disclosures.length > 0)
-        ? existing.mandatory_disclosures
-        : defaultDisclosures,
-    closing_heading: existing.closing_heading || (isAnnualReview ? 'Thank you for your cooperation' : 'Thank you'),
+    obligations_heading: existing.obligations_heading || 'Important information & obligations',
+    mandatory_disclosures: existing.mandatory_disclosures || [],
+    closing_heading: existing.closing_heading || 'Thank you',
     closing_text:
       existing.closing_text ||
-      (isAnnualReview && institution
-        ? `We appreciate your continued relationship with ${institution} and your help in completing the annual credit review.`
-        : (institution ? `Thank you for your continued relationship with ${institution}.` : 'Please reach out if you have any questions or need assistance.')),
-    sign_off_division: division,
-    sign_off_institution: institution,
-    footer_note:
-      existing.footer_note ||
-      'Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions.',
+      (institution ? `Thank you for your continued relationship with ${institution}.` : 'Please reach out if you have any questions or need assistance.'),
+    sign_off_division: existing.sign_off_division || '',
+    sign_off_institution: existing.sign_off_institution || '',
+    footer_note: '',
     page_footer_left: existing.page_footer_left || (institution ? `${institution}` : sourceFilename),
+    total_pages: existing.total_pages || data?.intelligence?.total_pages || 1,
     tone_applied: existing.tone_applied || 'Customer-Friendly & Clear',
     user_instruction: existing.user_instruction || '',
-    brand_color: existing.brand_color || '#163a5f',
+    brand_color: existing.brand_color || existing.source_design?.primary_color || '#163a5f',
+    source_design: existing.source_design || data?.document_metadata?.design_profile || null,
+    email_headers: existing.email_headers || null,
   }
 }
 
@@ -343,10 +296,41 @@ function ExecutiveRedesignedSheet({ rd }) {
   const checklistItems = rd.checklist || []
   const routes = rd.submission_routes || []
   const obligations = rd.mandatory_disclosures || []
+  const sd = rd.source_design || {}
+  const paperVars = {
+    fontFamily: sd.css_font || undefined,
+    color: sd.body_color || undefined,
+    '--rd-primary': sd.primary_color || rd.brand_color || '#163a5f',
+    '--rd-accent': sd.accent_bg || '#e8f1f8',
+    '--rd-body': sd.body_color || '#1e293b',
+    '--rd-tbl-hdr-bg': sd.table_header_bg || '#f1f5f9',
+    '--rd-tbl-hdr-fg': sd.table_header_fg || sd.primary_color || '#163a5f',
+    '--rd-tbl-border': sd.table_border_color || '#cbd5e1',
+  }
 
   return (
-    <div className="claria-exec-paper">
-      <h1 className="claria-exec-title">{rd.title || 'Your annual financial review'}</h1>
+    <div className="claria-exec-paper" style={paperVars}>
+      {sd.primary_color && (
+        <style>{`
+          .claria-exec-paper .claria-exec-title,
+          .claria-exec-paper .claria-exec-h2 { color: var(--rd-primary) !important; }
+          .claria-exec-paper .claria-exec-p,
+          .claria-exec-paper .claria-exec-lead { color: var(--rd-body) !important; }
+          .claria-exec-paper .claria-exec-deadline-box { background: var(--rd-accent) !important; border-color: var(--rd-primary) !important; }
+          .claria-exec-paper .claria-exec-deadline-label,
+          .claria-exec-paper .claria-exec-deadline-date { color: var(--rd-primary) !important; }
+          .claria-exec-paper .claria-exec-table th { background: var(--rd-tbl-hdr-bg) !important; color: var(--rd-tbl-hdr-fg) !important; border-color: var(--rd-tbl-border) !important; }
+          .claria-exec-paper .claria-exec-table td { border-color: var(--rd-tbl-border) !important; color: var(--rd-body) !important; }
+        `}</style>
+      )}
+      <h1 className="claria-exec-title">{rd.title || 'Customer Communication'}</h1>
+      {rd.email_headers && (rd.email_headers.from || rd.email_headers.to || rd.email_headers.subject) && (
+        <div style={{ margin: '10px 0 14px', paddingBottom: '10px', borderBottom: '1.5px solid var(--rd-primary, #163a5f)', fontSize: '13.5px', lineHeight: 1.65 }}>
+          {rd.email_headers.from && <div><strong>From:</strong> {rd.email_headers.from}</div>}
+          {rd.email_headers.to && <div><strong>To:</strong> {rd.email_headers.to}</div>}
+          {rd.email_headers.subject && <div><strong>Subject:</strong> {rd.email_headers.subject}</div>}
+        </div>
+      )}
       {rd.introduction && <p className="claria-exec-lead">{rd.introduction}</p>}
 
       {rd.deadline && rd.deadline !== '[TO BE CONFIRMED]' && (
@@ -429,19 +413,36 @@ function ExecutiveRedesignedSheet({ rd }) {
               ))}
             </ul>
           )}
-          {(sec.table || []).length > 0 && (
-            <table className="claria-exec-table" style={{ marginTop: '10px' }}>
-              <tbody>
-                {sec.table.map((row, ri) => (
-                  <tr key={ri}>
-                    {Array.isArray(row) && row.map((cell, ci) => (
-                      ri === 0 ? <th key={ci}>{cell}</th> : <td key={ci}>{cell}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          {(sec.table || []).length > 0 && (() => {
+            const validRows = sec.table.filter(r => Array.isArray(r) && r.length > 0)
+            if (validRows.length === 0) return null
+            const twoColCount = validRows.filter(r => r.length === 2).length
+            const targetCols = (twoColCount >= Math.ceil(validRows.length * 0.6))
+              ? 2
+              : Math.max(...validRows.map(r => r.length))
+            const normRows = validRows.map(r => {
+              if (r.length === targetCols) return r
+              if (r.length > targetCols) {
+                return [...r.slice(0, targetCols - 1), r.slice(targetCols - 1).join(' · ')]
+              }
+              return [...r, ...Array(targetCols - r.length).fill('')]
+            })
+            return (
+              <table className="claria-exec-table" style={{ marginTop: '10px', width: '100%', tableLayout: 'fixed' }}>
+                <tbody>
+                  {normRows.map((row, ri) => (
+                    <tr key={ri}>
+                      {row.map((cell, ci) => (
+                        (ri === 0 || (targetCols === 2 && ci === 0))
+                          ? <th key={ci} style={{ overflowWrap: 'break-word' }}>{cell}</th>
+                          : <td key={ci} style={{ overflowWrap: 'break-word' }}>{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )
+          })()}
         </div>
       ))}
 
@@ -452,24 +453,27 @@ function ExecutiveRedesignedSheet({ rd }) {
         </div>
       )}
 
-      <hr className="claria-exec-hr" />
-
-      <div className="claria-exec-section">
-        <h2 className="claria-exec-h2">{rd.closing_heading || 'Thank you'}</h2>
-        {rd.closing_text && <p className="claria-exec-p">{rd.closing_text}</p>}
-        {(rd.sign_off_division || rd.sign_off_institution) && (
-          <div className="claria-exec-signoff">
-            {rd.sign_off_division && <strong>{rd.sign_off_division}</strong>}
-            {rd.sign_off_institution && <span>{rd.sign_off_institution}</span>}
+      {(rd.closing_heading || rd.closing_text || rd.sign_off_division || rd.sign_off_institution) && (
+        <>
+          <hr className="claria-exec-hr" />
+          <div className="claria-exec-section">
+            {rd.closing_heading && <h2 className="claria-exec-h2">{rd.closing_heading}</h2>}
+            {rd.closing_text && <p className="claria-exec-p">{rd.closing_text}</p>}
+            {(rd.sign_off_division || rd.sign_off_institution) && (
+              <div className="claria-exec-signoff">
+                {rd.sign_off_division && <strong>{rd.sign_off_division}</strong>}
+                {rd.sign_off_institution && <span>{rd.sign_off_institution}</span>}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       {rd.footer_note && <p className="claria-exec-footnote">{rd.footer_note}</p>}
 
       <div className="claria-exec-page-footer">
         <span>{rd.page_footer_left}</span>
-        <span>Page 1</span>
+        <span>{rd.total_pages > 1 ? `1–${rd.total_pages} Pages` : 'Page 1'}</span>
       </div>
     </div>
   )

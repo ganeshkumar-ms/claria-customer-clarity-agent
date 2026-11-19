@@ -17,70 +17,47 @@ from services import document_intelligence_service as intel_svc
 PRIMARY_MODEL_ID = 'us.amazon.nova-lite-v1:0'
 FALLBACK_MODEL_ID = 'us.amazon.nova-pro-v1:0'
 
-REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Customer Communication Redesign Engine (Senior CCM Designer & BFSI Content Strategist).
-Your job is to transform a dense, formal, or harsh banking/enterprise letter into a crystal-clear, customer-friendly redesigned document matching our executive banking redesign template while strictly following the USER INSTRUCTION / REQUESTED TONE and preserving 100% of source facts, dates, reference numbers, financial figures, accounting standards, auditor requirements, warnings, and contractual obligations.
+REDESIGN_SYSTEM_PROMPT = """You are CLARIA, an Enterprise Customer Communication Redesign Engine.
+Your job is to rewrite the uploaded document in the USER'S REQUESTED TONE while keeping the EXACT SAME core content, structure, section headings, order, length, facts, numbers, dates, and tables as the input document.
 
-EXECUTIVE REDESIGN TEMPLATE STRUCTURE:
-1. `title`: Clear, customer-focused headline derived strictly from the uploaded document's subject or purpose.
-2. `introduction`: 1-2 sentence plain-English lead summary stating what the uploaded document is about and any key action/date.
-3. `deadline_label`: "PLEASE SUBMIT BY" (or appropriate action label) and `deadline`: Exact deadline date from the uploaded document, or empty string if none exists.
-4. `details_heading`: Appropriate details heading (e.g. "Key details" or "Your account details") and `account_details`: Array of `{"label": "...", "value": "..."}` extracting real identifiers, dates, amounts, or references from the uploaded document.
-5. `what_we_need_heading`: Clear heading for required items or key points.
-   - `what_we_need_intro`: Clear intro sentence before the checklist, or empty string.
-   - `checklist`: Clean array of actual required items/action points from the uploaded document without trailing periods.
-   - `preparation_requirement`: Any preparation/certification requirement explicitly stated in the uploaded document, or empty string.
-6. `why_we_need_heading`: Clear heading explaining why this matters or what happens next.
-   - `what_happens_next`: Plain-English explanation from the uploaded document of why this matters and what happens next.
-7. `how_to_send_heading`: Clear heading for submission instructions or next steps.
-   - `how_to_submit_intro`: Intro sentence before submission routes if applicable, or empty string.
-   - `submission_routes`: Bullet list of submission channels or next steps from the uploaded document.
-   - `need_help`: Contact/support sentence from the uploaded document, or empty string.
-8. `obligations_heading`: Clear heading for important information, warnings, or legal/contractual obligations.
-   - `mandatory_disclosures`: Array of paragraphs preserving any warnings, legal conditions, or mandatory disclosures from the uploaded document without weakening them.
-9. `closing_heading`: Warm closing heading.
-   - `closing_text`: Appreciative closing sentence aligned with the actual sender and requested tone.
-   - `sign_off_division`: Actual division/department from the uploaded document, or empty string.
-   - `sign_off_institution`: Actual organization/bank/company name from the uploaded document, or empty string.
-   - `footer_note`: "Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions."
+STRICT FIDELITY RULES (NEVER BREAK):
+1. DO NOT invent a new document, do NOT add new sections/topics, and do NOT force a banking-letter template onto documents that are not banking letters.
+2. Keep the EXACT same sections (`sections`), headings, paragraphs, bullet lists, and order from the input document—simply rewrite the phrasing in the requested tone for clarity.
+3. TABLES: Include `"table": [...]` ONLY for sections that actually have a table in the input document. If the input has NO table, every `"table"` MUST be `[]` and `account_details` MUST be `[]`.
+4. NEVER invent template headings like "Why we need these documents", "What we need from you", "How to send your documents", "What happens next", or "Thank you" unless those exact headings exist in the input document. Put ALL document content strictly inside `sections` using the input document's own headings!
+5. NEVER mention the tone name or meta-commentary inside the document text (never write "friendly", "friendly version", "empathetic tone", "in a formal tone"). Express the tone naturally through word choice only.
+6. Match the full length and page count of the input document. Never summarize or drop sections.
+7. FULL-BODY TONE REWRITE: You MUST visibly and thoroughly rewrite EVERY section's paragraphs, bullets, introduction, and closing in the requested tone—do NOT only change the title/intro while leaving the body paragraphs unchanged. Keep 100% of facts, numbers, dates, and tables intact.
+8. HARSH-TO-SOFTEN / EMPATHETIC / FRIENDLY BANKING STANDARD (apply whenever the user asks to soften, make less harsh, empathetic, respectful, or friendly):
+   - Open with a warm, understanding sentence BEFORE stating the overdue amount or required action. Use "Dear <Name>," (NEVER "Hi <Name>" for banking/legal notices) and avoid trivializing serious overdue notices with "Friendly Reminder" or "things can slip through the cracks" (use clear subjects like "Your pending payment for Loan No. <id>").
+   - Replace accusatory/blaming/threatening phrasing ("you have failed", "unacceptable", "your negligence", "FINAL DEMAND", "Final Notice", "do not mistake our patience for weakness", "do not contact us again", "entirely your own doing", "will not accept excuses") with respectful, calm, solution-focused language ("We understand circumstances can change and would like to help you get back on track") and offer concrete help options (instalments, restructuring, relief review) plus a clear response timeframe ("within one working day").
+   - PRESERVE 100% OF REQUIREMENTS, PAYMENT METHODS & LEGAL CONSEQUENCES:
+     * NEVER shift or invent a deadline (keep the exact original timeframe/date, e.g. "within 7 days of this notice").
+     * NEVER drop payment methods from the input (always keep "payment portal", "nearest branch", etc.).
+     * NEVER drop ANY legal or contractual consequence from the input (keep additional charges, credit bureau reporting, legal proceedings, and collateral/guarantee enforcement—softened into calm, neutral language like "further steps under the loan agreement may follow, including...").
+     * Keep EVERY row of any financial table including the "Total Amount Due" row, and use ONE consistent term ("Total Amount Due") throughout.
+   - EMAIL FORMAT & ZERO DUPLICATION: If the input is an email/letter (From:/To:/Subject:/Date:/Ref. No.), keep `From`, `To`, and tone-adapted `Subject` in `email_headers`, keep each table/field/reference/signature ONCE (never duplicate Date/Notice date, Interest/Charges, or signature), include "If you have already made this payment, please disregard this message", preserve exact brand capitalization (e.g. "ABC Commercial Bank Ltd."), and set `footer_note` to "" (NEVER include internal redesign notes in the letter).
 
-TONE & EMPATHY ADAPTATION RULES:
-- When the user asks for an EMPATHETIC / REASSURING / LESS HARSH tone (e.g., "make it empathy", "this document is very harsh"):
-  - Make `title`, `introduction`, `what_we_need_intro`, `what_happens_next`, `need_help`, and `closing_text` warm, supportive, reassuring, and collaborative (e.g., thanking the customer for their partnership, offering proactive support from their Relationship Manager if they need extra guidance), while keeping `account_details`, `checklist`, `preparation_requirement`, and `mandatory_disclosures` 100% factual and compliant.
-
-Output ONLY valid JSON matching this schema (CRITICAL: derive EVERY value strictly from the uploaded document — NEVER copy placeholder text or invent bank/loan details that are not in the uploaded document):
+Output ONLY valid JSON matching this schema:
 {
-  "title": "<Clear, customer-friendly title derived strictly from the uploaded document>",
-  "deadline_label": "PLEASE SUBMIT BY",
-  "deadline": "<Exact deadline/due date from source, or empty string if none>",
-  "introduction": "<1-2 sentence plain-English summary of the uploaded document>",
-  "details_heading": "<Appropriate heading such as 'Your account details' or 'Key document details'>",
-  "account_details": [
-    {"label": "<Field label from source>", "value": "<Exact value from source>"}
-  ],
-  "what_we_need_heading": "<Heading for required items or key points>",
-  "what_we_need_intro": "<1-sentence intro if applicable, else empty string>",
-  "checklist": ["<Actionable item or key point from source>"],
-  "preparation_requirement": "<Any preparation/certification requirement from source, or empty string>",
-  "why_we_need_heading": "<Heading explaining why this matters>",
-  "what_happens_next": "<Plain-English explanation from source of why this matters and what happens next>",
-  "how_to_send_heading": "<Heading for submission/next steps>",
-  "how_to_submit_intro": "<1-sentence intro if applicable, else empty string>",
-  "submission_routes": ["<Submission channel or next step from source>"],
-  "how_to_submit": "<Combined submission/next-step summary>",
-  "need_help": "<Support/contact instructions from source>",
+  "title": "<Document title visibly rewritten to match the requested tone while keeping the exact subject>",
+  "email_headers": {"from": "<Only if input is an email, else empty string>", "to": "<Only if input is an email, else empty string>", "subject": "<Tone-adapted email Subject ONLY if input is an email, else empty string>"},
+  "deadline_label": "",
+  "deadline": "<Exact deadline from input if one exists, else empty string>",
+  "introduction": "<Opening 1-2 sentences from the input rewritten in the requested tone>",
+  "details_heading": "<Only if input has an account/key-details table, else empty string>",
+  "account_details": [],
   "sections": [
-    {"heading": "<Section heading from source>", "paragraphs": ["<Redesigned paragraph>"], "bullets": ["<Bullet>"], "table": [["Col1", "Col2"]]}
+    {"heading": "<Exact section heading from input>", "page": 1, "paragraphs": ["<Input paragraph rewritten in requested tone>"], "bullets": ["<Input bullet rewritten in requested tone>"], "table": []}
   ],
-  "obligations_heading": "<Heading for mandatory disclosures/warnings>",
-  "mandatory_disclosures": [
-    "<Mandatory disclosure, warning, or contractual clause preserved from source>"
-  ],
-  "closing_heading": "<Warm closing heading>",
-  "closing_text": "<Closing message aligned with the requested tone and actual sender from source>",
-  "sign_off_division": "<Actual division/department from source, or empty string if none>",
-  "sign_off_institution": "<Actual organization/bank/company name from source, or empty string if none>",
-  "footer_note": "Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions.",
-  "design_notes": "1-sentence summary of what was restructured and how the requested tone was applied."
+  "obligations_heading": "<Only if input has explicit legal/mandatory disclosures section, else empty string>",
+  "mandatory_disclosures": [],
+  "closing_heading": "<Closing heading ONLY if input has a closing section, else empty string>",
+  "closing_text": "<Closing sentence ONLY if input has a closing, else empty string>",
+  "sign_off_division": "<Actual division from input, or empty string>",
+  "sign_off_institution": "<Actual organization from input, or empty string>",
+  "footer_note": "",
+  "design_notes": "1-sentence internal note on how the requested tone was applied."
 }"""
 
 
@@ -109,13 +86,13 @@ def _extract_source_metadata(raw_text: str) -> dict[str, str]:
 
     meta: dict[str, str] = {}
 
-    # Reference e.g. CCB-2026-0148
-    m_ref = re.search(r'\bReference\b[\s:|]*([A-Z]{2,6}-\d{4}-\d{3,6}|\b[A-Z0-9-]{6,20}\b)', flat, re.IGNORECASE)
+    # Reference e.g. CCB-2026-0148 (must contain at least one digit so normal words aren't captured)
+    m_ref = re.search(r'\b(?:Document\s+)?Reference\b[\s:|]+((?=[A-Z0-9-]*\d)[A-Z0-9-]{5,24})\b', flat)
     if m_ref:
         meta['reference'] = m_ref.group(1).strip()
 
     # Loan account e.g. CL-2024-00871
-    m_loan = re.search(r'\bLoan\s*account\b[\s:|]*([A-Z]{2,6}-\d{4}-\d{3,6}|\b[A-Z0-9-]{6,20}\b)', flat, re.IGNORECASE)
+    m_loan = re.search(r'\bLoan\s*account\b[\s:|]+((?=[A-Z0-9-]*\d)[A-Z0-9-]{5,24})\b', flat, re.IGNORECASE)
     if m_loan:
         meta['loan_account'] = m_loan.group(1).strip()
 
@@ -137,22 +114,34 @@ def _extract_source_metadata(raw_text: str) -> dict[str, str]:
     if m_dl:
         meta['deadline'] = m_dl.group(1).strip()
 
-    # Customer (handles PDF table wrap "Custom\ner\nGreenfield Agricultural Enterprises\nLtd.\nLoan" while skipping "Customer Communication")
+    # Customer (skip "Customer Communication / Support / Service / Care")
     m_cust = re.search(
-        r'Custom\s*er(?![\s:|]*Communication\b)[\s:|]+([A-Z][A-Za-z0-9\s&.,()-]+?(?:Ltd\.?|Limited|Inc\.?|PLC|LLP|Corp\.?|Enterprises))(?=\s+Loan\b|\s+Account\b|\s+Subject\b|\n|$)',
+        r'Custom\s*er(?![\s:|]*(?:Communication|Support|Service|Care|Relations)\b)[\s:|]+([A-Z][A-Za-z0-9\s&.,()-]+?(?:Ltd\.?|Limited|Inc\.?|PLC|LLP|Corp\.?|Enterprises))(?=\s+Loan\b|\s+Account\b|\s+Subject\b|\n|$)',
         txt,
         re.IGNORECASE,
     )
     if m_cust:
         meta['customer'] = re.sub(r'\s+', ' ', m_cust.group(1)).strip()
 
-    # Institution & Division
-    m_bank = re.search(r'\b([A-Z][A-Za-z]+\s+Commercial\s+Bank|[A-Z][A-Za-z\s]+Bank)\b', flat)
+    # Institution & Division (preserve exact capitalization like "ABC Commercial Bank Ltd.")
+    m_bank = re.search(r'\b([A-Z][A-Za-z0-9&.]*(?:\s+[A-Z][A-Za-z0-9&.]*){0,4}\s+Bank(?:\s+Ltd\.?|\s+Limited)?)\b', flat)
     if m_bank:
-        meta['institution'] = re.sub(r'\s+', ' ', m_bank.group(1)).strip().title()
+        meta['institution'] = re.sub(r'\s+', ' ', m_bank.group(1)).strip()
     m_div = re.search(r'\b(Commercial\s+Banking\s+Division|[A-Z][A-Za-z\s]+Division)\b', flat)
     if m_div:
         meta['division'] = re.sub(r'\s+', ' ', m_div.group(1)).strip()
+
+    # Email headers (From / To / Subject) when input is an email
+    m_from = re.search(r'(?:^|\n)\s*From\s*[:|]\s*([^\n]+)', txt, re.IGNORECASE)
+    m_to = re.search(r'(?:^|\n)\s*To\s*[:|]\s*([^\n]+)', txt, re.IGNORECASE)
+    m_subj = re.search(r'(?:^|\n)\s*Subject\s*[:|]\s*([^\n]+)', txt, re.IGNORECASE)
+    if (m_from and m_to) or m_subj:
+        if m_from:
+            meta['email_from'] = m_from.group(1).strip()
+        if m_to:
+            meta['email_to'] = m_to.group(1).strip()
+        if m_subj:
+            meta['email_subject'] = m_subj.group(1).strip()
 
     return meta
 
@@ -243,6 +232,35 @@ def _soften_text_for_tone(text: str, tones: list[str]) -> str:
         ]
         for pat, rep in replacements:
             out = re.sub(pat, rep, out, flags=re.IGNORECASE)
+    if any(t in tones for t in ('friendly', 'simple', 'empathetic', 'reassuring')):
+        plain_swaps = [
+            (r'\bin accordance with\b', 'following'),
+            (r'\bpursuant to\b', 'under'),
+            (r'\bprior to\b', 'before'),
+            (r'\bsubsequent to\b', 'after'),
+            (r'\butilize\b', 'use'),
+            (r'\bfacilitate\b', 'help with'),
+            (r'\bcommence\b', 'start'),
+            (r'\bterminate\b', 'end'),
+            (r'\bensure that\b', 'make sure'),
+            (r'\bshall be\b', 'will be'),
+            (r'\bshall\b', 'will'),
+            (r'\bhereby\b', ''),
+        ]
+        for pat, rep in plain_swaps:
+            out = re.sub(pat, rep, out, flags=re.IGNORECASE)
+        out = re.sub(r' {2,}', ' ', out).strip()
+    elif 'formal' in tones:
+        formal_swaps = [
+            (r"\bwe're\b", 'we are'),
+            (r"\byou're\b", 'you are'),
+            (r"\bdon't\b", 'do not'),
+            (r"\bcan't\b", 'cannot'),
+            (r"\bwon't\b", 'will not'),
+            (r"\bit's\b", 'it is'),
+        ]
+        for pat, rep in formal_swaps:
+            out = re.sub(pat, rep, out, flags=re.IGNORECASE)
     return out
 
 
@@ -251,7 +269,7 @@ def _deterministic_redesign(
     tone_info: dict[str, Any],
     instruction: str,
 ) -> dict[str, Any]:
-    """Produces a clean, fact-preserving structured redesign matching the executive template, honoring requested tone."""
+    """Produces a complete, length-matched, fact-preserving structured redesign from the actual source document."""
     tones = tone_info.get('tones') or ['professional']
     is_empathetic = any(t in tones for t in ('empathetic', 'reassuring'))
     is_friendly = 'friendly' in tones
@@ -262,85 +280,34 @@ def _deterministic_redesign(
 
     grouped: list[dict[str, Any]] = []
     sec_map: dict[str, dict[str, Any]] = {}
-    checklist_bullets: list[str] = []
-    prep_req = ''
-    why_text = ''
-    routes: list[str] = []
-    help_text = ''
     disclosures: list[str] = []
-    coop_text = ''
 
     for el in cust:
         sec_name = el.get('section') or 'Key Information'
         etype = el.get('element_type')
+        page_num = int(el.get('page') or 1)
         txt = (el.get('text') or '').strip()
         if not txt:
-            continue
-        tl = txt.lower()
-        if etype == 'bullet' or re.match(r'^[•\-\*▪▸]\s*', txt):
-            cleaned_b = re.sub(r'^(?:[•\-\*▪▸]|\d+[\.\)])\s*', '', txt).rstrip('.')
-            if cleaned_b and len(cleaned_b) > 3:
-                checklist_bullets.append(cleaned_b)
-            continue
-
-        matched_special = False
-        if 'accounting standard' in tl or 'authorised auditor' in tl or 'authorized auditor' in tl or 'statutory auditor' in tl:
-            prep_req = (
-                "All financial statements must follow the accounting standards applicable to your organisation "
-                "and must be certified by the authorised auditor wherever the loan agreement requires it."
-                if 'accounting standard' in tl and ('authorised auditor' in tl or 'authorized auditor' in tl)
-                else txt
-            )
-            matched_special = True
-        if 'ongoing assessment' in tl or 'repayment capacity' in tl or 'financial and non-financial covenants' in tl:
-            why_text = (
-                "We use the information as part of our ongoing review of your financial position, ability to repay the loan "
-                "and compliance with the financial and non-financial covenants that apply to your existing lending arrangement."
-                if 'repayment capacity' in tl
-                else _soften_text_for_tone(txt, tones)
-            )
-            matched_special = True
-        if 'incomplete submissions' in tl or 'could delay' in tl:
-            dl_str = meta.get('deadline') or '15 December 2026'
-            disclosures.append(
-                f"Please submit all documents by {dl_str}. Please ensure that all documents are complete and legible. Incomplete submissions may require additional clarification and could delay the Bank's annual credit review process."
-                if 'incomplete submissions' in tl
-                else txt
-            )
-            matched_special = True
-        if 'failure to provide' in tl or 'reporting obligation issue' in tl or 'failure to comply' in tl or 'breach of' in tl:
-            m_fail = re.search(r'(Failure to (?:provide|comply|submit)[^.]+\.)', txt, re.IGNORECASE)
-            disclosures.append(m_fail.group(1).strip() if m_fail else txt)
-            matched_special = True
-        if 'designated relationship manager' in tl or 'approved secure document submission channel' in tl:
-            routes = [
-                'Your designated Relationship Manager; or',
-                "The Bank's approved secure document submission channel.",
-            ]
-            if 'for clarification' in tl or 'contact your assigned relationship manager' in tl:
-                help_text = 'If you have questions about the documents or how to submit them, contact your assigned Relationship Manager.'
-            matched_special = True
-        if 'we appreciate your continued relationship' in tl:
-            m_app = re.search(r'(We appreciate your continued relationship[^.]+\.)', txt, re.IGNORECASE)
-            raw_coop = m_app.group(1).strip() if m_app else txt
-            coop_text = raw_coop.replace('cooperation in completing the annual credit review process.', 'help in completing the annual credit review.')
-            matched_special = True
-        if matched_special:
             continue
 
         if etype == 'heading':
             if txt not in sec_map:
-                obj = {'heading': txt, 'paragraphs': [], 'bullets': [], 'table': []}
+                obj = {'heading': txt, 'page': page_num, 'paragraphs': [], 'bullets': [], 'table': []}
                 sec_map[txt] = obj
                 grouped.append(obj)
             continue
+
         if sec_name not in sec_map:
-            obj = {'heading': sec_name, 'paragraphs': [], 'bullets': [], 'table': []}
+            obj = {'heading': sec_name, 'page': page_num, 'paragraphs': [], 'bullets': [], 'table': []}
             sec_map[sec_name] = obj
             grouped.append(obj)
         target = sec_map[sec_name]
         if etype == 'table' and el.get('rows'):
             target['table'].extend(el['rows'])
+        elif etype == 'bullet' or re.match(r'^[•\-\*▪▸]\s*', txt):
+            cleaned_b = re.sub(r'^(?:[•\-\*▪▸]|\d+[\.\)])\s*', '', txt).rstrip('.')
+            if cleaned_b:
+                target['bullets'].append(_soften_text_for_tone(cleaned_b, tones))
         else:
             target['paragraphs'].append(_soften_text_for_tone(txt, tones))
 
@@ -353,80 +320,48 @@ def _deterministic_redesign(
     if deadline_val == '[TO BE CONFIRMED]':
         deadline_val = ''
 
-    is_annual_review = 'annual financial' in raw_all.lower() or 'credit review' in raw_all.lower() or 'financial statements' in raw_all.lower()
-    raw_title = 'Your annual financial review' if is_annual_review else (structured_doc.get('document_title') or 'Your customer communication review')
-
+    raw_title = structured_doc.get('document_title') or 'Customer Communication'
     if is_empathetic:
-        title = "We're here to help with your annual financial review" if is_annual_review else f"We're here to help you with your {raw_title}"
+        title = f"Important Update & Support: {raw_title}"
     elif is_friendly:
-        title = "Let's complete your annual financial review" if is_annual_review else f"Let's complete your {raw_title}"
+        title = f"Welcome — {raw_title}"
+    elif 'concise' in tones:
+        title = raw_title.split(':')[0].strip() or raw_title
+    elif 'formal' in tones:
+        title = f"Official Notice: {raw_title}" if not raw_title.lower().startswith(('official', 'notice')) else raw_title
     else:
         title = raw_title
 
-    if is_annual_review and deadline_val:
-        if is_empathetic:
-            intro = (
-                f"Thank you for your valued partnership with us. To help us complete the annual review of your commercial loan smoothly, "
-                f"please send us your latest financial information by {deadline_val}. We're here to support you at every step."
-            )
-        elif is_friendly:
-            intro = (
-                f"We hope everything is going well with your business! To help us complete your annual commercial loan review, "
-                f"please share your latest financial information with us by {deadline_val}."
-            )
-        else:
-            intro = f"Please send us your latest financial information by {deadline_val} so we can complete the annual review of your commercial loan."
+    raw_open = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else f"Overview of {raw_title}."
+    sent_split = re.split(r'(?<=[.!?])\s+', raw_open)
+    base_intro = ' '.join(sent_split[:2]).strip()
+    if is_empathetic:
+        intro = (
+            "Thank you for your continued partnership with us. "
+            + _soften_text_for_tone(base_intro, tones)
+        )
+    elif is_friendly:
+        intro = (
+            "We hope you're having a great day! "
+            + _soften_text_for_tone(base_intro, tones)
+        )
     else:
-        raw_open = grouped[0]['paragraphs'][0] if (grouped and grouped[0].get('paragraphs')) else f"Summary of {raw_title}."
-        # Keep introduction concise (first 1-2 sentences) so the full document body stays in sections
-        sent_split = re.split(r'(?<=[.!?])\s+', raw_open)
-        base_intro = ' '.join(sent_split[:2]).strip()
-        if is_empathetic:
-            intro = (
-                "Thank you for your continued partnership with us. We want to make this as clear and supportive as possible. "
-                + _soften_text_for_tone(base_intro, tones)
-            )
-        elif is_friendly:
-            intro = (
-                "We hope you are doing well! Here is a clear, friendly overview of this communication. "
-                + _soften_text_for_tone(base_intro, tones)
-            )
-        else:
-            intro = _soften_text_for_tone(base_intro, tones)
+        intro = _soften_text_for_tone(base_intro, tones)
 
     account_details: list[dict[str, str]] = []
     if meta.get('customer'):
         account_details.append({'label': 'Customer', 'value': meta['customer']})
     if meta.get('loan_account'):
         account_details.append({'label': 'Loan account', 'value': meta['loan_account']})
-    if meta.get('reference') or ident.get('document_reference'):
-        account_details.append({'label': 'Reference', 'value': meta.get('reference') or ident.get('document_reference')})
+    ident_ref = ident.get('document_reference') or ''
+    if ident_ref == '[TO BE CONFIRMED]':
+        ident_ref = ''
+    if meta.get('reference') or ident_ref:
+        account_details.append({'label': 'Reference', 'value': meta.get('reference') or ident_ref})
     if meta.get('notice_date'):
         account_details.append({'label': 'Notice date', 'value': meta['notice_date']})
-    if not account_details:
-        account_details = [
-            {'label': 'Document Type', 'value': structured_doc.get('document_type') or 'Customer Communication'},
-            {'label': 'Reference', 'value': ident.get('document_reference') or '[TO BE CONFIRMED]'},
-        ]
-        if deadline_val:
-            account_details.append({'label': 'Submission Deadline', 'value': deadline_val})
-
-    if not disclosures:
-        disclosures = [
-            el['text'] for el in cust
-            if el.get('classification') in ('mandatory_disclosure', 'legal_contractual') and el.get('element_type') != 'heading'
-        ][:6]
-
-    if is_empathetic and help_text:
-        help_text = (
-            help_text + " We understand gathering financial documents can take extra coordination — please reach out early if you need any assistance or have questions."
-        )
-    elif is_empathetic and not help_text:
-        help_text = "If you have questions or need support at any stage, please reach out to your assigned Relationship Manager — we are here to help."
-    elif is_friendly and help_text:
-        help_text = help_text + " Your assigned Relationship Manager will be glad to help you with anything you need."
-    elif is_friendly and not help_text:
-        help_text = "Have questions? Feel free to reach out to your assigned Relationship Manager — we're always happy to help!"
+    if deadline_val:
+        account_details.append({'label': 'Key Date / Deadline', 'value': deadline_val})
 
     primary_action = _soften_text_for_tone((act.get('required_actions') or ['Review the details below'])[0][:180], tones)
     institution = meta.get('institution') or ''
@@ -436,66 +371,69 @@ def _deterministic_redesign(
         f"Thank you for your continued partnership with {institution}!"
         if (is_friendly and institution)
         else (
-            f"We appreciate your continued relationship with {institution} and your help in completing the annual credit review."
-            if (is_annual_review and institution)
-            else (
-                f"Thank you for your continued relationship with {institution}."
-                if institution
-                else "Please reach out if you have any questions or need further clarification."
-            )
+            f"Thank you for your continued relationship with {institution}."
+            if institution
+            else "Please reach out if you have any questions or need further clarification."
         )
     )
 
+    total_pages = int(structured_doc.get('total_pages') or 1)
+    word_count = int(structured_doc.get('word_count') or len(raw_all.split()))
+
+    email_headers = None
+    if meta.get('email_from') or meta.get('email_to') or meta.get('email_subject'):
+        email_headers = {
+            'from': meta.get('email_from') or '',
+            'to': meta.get('email_to') or '',
+            'subject': meta.get('email_subject') or title,
+        }
+
     return {
         'title': title,
-        'deadline_label': 'PLEASE SUBMIT BY',
+        'email_headers': email_headers,
+        'deadline_label': 'PLEASE SUBMIT BY' if deadline_val else '',
         'deadline': deadline_val,
         'introduction': intro,
-        'details_heading': 'Your loan details' if (meta.get('loan_account') or is_annual_review) else 'Key document details',
+        'details_heading': 'Key document details' if account_details else '',
         'account_details': account_details,
-        'what_we_need_heading': 'What we need from you' if is_annual_review else 'Key items & checklist',
-        'what_we_need_intro': (
-            'Please provide the following documents for your most recently completed financial year. '
-            'Use this checklist to make sure your submission is complete:'
-            if (is_annual_review and checklist_bullets) else ''
-        ),
-        'checklist': checklist_bullets[:10] if is_annual_review else [],
-        'preparation_requirement': prep_req,
-        'why_we_need_heading': 'Why we need these documents' if is_annual_review else 'Why this matters',
-        'what_happens_next': why_text,
-        'how_to_send_heading': 'How to send your documents' if (routes or is_annual_review) else 'Next steps',
-        'how_to_submit_intro': 'Please send the complete, legible documents using either of these approved routes:' if routes else '',
-        'submission_routes': routes,
-        'how_to_submit': ' / '.join(routes) if routes else '',
-        'need_help': help_text,
-        'sections': grouped if not is_annual_review else [],
-        'obligations_heading': 'Important information about your loan obligations' if is_annual_review else 'Important information & obligations',
-        'mandatory_disclosures': disclosures,
-        'closing_heading': 'Thank you' if not is_annual_review else ('Thank you for banking with us' if is_friendly else 'Thank you for your cooperation'),
-        'closing_text': coop_text or default_closing,
+        'what_we_need_heading': '',
+        'what_we_need_intro': '',
+        'checklist': [],
+        'preparation_requirement': '',
+        'why_we_need_heading': '',
+        'what_happens_next': '',
+        'how_to_send_heading': '',
+        'how_to_submit_intro': '',
+        'submission_routes': [],
+        'how_to_submit': '',
+        'need_help': '',
+        'sections': grouped,
+        'obligations_heading': '',
+        'mandatory_disclosures': [],
+        'closing_heading': '',
+        'closing_text': '',
         'sign_off_division': division,
         'sign_off_institution': institution,
-        'footer_note': (
-            'Customer-friendly redesign preserving all original facts, dates, requirements, and contractual or legal conditions.'
-        ),
-        'page_footer_left': institution or (structured_doc.get('filename') or 'Customer Communication Redesign'),
+        'footer_note': '',
+        'page_footer_left': institution or (structured_doc.get('filename') or ''),
+        'total_pages': total_pages,
+        'target_word_count': word_count,
         'status_summary': {
             'outcome': structured_doc.get('document_type') or 'Customer Communication',
             'key_figures': (fin.get('monetary_amounts') or [])[:3] + (fin.get('rates_and_percentages') or [])[:2],
             'primary_action': primary_action,
         },
         'salutation': 'Dear Valued Customer,',
-        'sections': [],
         'call_to_action': {
-            'label': 'PLEASE SUBMIT BY',
-            'deadline': deadline_val or '[TO BE CONFIRMED]',
+            'label': 'PLEASE SUBMIT BY' if deadline_val else 'KEY ACTION',
+            'deadline': deadline_val,
             'instruction': primary_action,
         },
         'options': [],
         'timeline': [],
         'tbc_placeholders': [],
-        'closing': f"{division}\n{institution}",
-        'design_notes': f"Restructured source communication into executive customer-friendly template with deadline banner, loan details table, checklist, and preserved legal obligations ({tone_info['tone_label']} tone applied).",
+        'closing': f"{division}\n{institution}".strip(),
+        'design_notes': f"Full-length ({total_pages}-page) customer-friendly redesign preserving all source sections and facts ({tone_info['tone_label']} tone applied).",
     }
 
 
@@ -503,6 +441,7 @@ def generate_redesigned_document(
     structured_doc: dict[str, Any],
     instruction: str,
     prior_redesigned: dict[str, Any] | None = None,
+    design_profile: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Generates a complete customer-facing redesigned document preserving facts and disclosures."""
     customer_text_parts = []
@@ -516,17 +455,27 @@ def generate_redesigned_document(
     tone_info = intel_svc.parse_tone_and_audience(instruction, customer_text)
     det_baseline = _deterministic_redesign(structured_doc, tone_info, instruction)
 
+    total_pages = int(structured_doc.get('total_pages') or 1)
+    source_word_count = int(structured_doc.get('word_count') or len(customer_text.split()))
+
     prompt_lines = [
         f"USER INSTRUCTION: {instruction or 'Redesign this customer communication into our executive customer-friendly layout while preserving all facts, dates, fees, and mandatory disclosures.'}",
         f"REQUESTED TONE: {tone_info['tone_label']}",
         f"TONE DIRECTIVE: {tone_info.get('tone_directive', '')}",
         f"TARGET AUDIENCE: {tone_info['audience']}",
         f"DESIGN MODE: {tone_info['design_mode']}",
+        (
+            f"LENGTH & PAGE PARITY REQUIREMENT: The input document has {total_pages} page(s) and approximately {source_word_count} words. "
+            f"You MUST redesign ALL sections, paragraphs, bullets, tables, and disclosures from EVERY page so the redesigned output matches the input's length (~{source_word_count} words across {total_pages} page(s)). Do NOT summarize or omit sections."
+        ),
     ]
     if tone_info.get('preserve_fee_table'):
         prompt_lines.append("CRITICAL: Preserve the original fee table structure and every numeric value verbatim.")
     if prior_redesigned:
-        prompt_lines.append(f"PREVIOUS VERSION TO REFINE:\n{json.dumps(prior_redesigned, ensure_ascii=False)[:8000]}")
+        prompt_lines.append(
+            "NOTE ON REFINEMENT: The user is requesting a new tone/refinement on the SAME source document below. "
+            "Re-redesign the full CUSTOMER-FACING SOURCE CONTENT below in the new requested tone while preserving the full length and all facts."
+        )
     prompt_lines.append(f"CUSTOMER-FACING SOURCE CONTENT:\n{customer_text}")
 
     user_prompt = '\n\n'.join(prompt_lines)
@@ -542,7 +491,7 @@ def generate_redesigned_document(
                     modelId=mid,
                     system=[{'text': REDESIGN_SYSTEM_PROMPT}],
                     messages=[{'role': 'user', 'content': [{'text': user_prompt}]}],
-                    inferenceConfig={'maxTokens': 2800, 'temperature': 0.2},
+                    inferenceConfig={'maxTokens': 4096, 'temperature': 0.35},
                 )
                 raw = resp['output']['message']['content'][0]['text']
                 cand = json.loads(_strip_json_fences(raw))
@@ -570,15 +519,51 @@ def generate_redesigned_document(
         model_used = 'deterministic-fallback'
         parsed = det_baseline
     else:
-        # Backfill any missing structural fields from deterministic baseline so the document layout is always 100% complete
-        for k, v in det_baseline.items():
-            if not parsed.get(k) and v:
-                parsed[k] = v
-        # Ensure account_details has all deterministically extracted rows (Customer, Loan account, Reference, Notice date)
-        if det_baseline.get('account_details') and len(det_baseline['account_details']) >= len(parsed.get('account_details') or []):
+        # Backfill only missing title/intro/sections/sign-off (never dump raw mandatory_disclosures if LLM already produced sections)
+        for k in ('title', 'introduction', 'sections', 'sign_off_division', 'sign_off_institution', 'page_footer_left'):
+            if not parsed.get(k) and det_baseline.get(k):
+                parsed[k] = det_baseline[k]
+        # Only backfill account_details if the source has a multi-field metadata block AND no email_headers/body table already covers it
+        has_body_table = any(s.get('table') for s in (parsed.get('sections') or []))
+        if len(det_baseline.get('account_details') or []) >= 2 and not parsed.get('account_details') and not parsed.get('email_headers') and not has_body_table:
             parsed['account_details'] = det_baseline['account_details']
-        # If sections simply duplicate mandatory_disclosures, clear redundant sections so the layout stays crisp like the template
-        if parsed.get('checklist') and parsed.get('mandatory_disclosures') and parsed.get('sections'):
+            parsed['details_heading'] = det_baseline.get('details_heading') or 'Key details'
+        # Strip any internal meta footer_note and prevent duplicate signature if closing_text already signs off with the institution
+        parsed['footer_note'] = ''
+        ct_low = (parsed.get('closing_text') or '').lower()
+        inst_low = (parsed.get('sign_off_institution') or '').lower()
+        if inst_low and inst_low in ct_low:
+            parsed['sign_off_institution'] = ''
+            parsed['sign_off_division'] = ''
+        # Backfill email_headers if the source was an email
+        det_eh = det_baseline.get('email_headers')
+        if det_eh:
+            cur_eh = parsed.get('email_headers') if isinstance(parsed.get('email_headers'), dict) else {}
+            parsed['email_headers'] = {
+                'from': cur_eh.get('from') or det_eh.get('from') or '',
+                'to': cur_eh.get('to') or det_eh.get('to') or '',
+                'subject': cur_eh.get('subject') or det_eh.get('subject') or parsed.get('title') or '',
+            }
+        # Preserve any source tables from det_baseline if LLM omitted them
+        det_tables = [s['table'] for s in (det_baseline.get('sections') or []) if s.get('table')]
+        llm_has_table = any(s.get('table') for s in (parsed.get('sections') or []))
+        if det_tables and not llm_has_table:
+            parsed.setdefault('sections', [])
+            for tbl in det_tables:
+                parsed['sections'].insert(0, {'heading': '', 'page': 1, 'paragraphs': [], 'bullets': [], 'table': tbl})
+        # Preserve ALL LLM-rewritten sections in the new tone; only append any uncovered trailing sections if LLM stopped early on a long document
+        llm_secs = parsed.get('sections') or []
+        det_secs = det_baseline.get('sections') or []
+        if llm_secs and len(det_secs) > len(llm_secs):
+            seen_h = {(s.get('heading') or '').strip().lower() for s in llm_secs}
+            for ds in det_secs[len(llm_secs):]:
+                dh = (ds.get('heading') or '').strip().lower()
+                if dh and dh not in seen_h:
+                    llm_secs.append(ds)
+                    seen_h.add(dh)
+            parsed['sections'] = llm_secs
+        # If sections simply duplicate mandatory_disclosures, clear redundant sections only when checklist covers the body
+        if parsed.get('checklist') and parsed.get('mandatory_disclosures') and parsed.get('sections') and total_pages == 1:
             disc_set = {d.strip().lower()[:60] for d in parsed['mandatory_disclosures'] if d}
             cleaned_secs = []
             for sec in parsed['sections']:
@@ -594,6 +579,12 @@ def generate_redesigned_document(
     parsed.setdefault('sections', [])
     parsed.setdefault('mandatory_disclosures', det_baseline.get('mandatory_disclosures') or [])
     parsed.setdefault('closing', det_baseline.get('closing') or '')
+    parsed['total_pages'] = total_pages
+    parsed['target_word_count'] = source_word_count
+    if design_profile:
+        parsed['source_design'] = design_profile
+        if design_profile.get('primary_color'):
+            parsed['brand_color'] = design_profile['primary_color']
     parsed['tone_applied'] = tone_info['tone_label']
     parsed['user_instruction'] = (instruction or '').strip()
     parsed['audience_applied'] = tone_info['audience']

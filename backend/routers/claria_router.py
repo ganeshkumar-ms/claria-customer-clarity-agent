@@ -80,14 +80,17 @@ def _run_enterprise_pipeline(
     prior_redesigned: dict | None = None,
     version_reason: str = 'Initial redesign',
     creator: str = 'Document Creator',
+    design_profile: dict | None = None,
 ) -> dict:
     """Runs full-document intelligence, redesign, fact verification, comparison, export & governance."""
     structured = document_intelligence_service.parse_structured_document(raw_text, filename, doc_id=doc_id or '')
     used_doc_id = structured['document_id']
+    eff_design = design_profile or (doc_meta or {}).get('design_profile')
     redesigned = redesign_engine_service.generate_redesigned_document(
         structured,
         instruction=instruction,
         prior_redesigned=prior_redesigned,
+        design_profile=eff_design,
     )
     fact_ver = document_intelligence_service.verify_output_facts(
         structured.get('source_facts') or [],
@@ -170,6 +173,7 @@ async def redesign(
     active_document_id: Optional[str] = Form(None),
     active_document_text: Optional[str] = Form(None),
     active_document_filename: Optional[str] = Form(None),
+    active_design_profile: Optional[str] = Form(None),
 ):
     import re as _re
     try:
@@ -233,16 +237,38 @@ async def redesign(
         if user_instruction:
             combined_text += f"\nRecipient's Question / Note: {user_instruction}\n"
 
-    # If no new file was uploaded, check if the user is refining an active document in the conversation (e.g. "make it empathy")
-    if not file and user_instruction and len(user_instruction.split()) <= 60 and _re.search(REFINEMENT_INTENT_RE, user_instruction, _re.IGNORECASE):
+    # If no new file was uploaded, check if we have an active/pending document in this conversation
+    is_pure_greeting = bool(
+        user_instruction
+        and _re.match(
+            r'^(?:hi+|hello+|hey+|hlo|hola|ok|okay|thanks|thank\s+you|bye|good\s+(?:morning|afternoon|evening))[\s!.,?]*$',
+            user_instruction,
+            _re.IGNORECASE,
+        )
+    )
+    has_active_doc_ctx = bool((active_document_id and active_document_id.strip()) or (active_document_text and active_document_text.strip()))
+
+    if not file and user_instruction and not is_pure_greeting and (
+        has_active_doc_ctx
+        or (len(user_instruction.split()) <= 60 and _re.search(REFINEMENT_INTENT_RE, user_instruction, _re.IGNORECASE))
+    ):
         rec = (
-            governance_store_service.get_document_record(active_document_id)
-            if active_document_id
-            else governance_store_service.get_latest_document_record()
+            governance_store_service.get_document_record(active_document_id.strip())
+            if (active_document_id and active_document_id.strip())
+            else None
         )
         if rec:
             structured_prev = rec.get('structured_doc') or {}
-            raw_doc_text = '\n'.join(el.get('text', '') for el in (structured_prev.get('elements') or []))
+            if active_document_text and active_document_text.strip():
+                raw_doc_text = active_document_text.strip()
+            else:
+                parts = []
+                for el in (structured_prev.get('elements') or []):
+                    if el.get('element_type') == 'table' and el.get('rows'):
+                        parts.extend(' | '.join(str(c) for c in r) for r in el['rows'])
+                    elif el.get('text'):
+                        parts.append(el['text'])
+                raw_doc_text = '\n'.join(parts)
             doc_filename = rec.get('filename') or active_document_filename or 'Customer_Communication.pdf'
             active_document_id = rec.get('document_id') or active_document_id
             latest_ver = (rec.get('versions') or [])[-1] if rec.get('versions') else {}
@@ -252,32 +278,12 @@ async def redesign(
                 'stored_name': rec.get('stored_name'),
                 'view_url': rec.get('original_view_url'),
                 'url': rec.get('original_download_url'),
+                'design_profile': (rec.get('original_meta') or {}).get('design_profile'),
             }
         elif active_document_text and active_document_text.strip():
             raw_doc_text = active_document_text.strip()
             doc_filename = active_document_filename or 'Customer_Communication.pdf'
             doc_meta = {'filename': doc_filename}
-        else:
-            candidates = [
-                p for p in UPLOADS_DIR.glob('*')
-                if p.is_file()
-                and not p.name.startswith('highlighted_')
-                and not p.name.startswith('doc-')
-            ]
-            if candidates:
-                candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
-                latest_p = candidates[0]
-                stored_name = latest_p.name
-                doc_filename = _display_name(stored_name)
-                ext_res = document_service.extract_text(latest_p.read_bytes(), doc_filename)
-                raw_doc_text = ext_res.get('text', '')
-                q = quote(stored_name)
-                doc_meta = {
-                    'filename': doc_filename,
-                    'stored_name': stored_name,
-                    'url': f'/api/document/{q}',
-                    'view_url': f'/api/document/{q}/view',
-                }
         if not (raw_doc_text and raw_doc_text.strip()):
             return {
                 'type': 'chat',
@@ -301,6 +307,39 @@ async def redesign(
                 'guardrail_details': guard,
             }
         clean_source = claria_service._extract_clean_document_text(raw_doc_text, guard.get('sanitized_text', raw_doc_text))
+
+        # If user uploaded ONLY a file without specifying a tone/instruction, ask what to do, which tone, and how to redesign (no preset options)
+        if file and not user_instruction:
+            return {
+                'type': 'chat',
+                'awaiting_tone': True,
+                'message': (
+                    f"I've received {doc_filename or 'your document'}. "
+                    "What would you like me to do with this document — which tone should I use, and how would you like it redesigned?"
+                ),
+                'document_metadata': doc_meta,
+                'pending_document': {
+                    'filename': doc_filename or 'customer_communication.txt',
+                    'raw_text': clean_source,
+                    'stored_name': stored_name,
+                    'design_profile': (doc_meta or {}).get('design_profile'),
+                },
+            }
+
+        parsed_active_design = None
+        if active_design_profile:
+            try:
+                parsed_active_design = json.loads(active_design_profile)
+            except Exception:
+                parsed_active_design = None
+        eff_design_profile = (
+            (doc_meta or {}).get('design_profile')
+            or parsed_active_design
+            or (prior_redesigned or {}).get('source_design')
+        )
+        if eff_design_profile and isinstance(doc_meta, dict) and not doc_meta.get('design_profile'):
+            doc_meta['design_profile'] = eff_design_profile
+
         effective_instruction = user_instruction or 'Redesign professionally for clarity while preserving all facts and disclosures.'
 
         ent_bundle = _run_enterprise_pipeline(
@@ -311,6 +350,7 @@ async def redesign(
             doc_id=active_document_id if prior_redesigned else None,
             prior_redesigned=prior_redesigned,
             version_reason=f"Tone/Redesign ({effective_instruction[:40]})" if user_instruction else 'Initial redesign',
+            design_profile=eff_design_profile,
         )
         rd = ent_bundle.get('redesigned_document') or {}
         tone_label = rd.get('tone_applied') or 'Professional & Clear'

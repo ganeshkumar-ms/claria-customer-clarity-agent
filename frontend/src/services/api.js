@@ -9,6 +9,8 @@ export async function redesignCommunication({
   activeDocumentId = '',
   activeDocumentText = '',
   activeDocumentFilename = '',
+  activeDesignProfile = null,
+  activeDocumentStoredName = '',
 }) {
   const formData = new FormData()
   if (file) {
@@ -25,6 +27,12 @@ export async function redesignCommunication({
   }
   if (activeDocumentFilename) {
     formData.append('active_document_filename', activeDocumentFilename)
+  }
+  if (activeDesignProfile) {
+    formData.append('active_design_profile', JSON.stringify(activeDesignProfile))
+  }
+  if (activeDocumentStoredName) {
+    formData.append('active_document_stored_name', activeDocumentStoredName)
   }
   formData.append('conversation_history', JSON.stringify(conversationHistory))
 

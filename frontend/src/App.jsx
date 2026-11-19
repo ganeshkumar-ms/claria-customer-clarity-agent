@@ -355,9 +355,9 @@ export default function App() {
 
     if (!content && !file) return
 
-    const isHomeStart = view === 'home' || !targetSessionId
-    let activeId = (!isHomeStart && targetSessionId) ? targetSessionId : generateId()
-    if (isHomeStart) {
+    const isFreshSession = !targetSessionId
+    const activeId = targetSessionId || generateId()
+    if (view === 'home' || isFreshSession) {
       setCurrentSessionId(activeId)
       setView('chat')
     }
@@ -383,7 +383,7 @@ export default function App() {
       timestamp: new Date().toLocaleTimeString()
     }
 
-    const baseMsgs = (!isHomeStart && currentSession) ? (currentSession.messages || []) : []
+    const baseMsgs = (!isFreshSession && currentSession && currentSession.id === activeId) ? (currentSession.messages || []) : []
     const nextMessages = [...baseMsgs, userMessage]
     setMessages(nextMessages)
     setIsThinking(true)
@@ -401,15 +401,32 @@ export default function App() {
       ? [...nextMessages].reverse().find(m => m.role === 'user' && typeof File !== 'undefined' && m.file instanceof File)
       : null
     const effectiveFile = file || priorFileMsg?.file || null
-    const lastRedesignMsg = !effectiveFile
-      ? [...nextMessages].reverse().find(m => m.role === 'ai' && m.content?.type === 'redesign')
+    const lastDocMsg = !effectiveFile
+      ? [...nextMessages].reverse().find(
+          m => m.role === 'ai' && (m.content?.type === 'redesign' || m.content?.pending_document?.raw_text)
+        )
       : null
-    const activeDocumentId = lastRedesignMsg?.content?.document_id || ''
-    const activeDocumentText = lastRedesignMsg?.content?.highlighted_document?.raw_text || ''
+    const activeDocumentId = lastDocMsg?.content?.document_id || ''
+    const activeDocumentText =
+      lastDocMsg?.content?.pending_document?.raw_text ||
+      lastDocMsg?.content?.highlighted_document?.raw_text ||
+      ''
     const activeDocumentFilename =
-      lastRedesignMsg?.content?.highlighted_document?.source_filename ||
-      lastRedesignMsg?.document_metadata?.filename ||
-      lastRedesignMsg?.content?.document_metadata?.filename ||
+      lastDocMsg?.content?.pending_document?.filename ||
+      lastDocMsg?.content?.highlighted_document?.source_filename ||
+      lastDocMsg?.document_metadata?.filename ||
+      lastDocMsg?.content?.document_metadata?.filename ||
+      ''
+    const activeDesignProfile =
+      lastDocMsg?.content?.pending_document?.design_profile ||
+      lastDocMsg?.content?.redesigned_document?.source_design ||
+      lastDocMsg?.document_metadata?.design_profile ||
+      lastDocMsg?.content?.document_metadata?.design_profile ||
+      null
+    const activeDocumentStoredName =
+      lastDocMsg?.content?.pending_document?.stored_name ||
+      lastDocMsg?.document_metadata?.stored_name ||
+      lastDocMsg?.content?.document_metadata?.stored_name ||
       ''
 
     // Build memory history
@@ -442,6 +459,8 @@ export default function App() {
           activeDocumentId,
           activeDocumentText,
           activeDocumentFilename,
+          activeDesignProfile,
+          activeDocumentStoredName,
         }),
         new Promise(res => setTimeout(res, 900))
       ])
@@ -536,6 +555,7 @@ export default function App() {
                   onChange={(e) => {
                     const f = e.target.files?.[0]
                     if (f) setAttachedFile(f)
+                    e.target.value = ''
                   }}
                 />
                 <button
@@ -800,6 +820,7 @@ export default function App() {
                       onChange={(e) => {
                         const f = e.target.files?.[0]
                         if (f) setAttachedFile(f)
+                        e.target.value = ''
                       }}
                     />
                     <button
