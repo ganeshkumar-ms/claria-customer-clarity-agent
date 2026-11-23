@@ -703,7 +703,18 @@ export default function App() {
                   )}
                   <small>ENTERPRISE INTELLIGENCE WORKSPACE</small>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div className="mobileActions" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    className="mobileMenu"
+                    type="button"
+                    aria-label="Open recent conversations"
+                    onClick={() => setDrawerOpen(o => !o)}
+                  >
+                    <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M5 7h14M5 12h14M5 17h14" />
+                    </svg>
+                    <span>RECENT</span>
+                  </button>
                   <button className="ghost" onClick={goHome} type="button">
                     <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="m3 10 9-7 9 7" />

@@ -416,6 +416,29 @@ function ExecutiveRedesignedSheet({ rd }) {
           {(sec.table || []).length > 0 && (() => {
             const validRows = sec.table.filter(r => Array.isArray(r) && r.length > 0)
             if (validRows.length === 0) return null
+
+            // Guard: if a single-row or malformed table actually contains a wall of prose
+            // (e.g. from a PDF line with a '|' separator), render it as clean paragraphs instead of a broken table
+            const maxCellLen = Math.max(...validRows.flat().map(c => String(c || '').trim().length))
+            if ((validRows.length === 1 && maxCellLen > 160) || maxCellLen > 320) {
+              const joined = validRows
+                .map(r => r.map(c => String(c || '').trim()).filter(Boolean).join(' — '))
+                .join('\n')
+                .replace(/\[Page\s+\d+\s+of\s+\d+\]\s*/gi, '')
+                .trim()
+              const parts = joined
+                .split(/(?=(?:\b\d+\)\s+|\bInstructions\s*[-:]|\bCandidate's Signature\b))/i)
+                .map(s => s.trim())
+                .filter(Boolean)
+              return (
+                <div style={{ marginTop: '8px' }}>
+                  {parts.map((part, pi) => (
+                    <p key={pi} className="claria-exec-p">{part}</p>
+                  ))}
+                </div>
+              )
+            }
+
             const twoColCount = validRows.filter(r => r.length === 2).length
             const targetCols = (twoColCount >= Math.ceil(validRows.length * 0.6))
               ? 2
@@ -428,12 +451,12 @@ function ExecutiveRedesignedSheet({ rd }) {
               return [...r, ...Array(targetCols - r.length).fill('')]
             })
             return (
-              <table className="claria-exec-table" style={{ marginTop: '10px', width: '100%', tableLayout: 'fixed' }}>
+              <table className="claria-exec-table" style={{ marginTop: '10px', width: '100%' }}>
                 <tbody>
                   {normRows.map((row, ri) => (
                     <tr key={ri}>
                       {row.map((cell, ci) => (
-                        (ri === 0 || (targetCols === 2 && ci === 0))
+                        (targetCols === 2 ? ci === 0 : ri === 0)
                           ? <th key={ci} style={{ overflowWrap: 'break-word' }}>{cell}</th>
                           : <td key={ci} style={{ overflowWrap: 'break-word' }}>{cell}</td>
                       ))}
