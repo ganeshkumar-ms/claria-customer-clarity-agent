@@ -229,7 +229,7 @@ export default function App() {
         if (lastAi) {
           const elRect = el.getBoundingClientRect()
           const bubbleRect = lastAi.getBoundingClientRect()
-          const targetTop = el.scrollTop + (bubbleRect.top - elRect.top) - 44
+          const targetTop = el.scrollTop + (bubbleRect.top - elRect.top) - 18
           el.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
         } else {
           el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
@@ -251,7 +251,7 @@ export default function App() {
         if (lastAiBubble) {
           const elRect = el.getBoundingClientRect()
           const bubbleRect = lastAiBubble.getBoundingClientRect()
-          const targetTop = el.scrollTop + (bubbleRect.top - elRect.top) - 44
+          const targetTop = el.scrollTop + (bubbleRect.top - elRect.top) - 18
           el.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
         }
       }, 50)
@@ -319,7 +319,7 @@ export default function App() {
         if (lastAi) {
           const elRect = el.getBoundingClientRect()
           const bubbleRect = lastAi.getBoundingClientRect()
-          const targetTop = el.scrollTop + (bubbleRect.top - elRect.top) - 44
+          const targetTop = el.scrollTop + (bubbleRect.top - elRect.top) - 18
           el.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
         } else {
           el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
