@@ -1179,9 +1179,1599 @@
       ],
       "status": "Awaiting human review",
       "approval_records": []
+    },
+    "doc-ff648f553b": {
+      "document_id": "doc-ff648f553b",
+      "filename": "loan_overdue_notice.pdf",
+      "document_title": "[Page 1 of 2]",
+      "document_type": "Collections Communication",
+      "department": "Customer Communications",
+      "creator": "Document Creator",
+      "created_at": "2026-11-25T16:23:52+00:00",
+      "updated_at": "2026-11-25T16:24:27+00:00",
+      "sha256": "",
+      "stored_name": "",
+      "original_view_url": "",
+      "original_download_url": "",
+      "total_pages": 2,
+      "word_count": 314,
+      "structured_doc": {
+        "document_id": "doc-ff648f553b",
+        "filename": "loan_overdue_notice.pdf",
+        "document_title": "[Page 1 of 2]",
+        "document_type": "Collections Communication",
+        "total_pages": 2,
+        "word_count": 314,
+        "elements": [
+          {
+            "element_id": "doc-ff648f553b-el-1",
+            "page": 1,
+            "section": "Document Overview",
+            "element_type": "paragraph",
+            "text": "ABC Commercial Bank Ltd.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-tbl-2",
+            "page": 1,
+            "section": "Document Overview",
+            "element_type": "table",
+            "text": "Recovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com",
+            "rows": [
+              [
+                "Recovery & Collections Department",
+                "45 Anna Salai, Chennai - 600002",
+                "recovery@abccommercialbank.com"
+              ]
+            ],
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-3",
+            "page": 1,
+            "section": "Document Overview",
+            "element_type": "paragraph",
+            "text": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to repay your business loan on time, and your repeated silence is unacceptable. We have sent multiple reminders and you have ignored every one of them.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-hd-4",
+            "page": 1,
+            "section": "The facts are as follows:",
+            "element_type": "heading",
+            "text": "The facts are as follows:",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-5",
+            "page": 1,
+            "section": "The facts are as follows:",
+            "element_type": "paragraph",
+            "text": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are obligated to repay it. We will not accept excuses, delays, or partial promises. Your negligence has already cost us time and resources, and we will not tolerate it any longer. You must pay the full amount of Rs. 4,88,250 within 7 days of the date of this notice.",
+            "classification": "legal_contractual",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-hd-6",
+            "page": 1,
+            "section": "If you fail to do so, we will:",
+            "element_type": "heading",
+            "text": "If you fail to do so, we will:",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-7",
+            "page": 1,
+            "section": "If you fail to do so, we will:",
+            "element_type": "paragraph",
+            "text": "(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to your balance; (cid : [REDACTED_PIN_CVV]) Initiate legal proceedings and recover the amount, along with all legal costs, from you; (cid : [REDACTED_PIN_CVV]) Enforce our rights over any collateral or guarantees securing this loan. Do not mistake our patience for weakness. This matter is now beyond reminders. Your credibility as a borrower is at stake, and the consequences of continued default will be entirely your own doing. Pay immediately via the bank's payment portal or at your nearest branch. Do not contact us again without payment.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-8",
+            "page": 2,
+            "section": "If you fail to do so, we will:",
+            "element_type": "paragraph",
+            "text": "Regards, Suresh Menon Recovery Manager ABC Commercial Bank Ltd.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "customer_elements": [
+          {
+            "element_id": "doc-ff648f553b-el-1",
+            "page": 1,
+            "section": "Document Overview",
+            "element_type": "paragraph",
+            "text": "ABC Commercial Bank Ltd.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-tbl-2",
+            "page": 1,
+            "section": "Document Overview",
+            "element_type": "table",
+            "text": "Recovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com",
+            "rows": [
+              [
+                "Recovery & Collections Department",
+                "45 Anna Salai, Chennai - 600002",
+                "recovery@abccommercialbank.com"
+              ]
+            ],
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-3",
+            "page": 1,
+            "section": "Document Overview",
+            "element_type": "paragraph",
+            "text": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to repay your business loan on time, and your repeated silence is unacceptable. We have sent multiple reminders and you have ignored every one of them.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-hd-4",
+            "page": 1,
+            "section": "The facts are as follows:",
+            "element_type": "heading",
+            "text": "The facts are as follows:",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-5",
+            "page": 1,
+            "section": "The facts are as follows:",
+            "element_type": "paragraph",
+            "text": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are obligated to repay it. We will not accept excuses, delays, or partial promises. Your negligence has already cost us time and resources, and we will not tolerate it any longer. You must pay the full amount of Rs. 4,88,250 within 7 days of the date of this notice.",
+            "classification": "legal_contractual",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-hd-6",
+            "page": 1,
+            "section": "If you fail to do so, we will:",
+            "element_type": "heading",
+            "text": "If you fail to do so, we will:",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-7",
+            "page": 1,
+            "section": "If you fail to do so, we will:",
+            "element_type": "paragraph",
+            "text": "(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to your balance; (cid : [REDACTED_PIN_CVV]) Initiate legal proceedings and recover the amount, along with all legal costs, from you; (cid : [REDACTED_PIN_CVV]) Enforce our rights over any collateral or guarantees securing this loan. Do not mistake our patience for weakness. This matter is now beyond reminders. Your credibility as a borrower is at stake, and the consequences of continued default will be entirely your own doing. Pay immediately via the bank's payment portal or at your nearest branch. Do not contact us again without payment.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          },
+          {
+            "element_id": "doc-ff648f553b-el-8",
+            "page": 2,
+            "section": "If you fail to do so, we will:",
+            "element_type": "paragraph",
+            "text": "Regards, Suresh Menon Recovery Manager ABC Commercial Bank Ltd.",
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "internal_elements": [],
+        "headings": [
+          {
+            "page": 1,
+            "text": "The facts are as follows:",
+            "internal": false
+          },
+          {
+            "page": 1,
+            "text": "If you fail to do so, we will:",
+            "internal": false
+          }
+        ],
+        "tables": [
+          {
+            "element_id": "doc-ff648f553b-tbl-2",
+            "page": 1,
+            "section": "Document Overview",
+            "element_type": "table",
+            "text": "Recovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com",
+            "rows": [
+              [
+                "Recovery & Collections Department",
+                "45 Anna Salai, Chennai - 600002",
+                "recovery@abccommercialbank.com"
+              ]
+            ],
+            "classification": "customer_facing",
+            "sensitivity": "Customer-Public",
+            "extraction_confidence": "Verified"
+          }
+        ],
+        "source_facts": [
+          {
+            "fact_id": "doc-ff648f553b-F001",
+            "category": "date_deadline",
+            "extracted_value": "19 November 2026",
+            "normalized_value": "19november2026",
+            "source_page": 1,
+            "source_section": "Document Overview",
+            "source_text": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+            "extraction_confidence": "Verified",
+            "verification_status": "Pending output check"
+          },
+          {
+            "fact_id": "doc-ff648f553b-F002",
+            "category": "date_deadline",
+            "extracted_value": "15 September 2026",
+            "normalized_value": "15september2026",
+            "source_page": 1,
+            "source_section": "The facts are as follows:",
+            "source_text": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+            "extraction_confidence": "Verified",
+            "verification_status": "Pending output check"
+          }
+        ],
+        "communication_intelligence": {
+          "document_identity": {
+            "document_title": "[Page 1 of 2]",
+            "document_type": "Collections Communication",
+            "source_filename": "loan_overdue_notice.pdf",
+            "document_reference": "ABC/REC/2026/118347",
+            "issue_date": "[TO BE CONFIRMED]",
+            "intended_audience": "Customer / Recipient",
+            "communication_channel": "Digital / Print Customer Communication"
+          },
+          "business_context": {
+            "communication_purpose": "Collections Communication — [Page 1 of 2]",
+            "main_message": "ABC Commercial Bank Ltd.",
+            "action_required": true
+          },
+          "financial_intelligence": {
+            "monetary_amounts": [],
+            "rates_and_percentages": [],
+            "identifiers": [],
+            "payment_or_effective_dates": []
+          },
+          "legal_and_regulatory_intelligence": {
+            "disclosures_and_clauses_count": 2,
+            "key_disclosures": [
+              "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the ",
+              "(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to your balance; (cid : [REDACTED_PIN_CVV]"
+            ]
+          },
+          "customer_action_intelligence": {
+            "required_actions": [
+              "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. ",
+              "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the ",
+              "(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to your balance; (cid : [REDACTED_PIN_CVV]"
+            ],
+            "deadlines": [
+              "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 Yo"
+            ],
+            "support_channels": [
+              "(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to"
+            ]
+          },
+          "missing_or_conflicting": [
+            "Effective date or action deadline not explicitly found — mark [TO BE CONFIRMED] if required."
+          ]
+        },
+        "has_internal_content": false,
+        "audience_clarification_needed": false
+      },
+      "versions": [
+        {
+          "version_number": 1,
+          "version_label": "Version 1 — Tone/Redesign (redesign it shortly)",
+          "parent_version": 0,
+          "created_at": "2026-11-25T16:23:52+00:00",
+          "instruction": "redesign it shortly",
+          "model_governance": {
+            "model_id": "us.amazon.nova-lite-v1:0",
+            "prompt_version": "claria-enterprise-v2.0",
+            "processed_at": "2026-11-25T16:23:52+00:00",
+            "document_id": "doc-ff648f553b",
+            "version_number": 1,
+            "validation_status": "Requires manual review"
+          },
+          "redesigned_document": {
+            "title": "Final Demand Notice for Overdue Loan Repayment",
+            "email_headers": {
+              "from": "Recovery & Collections Department, ABC Commercial Bank Ltd.",
+              "to": "Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045",
+              "subject": "Final Demand: Immediate Repayment of Overdue Loan No. LN-2026-004581"
+            },
+            "deadline_label": "",
+            "deadline": "within 7 days of this notice",
+            "introduction": "Dear Mr. Kumar, We regret to inform you that your business loan has not been repaid as per the agreed terms.",
+            "details_heading": "Account Details",
+            "account_details": [
+              {
+                "Loan Account No.": "LN-2026-004581",
+                "Original Due Date": "15 September 2026",
+                "Days Overdue": "65 days",
+                "Outstanding Principal": "Rs. 4,50,000",
+                "Penalty and Interest Accrued": "Rs. 38,250",
+                "Total Amount Due Now": "Rs. 4,88,250"
+              }
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "page": 1,
+                "paragraphs": [],
+                "bullets": [],
+                "table": [
+                  [
+                    "Recovery & Collections Department",
+                    "45 Anna Salai, Chennai - 600002",
+                    "recovery@abccommercialbank.com"
+                  ]
+                ]
+              },
+              {
+                "heading": "Consequences of Non-Payment",
+                "page": 1,
+                "paragraphs": [
+                  "Failure to settle the due amount within the stipulated timeframe will result in severe repercussions, including reporting your default to credit bureaus, adding further penalties and interest, initiating legal proceedings, and enforcing rights over any collateral or guarantees."
+                ],
+                "bullets": [
+                  "Report your default to all credit bureaus, severely damaging your credit score for years.",
+                  "Add further penalties, interest, and recovery charges to your balance.",
+                  "Initiate legal proceedings and recover the amount, along with all legal costs, from you.",
+                  "Enforce our rights over any collateral or guarantees securing this loan."
+                ],
+                "table": []
+              },
+              {
+                "heading": "If you fail to do so, we will:",
+                "page": 1,
+                "paragraphs": [
+                  "(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to your balance; (cid : [REDACTED_PIN_CVV]) Initiate legal proceedings and recover the amount, along with all legal costs, from you; (cid : [REDACTED_PIN_CVV]) Enforce our rights over any collateral or guarantees securing this loan. Do not mistake our patience for weakness. This matter is now beyond reminders. Your credibility as a borrower is at stake, and the consequences of continued default will be entirely your own doing. Pay immediately via the bank's payment portal or at your nearest branch. Do not contact us again without payment.",
+                  "Regards, Suresh Menon Recovery Manager ABC Commercial Bank Ltd."
+                ],
+                "bullets": [],
+                "table": []
+              }
+            ],
+            "obligations_heading": "",
+            "mandatory_disclosures": [],
+            "closing_heading": "",
+            "closing_text": "",
+            "sign_off_division": "Recovery & Collections Department",
+            "sign_off_institution": "ABC Commercial Bank Ltd.",
+            "footer_note": "",
+            "design_notes": "Rewritten to be concise and direct while preserving all factual dates, figures, and mandatory disclosures.",
+            "page_footer_left": "ABC Commercial Bank Ltd",
+            "salutation": "Dear Valued Customer,",
+            "closing": "ABC Commercial Bank Ltd",
+            "total_pages": 2,
+            "target_word_count": 314,
+            "source_design": {
+              "font_family": "sans",
+              "font_name": "Helvetica",
+              "css_font": "'Helvetica', 'Segoe UI', Arial, Helvetica, sans-serif",
+              "primary_color": "#808080",
+              "accent_bg": "#f8d7d7",
+              "body_color": "#000000",
+              "table_header_bg": "#f8d7d7",
+              "table_header_fg": "#808080",
+              "table_border_color": "#000000",
+              "title_size": 16.1,
+              "heading_size": 13.1,
+              "body_size": 10.5,
+              "page_width": 612,
+              "page_height": 792
+            },
+            "brand_color": "#808080",
+            "tone_applied": "Concise",
+            "user_instruction": "redesign it shortly",
+            "audience_applied": "general public",
+            "design_mode": "preserve_format",
+            "tone_safety_warning": null,
+            "model_used": "us.amazon.nova-lite-v1:0",
+            "plain_text": "Final Demand Notice for Overdue Loan Repayment\nDear Mr. Kumar, We regret to inform you that your business loan has not been repaid as per the agreed terms.\n\nPLEASE SUBMIT BY WITHIN 7 DAYS OF THIS NOTICE\n\nAccount Details\nRecovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com\n\nConsequences of Non-Payment\nFailure to settle the due amount within the stipulated timeframe will result in severe repercussions, including reporting your default to credit bureaus, adding further penalties and interest, initiating legal proceedings, and enforcing rights over any collateral or guarantees.\n• Report your default to all credit bureaus, severely damaging your credit score for years.\n• Add further penalties, interest, and recovery charges to your balance.\n• Initiate legal proceedings and recover the amount, along with all legal costs, from you.\n• Enforce our rights over any collateral or guarantees securing this loan.\n\nIf you fail to do so, we will:\n(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to your balance; (cid : [REDACTED_PIN_CVV]) Initiate legal proceedings and recover the amount, along with all legal costs, from you; (cid : [REDACTED_PIN_CVV]) Enforce our rights over any collateral or guarantees securing this loan. Do not mistake our patience for weakness. This matter is now beyond reminders. Your credibility as a borrower is at stake, and the consequences of continued default will be entirely your own doing. Pay immediately via the bank's payment portal or at your nearest branch. Do not contact us again without payment.\nRegards, Suresh Menon Recovery Manager ABC Commercial Bank Ltd.\n\nThank you for your cooperation\nABC Commercial Bank Ltd\nRecovery & Collections Department\nABC Commercial Bank Ltd."
+          },
+          "fact_verification": {
+            "overall_status": "Requires manual review",
+            "total_facts": 2,
+            "verified_count": 0,
+            "discrepancy_count": 2,
+            "missing_count": 2,
+            "facts": [
+              {
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "date_deadline",
+                "extracted_value": "19 November 2026",
+                "normalized_value": "19november2026",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_text": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "extraction_confidence": "Verified",
+                "verification_status": "Missing",
+                "output_value": null
+              },
+              {
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "date_deadline",
+                "extracted_value": "15 September 2026",
+                "normalized_value": "15september2026",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_text": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "extraction_confidence": "Verified",
+                "verification_status": "Missing",
+                "output_value": null
+              }
+            ],
+            "issues": [
+              {
+                "issue_id": "ISS-doc-ff648f553b-F001",
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "19 November 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              },
+              {
+                "issue_id": "ISS-doc-ff648f553b-F002",
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "15 September 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              }
+            ],
+            "out_money_count": 0
+          },
+          "comparison": {
+            "changes": [
+              {
+                "change_id": "CHG-001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Document Overview",
+                "output_section": "Redesigned Output",
+                "original_text": "19 November 2026",
+                "revised_text": "Not found in redesigned output",
+                "change_explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "impact_assessment": "May affect financial accuracy or customer obligations.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending",
+                "issue_id": "ISS-doc-ff648f553b-F001"
+              },
+              {
+                "change_id": "CHG-002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "The facts are as follows:",
+                "output_section": "Redesigned Output",
+                "original_text": "15 September 2026",
+                "revised_text": "Not found in redesigned output",
+                "change_explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "impact_assessment": "May affect financial accuracy or customer obligations.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending",
+                "issue_id": "ISS-doc-ff648f553b-F002"
+              },
+              {
+                "change_id": "CHG-003",
+                "category": "Modified content",
+                "severity": "Medium",
+                "highlight_color": "yellow",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "ABC Commercial Bank Ltd.",
+                "revised_text": "Final Demand Notice for Overdue Loan Repayment Dear Mr. Kumar, We regret to inform you that your business loan has not been repaid as per the agreed terms. PLEASE SUBMIT BY WITHIN 7 DAYS OF THIS NOTICE Account Details",
+                "change_explanation": "Passage rewritten for clarity, tone, or audience readability.",
+                "source_evidence": "ABC Commercial Bank Ltd.",
+                "impact_assessment": "Requires reviewer confirmation",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              },
+              {
+                "change_id": "CHG-004",
+                "category": "Modified content",
+                "severity": "Medium",
+                "highlight_color": "yellow",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to repay your business loan on time, and your repeated silence i",
+                "revised_text": "Consequences of Non-Payment Failure to settle the due amount within the stipulated timeframe will result in severe repercussions, including reporting your default to credit bureaus, adding further penalties and interest, initiating legal proceedings, and enforcing rights over any collateral or guarantees. • Report your",
+                "change_explanation": "Passage rewritten for clarity, tone, or audience readability.",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is",
+                "impact_assessment": "Requires reviewer confirmation",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              },
+              {
+                "change_id": "CHG-005",
+                "category": "Added content",
+                "severity": "Low",
+                "highlight_color": "green",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "—",
+                "revised_text": "Thank you for your cooperation ABC Commercial Bank Ltd Recovery & Collections Department ABC Commercial Bank Ltd.",
+                "change_explanation": "New customer-friendly framing or transitional text added during redesign.",
+                "source_evidence": "Added in redesigned version",
+                "impact_assessment": "Cosmetic / readability simplification",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              }
+            ],
+            "counts": {
+              "total_changes": 5,
+              "added": 1,
+              "modified": 2,
+              "removed": 2,
+              "structural": 0,
+              "critical": 0,
+              "high": 0
+            },
+            "highlighted_changes_html": "<div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Final Demand Notice for Overdue Loan Repayment</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Dear Mr. Kumar, We regret to inform you that your business loan has not been repaid as per the agreed terms.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">PLEASE SUBMIT BY WITHIN 7 DAYS OF THIS NOTICE</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Account Details</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">Recovery &amp; Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Consequences of Non-Payment</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Failure to settle the due amount within the stipulated timeframe will result in severe repercussions, including reporting your default to credit bureaus, adding further penalties and interest, initiating legal proceedings, and enforcing rights over any collateral or guarantees.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Report your default to all credit bureaus, severely damaging your credit score for years.</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">• Add further penalties, interest, and recovery charges to your balance.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Initiate legal proceedings and recover the amount, along with all legal costs, from you.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Enforce our rights over any collateral or guarantees securing this loan.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">If you fail to do so, we will:</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">(cid : [REDACTED_PIN_CVV]) Report your default to all credit bureaus, severely damaging your credit score for years; (cid : [REDACTED_PIN_CVV]) Add further penalties, interest, and recovery charges to your balance; (cid : [REDACTED_PIN_CVV]) Initiate legal proceedings and recover the amount, along with all legal costs, from you; (cid : [REDACTED_PIN_CVV]) Enforce our rights over any collateral or guarantees securing this loan. Do not mistake our patience for weakness. This matter is now beyond reminders. Your credibility as a borrower is at stake, and the consequences of continued default will be entirely your own doing. Pay immediately via the bank&#x27;s payment portal or at your nearest branch. Do not contact us again without payment.</div><div class=\"claria-cmp-line claria-cmp-unchanged\">Regards, Suresh Menon Recovery Manager ABC Commercial Bank Ltd.</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Thank you for your cooperation</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">ABC Commercial Bank Ltd</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">Recovery &amp; Collections Department</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">ABC Commercial Bank Ltd.</div><div class=\"claria-cmp-removed-box\"><strong>Removed / Missing Items Requiring Review:</strong><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">19 November 2026</mark></div><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">15 September 2026</mark></div></div>",
+            "actionable_issues": [
+              {
+                "issue_id": "ISS-doc-ff648f553b-F001",
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "19 November 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              },
+              {
+                "issue_id": "ISS-doc-ff648f553b-F002",
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "15 September 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              }
+            ],
+            "correction_prompt": "I identified differences that may affect the accuracy or meaning of your redesigned document. Would you like me to apply the selected corrections and regenerate it?",
+            "coverage": {
+              "status": "Successfully compared",
+              "pages_total": 2,
+              "pages_compared": 2,
+              "checks_performed": [
+                "Content diff",
+                "Financial fact verification",
+                "Mandatory disclosure check",
+                "Structural & semantic comparison"
+              ],
+              "pagination_note": "Best-effort section alignment applied between original and redesigned layouts."
+            }
+          },
+          "downloads": {
+            "clean_pdf": {
+              "filename": "doc-ff648f553b_v1_35025_clean.pdf",
+              "stored_name": "doc-ff648f553b_v1_35025_clean.pdf",
+              "format": "PDF",
+              "size_bytes": 6544,
+              "page_count": 2,
+              "download_url": "/api/document/doc-ff648f553b_v1_35025_clean.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v1_35025_clean.pdf/view",
+              "validated": true
+            },
+            "clean_docx": {
+              "filename": "doc-ff648f553b_v1_35025_clean.docx",
+              "stored_name": "doc-ff648f553b_v1_35025_clean.docx",
+              "format": "DOCX",
+              "size_bytes": 2139,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v1_35025_clean.docx",
+              "view_url": "/api/document/doc-ff648f553b_v1_35025_clean.docx",
+              "validated": true
+            },
+            "highlighted_pdf": {
+              "filename": "doc-ff648f553b_v1_35025_highlighted.pdf",
+              "stored_name": "doc-ff648f553b_v1_35025_highlighted.pdf",
+              "format": "PDF",
+              "size_bytes": 7505,
+              "page_count": 2,
+              "download_url": "/api/document/doc-ff648f553b_v1_35025_highlighted.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v1_35025_highlighted.pdf/view",
+              "validated": true
+            },
+            "highlighted_docx": {
+              "filename": "doc-ff648f553b_v1_35025_highlighted.docx",
+              "stored_name": "doc-ff648f553b_v1_35025_highlighted.docx",
+              "format": "DOCX",
+              "size_bytes": 2352,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v1_35025_highlighted.docx",
+              "view_url": "/api/document/doc-ff648f553b_v1_35025_highlighted.docx",
+              "validated": true
+            },
+            "report_pdf": {
+              "filename": "doc-ff648f553b_v1_35025_comparison_report.pdf",
+              "stored_name": "doc-ff648f553b_v1_35025_comparison_report.pdf",
+              "format": "PDF",
+              "size_bytes": 8756,
+              "page_count": 1,
+              "download_url": "/api/document/doc-ff648f553b_v1_35025_comparison_report.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v1_35025_comparison_report.pdf/view",
+              "validated": true
+            },
+            "report_docx": {
+              "filename": "doc-ff648f553b_v1_35025_comparison_report.docx",
+              "stored_name": "doc-ff648f553b_v1_35025_comparison_report.docx",
+              "format": "DOCX",
+              "size_bytes": 2138,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v1_35025_comparison_report.docx",
+              "view_url": "/api/document/doc-ff648f553b_v1_35025_comparison_report.docx",
+              "validated": true
+            }
+          },
+          "quality_validation": {
+            "clean_pdf": {
+              "valid": true,
+              "size_bytes": 6544,
+              "page_count": 2,
+              "format": "PDF"
+            },
+            "clean_docx": {
+              "valid": true,
+              "size_bytes": 2139,
+              "format": "DOCX"
+            },
+            "highlighted_pdf": {
+              "valid": true,
+              "size_bytes": 7505,
+              "page_count": 2,
+              "format": "PDF"
+            },
+            "highlighted_docx": {
+              "valid": true,
+              "size_bytes": 2352,
+              "format": "DOCX"
+            },
+            "report_pdf": {
+              "valid": true,
+              "size_bytes": 8756,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "report_docx": {
+              "valid": true,
+              "size_bytes": 2138,
+              "format": "DOCX"
+            }
+          },
+          "status": "Issues detected"
+        },
+        {
+          "version_number": 2,
+          "version_label": "Version 2 — Tone/Redesign (Simplify this communication into plain, )",
+          "parent_version": 1,
+          "created_at": "2026-11-25T16:24:08+00:00",
+          "instruction": "Simplify this communication into plain, easy-to-understand everyday English while keeping all facts and legal obligations.",
+          "model_governance": {
+            "model_id": "us.amazon.nova-lite-v1:0",
+            "prompt_version": "claria-enterprise-v2.0",
+            "processed_at": "2026-11-25T16:24:08+00:00",
+            "document_id": "doc-ff648f553b",
+            "version_number": 2,
+            "validation_status": "Requires manual review"
+          },
+          "redesigned_document": {
+            "title": "Final Request for Repayment of Overdue Loan No. LN-2026-004581",
+            "email_headers": {
+              "from": "recovery@abccommercialbank.com",
+              "to": "rajeshkumar@example.com",
+              "subject": "Final Request for Repayment of Overdue Loan No. LN-2026-004581"
+            },
+            "deadline_label": "",
+            "deadline": "within 7 days of the date of this notice",
+            "introduction": "Dear Mr. Kumar, We hope this message finds you well. We understand that circumstances can change, and we are here to help you get back on track with your loan repayment.",
+            "details_heading": "Loan Details",
+            "account_details": [
+              {
+                "Loan Account No.": "LN-2026-004581",
+                "Original Due Date": "15 September 2026",
+                "Days Overdue": "65 days",
+                "Outstanding Principal": "Rs. 4,50,000",
+                "Penalty and Interest Accrued": "Rs. 38,250",
+                "Total Amount Due Now": "Rs. 4,88,250"
+              }
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "page": 1,
+                "paragraphs": [],
+                "bullets": [],
+                "table": [
+                  [
+                    "Recovery & Collections Department",
+                    "45 Anna Salai, Chennai - 600002",
+                    "recovery@abccommercialbank.com"
+                  ]
+                ]
+              },
+              {
+                "heading": "The facts are as follows:",
+                "page": 1,
+                "paragraphs": [
+                  "You borrowed this money, accepted the terms, and are obligated to repay it. We are here to assist you in resolving this matter promptly."
+                ],
+                "bullets": [],
+                "table": []
+              },
+              {
+                "heading": "If you fail to do so, we will:",
+                "page": 1,
+                "paragraphs": [],
+                "bullets": [
+                  "Report your default to all credit bureaus, which may severely impact your credit score for years.",
+                  "Add further penalties, interest, and recovery charges to your balance.",
+                  "Initiate legal proceedings to recover the amount, along with all legal costs, from you.",
+                  "Enforce our rights over any collateral or guarantees securing this loan."
+                ],
+                "table": []
+              }
+            ],
+            "obligations_heading": "",
+            "mandatory_disclosures": [
+              "Please pay the full amount of Rs. 4,88,250 within 7 days of the date of this notice. You can make the payment via the bank's payment portal or at your nearest branch."
+            ],
+            "closing_heading": "",
+            "closing_text": "",
+            "sign_off_division": "Recovery & Collections Department",
+            "sign_off_institution": "ABC Commercial Bank Ltd.",
+            "footer_note": "",
+            "design_notes": "The tone has been softened to be more empathetic and reassuring while preserving all facts, legal obligations, and deadlines.",
+            "page_footer_left": "ABC Commercial Bank Ltd",
+            "salutation": "Dear Valued Customer,",
+            "closing": "ABC Commercial Bank Ltd",
+            "total_pages": 2,
+            "target_word_count": 314,
+            "source_design": {
+              "font_family": "sans",
+              "font_name": "Helvetica",
+              "css_font": "'Helvetica', 'Segoe UI', Arial, Helvetica, sans-serif",
+              "primary_color": "#808080",
+              "accent_bg": "#f8d7d7",
+              "body_color": "#000000",
+              "table_header_bg": "#f8d7d7",
+              "table_header_fg": "#808080",
+              "table_border_color": "#000000",
+              "title_size": 16.1,
+              "heading_size": 13.1,
+              "body_size": 10.5,
+              "page_width": 612,
+              "page_height": 792
+            },
+            "brand_color": "#808080",
+            "tone_applied": "Empathetic & Simple",
+            "user_instruction": "Simplify this communication into plain, easy-to-understand everyday English while keeping all facts and legal obligations.",
+            "audience_applied": "general public",
+            "design_mode": "preserve_format",
+            "tone_safety_warning": null,
+            "model_used": "us.amazon.nova-lite-v1:0",
+            "plain_text": "Final Request for Repayment of Overdue Loan No. LN-2026-004581\nDear Mr. Kumar, We hope this message finds you well. We understand that circumstances can change, and we are here to help you get back on track with your loan repayment.\n\nPLEASE SUBMIT BY WITHIN 7 DAYS OF THE DATE OF THIS NOTICE\n\nLoan Details\nRecovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com\n\nThe facts are as follows:\nYou borrowed this money, accepted the terms, and are obligated to repay it. We are here to assist you in resolving this matter promptly.\n\nIf you fail to do so, we will:\n• Report your default to all credit bureaus, which may severely impact your credit score for years.\n• Add further penalties, interest, and recovery charges to your balance.\n• Initiate legal proceedings to recover the amount, along with all legal costs, from you.\n• Enforce our rights over any collateral or guarantees securing this loan.\n\nImportant information about your loan obligations\nPlease pay the full amount of Rs. 4,88,250 within 7 days of the date of this notice. You can make the payment via the bank's payment portal or at your nearest branch.\n\nThank you for your cooperation\nABC Commercial Bank Ltd\nRecovery & Collections Department\nABC Commercial Bank Ltd."
+          },
+          "fact_verification": {
+            "overall_status": "Requires manual review",
+            "total_facts": 2,
+            "verified_count": 0,
+            "discrepancy_count": 2,
+            "missing_count": 2,
+            "facts": [
+              {
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "date_deadline",
+                "extracted_value": "19 November 2026",
+                "normalized_value": "19november2026",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_text": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "extraction_confidence": "Verified",
+                "verification_status": "Missing",
+                "output_value": null
+              },
+              {
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "date_deadline",
+                "extracted_value": "15 September 2026",
+                "normalized_value": "15september2026",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_text": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "extraction_confidence": "Verified",
+                "verification_status": "Missing",
+                "output_value": null
+              }
+            ],
+            "issues": [
+              {
+                "issue_id": "ISS-doc-ff648f553b-F001",
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "19 November 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              },
+              {
+                "issue_id": "ISS-doc-ff648f553b-F002",
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "15 September 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              }
+            ],
+            "out_money_count": 0
+          },
+          "comparison": {
+            "changes": [
+              {
+                "change_id": "CHG-001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Document Overview",
+                "output_section": "Redesigned Output",
+                "original_text": "19 November 2026",
+                "revised_text": "Not found in redesigned output",
+                "change_explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "impact_assessment": "May affect financial accuracy or customer obligations.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending",
+                "issue_id": "ISS-doc-ff648f553b-F001"
+              },
+              {
+                "change_id": "CHG-002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "The facts are as follows:",
+                "output_section": "Redesigned Output",
+                "original_text": "15 September 2026",
+                "revised_text": "Not found in redesigned output",
+                "change_explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "impact_assessment": "May affect financial accuracy or customer obligations.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending",
+                "issue_id": "ISS-doc-ff648f553b-F002"
+              },
+              {
+                "change_id": "CHG-003",
+                "category": "Added content",
+                "severity": "Low",
+                "highlight_color": "green",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "—",
+                "revised_text": "Final Request for Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, We hope this message finds you well. We understand that circumstances can change, and we are here to help you get back on track with your loan repayment. PLEASE SUBMIT BY WITHIN 7 DAYS OF THE DATE OF THIS NOTICE Loan Details Recovery & Colle",
+                "change_explanation": "New customer-friendly framing or transitional text added during redesign.",
+                "source_evidence": "Added in redesigned version",
+                "impact_assessment": "Cosmetic / readability simplification",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              },
+              {
+                "change_id": "CHG-004",
+                "category": "Removed content",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "Recovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This i",
+                "revised_text": "—",
+                "change_explanation": "Source passage omitted or consolidated in redesigned output; verify nothing mandatory was dropped.",
+                "source_evidence": "Recovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 ",
+                "impact_assessment": "Requires reviewer confirmation",
+                "recommended_correction": "Restore omitted text if mandatory.",
+                "review_status": "pending"
+              }
+            ],
+            "counts": {
+              "total_changes": 4,
+              "added": 1,
+              "modified": 0,
+              "removed": 3,
+              "structural": 0,
+              "critical": 0,
+              "high": 0
+            },
+            "highlighted_changes_html": "<div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Final Request for Repayment of Overdue Loan No. LN-2026-004581</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Dear Mr. Kumar, We hope this message finds you well. We understand that circumstances can change, and we are here to help you get back on track with your loan repayment.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">PLEASE SUBMIT BY WITHIN 7 DAYS OF THE DATE OF THIS NOTICE</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Loan Details</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">Recovery &amp; Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">The facts are as follows:</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">You borrowed this money, accepted the terms, and are obligated to repay it. We are here to assist you in resolving this matter promptly.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">If you fail to do so, we will:</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Report your default to all credit bureaus, which may severely impact your credit score for years.</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">• Add further penalties, interest, and recovery charges to your balance.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Initiate legal proceedings to recover the amount, along with all legal costs, from you.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Enforce our rights over any collateral or guarantees securing this loan.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Important information about your loan obligations</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Please pay the full amount of Rs. 4,88,250 within 7 days of the date of this notice. You can make the payment via the bank&#x27;s payment portal or at your nearest branch.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Thank you for your cooperation</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">ABC Commercial Bank Ltd</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">Recovery &amp; Collections Department</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">ABC Commercial Bank Ltd.</div><div class=\"claria-cmp-removed-box\"><strong>Removed / Missing Items Requiring Review:</strong><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">19 November 2026</mark></div><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">15 September 2026</mark></div><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">Recovery &amp; Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This i</mark></div></div>",
+            "actionable_issues": [
+              {
+                "issue_id": "ISS-doc-ff648f553b-F001",
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "19 November 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              },
+              {
+                "issue_id": "ISS-doc-ff648f553b-F002",
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "15 September 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              }
+            ],
+            "correction_prompt": "I identified differences that may affect the accuracy or meaning of your redesigned document. Would you like me to apply the selected corrections and regenerate it?",
+            "coverage": {
+              "status": "Successfully compared",
+              "pages_total": 2,
+              "pages_compared": 2,
+              "checks_performed": [
+                "Content diff",
+                "Financial fact verification",
+                "Mandatory disclosure check",
+                "Structural & semantic comparison"
+              ],
+              "pagination_note": "Best-effort section alignment applied between original and redesigned layouts."
+            }
+          },
+          "downloads": {
+            "clean_pdf": {
+              "filename": "doc-ff648f553b_v2_711eb_clean.pdf",
+              "stored_name": "doc-ff648f553b_v2_711eb_clean.pdf",
+              "format": "PDF",
+              "size_bytes": 4800,
+              "page_count": 1,
+              "download_url": "/api/document/doc-ff648f553b_v2_711eb_clean.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v2_711eb_clean.pdf/view",
+              "validated": true
+            },
+            "clean_docx": {
+              "filename": "doc-ff648f553b_v2_711eb_clean.docx",
+              "stored_name": "doc-ff648f553b_v2_711eb_clean.docx",
+              "format": "DOCX",
+              "size_bytes": 1968,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v2_711eb_clean.docx",
+              "view_url": "/api/document/doc-ff648f553b_v2_711eb_clean.docx",
+              "validated": true
+            },
+            "highlighted_pdf": {
+              "filename": "doc-ff648f553b_v2_711eb_highlighted.pdf",
+              "stored_name": "doc-ff648f553b_v2_711eb_highlighted.pdf",
+              "format": "PDF",
+              "size_bytes": 6836,
+              "page_count": 2,
+              "download_url": "/api/document/doc-ff648f553b_v2_711eb_highlighted.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v2_711eb_highlighted.pdf/view",
+              "validated": true
+            },
+            "highlighted_docx": {
+              "filename": "doc-ff648f553b_v2_711eb_highlighted.docx",
+              "stored_name": "doc-ff648f553b_v2_711eb_highlighted.docx",
+              "format": "DOCX",
+              "size_bytes": 2288,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v2_711eb_highlighted.docx",
+              "view_url": "/api/document/doc-ff648f553b_v2_711eb_highlighted.docx",
+              "validated": true
+            },
+            "report_pdf": {
+              "filename": "doc-ff648f553b_v2_711eb_comparison_report.pdf",
+              "stored_name": "doc-ff648f553b_v2_711eb_comparison_report.pdf",
+              "format": "PDF",
+              "size_bytes": 7992,
+              "page_count": 1,
+              "download_url": "/api/document/doc-ff648f553b_v2_711eb_comparison_report.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v2_711eb_comparison_report.pdf/view",
+              "validated": true
+            },
+            "report_docx": {
+              "filename": "doc-ff648f553b_v2_711eb_comparison_report.docx",
+              "stored_name": "doc-ff648f553b_v2_711eb_comparison_report.docx",
+              "format": "DOCX",
+              "size_bytes": 2043,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v2_711eb_comparison_report.docx",
+              "view_url": "/api/document/doc-ff648f553b_v2_711eb_comparison_report.docx",
+              "validated": true
+            }
+          },
+          "quality_validation": {
+            "clean_pdf": {
+              "valid": true,
+              "size_bytes": 4800,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "clean_docx": {
+              "valid": true,
+              "size_bytes": 1968,
+              "format": "DOCX"
+            },
+            "highlighted_pdf": {
+              "valid": true,
+              "size_bytes": 6836,
+              "page_count": 2,
+              "format": "PDF"
+            },
+            "highlighted_docx": {
+              "valid": true,
+              "size_bytes": 2288,
+              "format": "DOCX"
+            },
+            "report_pdf": {
+              "valid": true,
+              "size_bytes": 7992,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "report_docx": {
+              "valid": true,
+              "size_bytes": 2043,
+              "format": "DOCX"
+            }
+          },
+          "status": "Issues detected"
+        },
+        {
+          "version_number": 3,
+          "version_label": "Version 3 — Tone/Redesign (Use a formal executive banking tone whil)",
+          "parent_version": 2,
+          "created_at": "2026-11-25T16:24:27+00:00",
+          "instruction": "Use a formal executive banking tone while keeping the clear checklist and deadline structure.",
+          "model_governance": {
+            "model_id": "us.amazon.nova-lite-v1:0",
+            "prompt_version": "claria-enterprise-v2.0",
+            "processed_at": "2026-11-25T16:24:27+00:00",
+            "document_id": "doc-ff648f553b",
+            "version_number": 3,
+            "validation_status": "Requires manual review"
+          },
+          "redesigned_document": {
+            "title": "Final Notice for Immediate Repayment of Overdue Loan",
+            "email_headers": {
+              "from": "Recovery & Collections Department, ABC Commercial Bank Ltd.",
+              "to": "Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045",
+              "subject": "Final Demand: Immediate Repayment of Overdue Loan No. LN-2026-004581"
+            },
+            "deadline_label": "",
+            "deadline": "within 7 days of the date of this notice",
+            "introduction": "Dear Mr. Kumar, We hope this message finds you well. We are writing to bring to your attention an overdue loan that requires immediate attention.",
+            "details_heading": "Loan Details",
+            "account_details": [
+              {
+                "Loan Account No.": "LN-2026-004581",
+                "Original Due Date": "15 September 2026",
+                "Days Overdue": "65 days",
+                "Outstanding Principal": "Rs. 4,50,000",
+                "Penalty and Interest Accrued": "Rs. 38,250",
+                "Total Amount Due Now": "Rs. 4,88,250"
+              }
+            ],
+            "sections": [
+              {
+                "heading": "",
+                "page": 1,
+                "paragraphs": [],
+                "bullets": [],
+                "table": [
+                  [
+                    "Recovery & Collections Department",
+                    "45 Anna Salai, Chennai - 600002",
+                    "recovery@abccommercialbank.com"
+                  ]
+                ]
+              },
+              {
+                "heading": "The facts are as follows:",
+                "page": 1,
+                "paragraphs": [
+                  "You borrowed this money, accepted the terms, and are obligated to repay it. We kindly request your prompt attention to this matter."
+                ],
+                "bullets": [],
+                "table": []
+              },
+              {
+                "heading": "If you fail to do so, we will:",
+                "page": 1,
+                "paragraphs": [],
+                "bullets": [
+                  "Report your default to all credit bureaus, which may severely impact your credit score for years.",
+                  "Add further penalties, interest, and recovery charges to your balance.",
+                  "Initiate legal proceedings and recover the amount, along with all legal costs, from you.",
+                  "Enforce our rights over any collateral or guarantees securing this loan."
+                ],
+                "table": []
+              }
+            ],
+            "obligations_heading": "",
+            "mandatory_disclosures": [],
+            "closing_heading": "",
+            "closing_text": "",
+            "sign_off_division": "Recovery & Collections Department",
+            "sign_off_institution": "ABC Commercial Bank Ltd.",
+            "footer_note": "",
+            "design_notes": "The requested tone was applied by simplifying complex banking and legal jargon into plain English while maintaining all exact dates, figures, and mandatory legal disclosures.",
+            "page_footer_left": "ABC Commercial Bank Ltd",
+            "salutation": "Dear Valued Customer,",
+            "closing": "ABC Commercial Bank Ltd",
+            "total_pages": 2,
+            "target_word_count": 314,
+            "source_design": {
+              "font_family": "sans",
+              "font_name": "Helvetica",
+              "css_font": "'Helvetica', 'Segoe UI', Arial, Helvetica, sans-serif",
+              "primary_color": "#808080",
+              "accent_bg": "#f8d7d7",
+              "body_color": "#000000",
+              "table_header_bg": "#f8d7d7",
+              "table_header_fg": "#808080",
+              "table_border_color": "#000000",
+              "title_size": 16.1,
+              "heading_size": 13.1,
+              "body_size": 10.5,
+              "page_width": 612,
+              "page_height": 792
+            },
+            "brand_color": "#808080",
+            "tone_applied": "Simple & Formal",
+            "user_instruction": "Use a formal executive banking tone while keeping the clear checklist and deadline structure.",
+            "audience_applied": "general public",
+            "design_mode": "preserve_format",
+            "tone_safety_warning": null,
+            "model_used": "us.amazon.nova-lite-v1:0",
+            "plain_text": "Final Notice for Immediate Repayment of Overdue Loan\nDear Mr. Kumar, We hope this message finds you well. We are writing to bring to your attention an overdue loan that requires immediate attention.\n\nPLEASE SUBMIT BY WITHIN 7 DAYS OF THE DATE OF THIS NOTICE\n\nLoan Details\nRecovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com\n\nThe facts are as follows:\nYou borrowed this money, accepted the terms, and are obligated to repay it. We kindly request your prompt attention to this matter.\n\nIf you fail to do so, we will:\n• Report your default to all credit bureaus, which may severely impact your credit score for years.\n• Add further penalties, interest, and recovery charges to your balance.\n• Initiate legal proceedings and recover the amount, along with all legal costs, from you.\n• Enforce our rights over any collateral or guarantees securing this loan.\n\nThank you for your cooperation\nABC Commercial Bank Ltd\nRecovery & Collections Department\nABC Commercial Bank Ltd."
+          },
+          "fact_verification": {
+            "overall_status": "Requires manual review",
+            "total_facts": 2,
+            "verified_count": 0,
+            "discrepancy_count": 2,
+            "missing_count": 2,
+            "facts": [
+              {
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "date_deadline",
+                "extracted_value": "19 November 2026",
+                "normalized_value": "19november2026",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_text": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "extraction_confidence": "Verified",
+                "verification_status": "Missing",
+                "output_value": null
+              },
+              {
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "date_deadline",
+                "extracted_value": "15 September 2026",
+                "normalized_value": "15september2026",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_text": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "extraction_confidence": "Verified",
+                "verification_status": "Missing",
+                "output_value": null
+              }
+            ],
+            "issues": [
+              {
+                "issue_id": "ISS-doc-ff648f553b-F001",
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "19 November 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              },
+              {
+                "issue_id": "ISS-doc-ff648f553b-F002",
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "15 September 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              }
+            ],
+            "out_money_count": 0
+          },
+          "comparison": {
+            "changes": [
+              {
+                "change_id": "CHG-001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Document Overview",
+                "output_section": "Redesigned Output",
+                "original_text": "19 November 2026",
+                "revised_text": "Not found in redesigned output",
+                "change_explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "impact_assessment": "May affect financial accuracy or customer obligations.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending",
+                "issue_id": "ISS-doc-ff648f553b-F001"
+              },
+              {
+                "change_id": "CHG-002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "The facts are as follows:",
+                "output_section": "Redesigned Output",
+                "original_text": "15 September 2026",
+                "revised_text": "Not found in redesigned output",
+                "change_explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "impact_assessment": "May affect financial accuracy or customer obligations.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending",
+                "issue_id": "ISS-doc-ff648f553b-F002"
+              },
+              {
+                "change_id": "CHG-003",
+                "category": "Added content",
+                "severity": "Low",
+                "highlight_color": "green",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "—",
+                "revised_text": "Final Notice for Immediate Repayment of Overdue Loan Dear Mr. Kumar, We hope this message finds you well. We are writing to bring to your attention an overdue loan that requires immediate attention. PLEASE SUBMIT BY WITHIN 7 DAYS OF THE DATE OF THIS NOTICE Loan Details Recovery & Collections Department | 45 Anna Salai,",
+                "change_explanation": "New customer-friendly framing or transitional text added during redesign.",
+                "source_evidence": "Added in redesigned version",
+                "impact_assessment": "Cosmetic / readability simplification",
+                "recommended_correction": "No correction needed if meaning is preserved.",
+                "review_status": "pending"
+              },
+              {
+                "change_id": "CHG-004",
+                "category": "Removed content",
+                "severity": "Medium",
+                "highlight_color": "red",
+                "original_page": 1,
+                "output_page": 1,
+                "original_section": "Original Body",
+                "output_section": "Redesigned Body",
+                "original_text": "Recovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This i",
+                "revised_text": "—",
+                "change_explanation": "Source passage omitted or consolidated in redesigned output; verify nothing mandatory was dropped.",
+                "source_evidence": "Recovery & Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 ",
+                "impact_assessment": "Requires reviewer confirmation",
+                "recommended_correction": "Restore omitted text if mandatory.",
+                "review_status": "pending"
+              }
+            ],
+            "counts": {
+              "total_changes": 4,
+              "added": 1,
+              "modified": 0,
+              "removed": 3,
+              "structural": 0,
+              "critical": 0,
+              "high": 0
+            },
+            "highlighted_changes_html": "<div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Final Notice for Immediate Repayment of Overdue Loan</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Dear Mr. Kumar, We hope this message finds you well. We are writing to bring to your attention an overdue loan that requires immediate attention.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">PLEASE SUBMIT BY WITHIN 7 DAYS OF THE DATE OF THIS NOTICE</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Loan Details</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">Recovery &amp; Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com</div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">The facts are as follows:</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">You borrowed this money, accepted the terms, and are obligated to repay it. We kindly request your prompt attention to this matter.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">If you fail to do so, we will:</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Report your default to all credit bureaus, which may severely impact your credit score for years.</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">• Add further penalties, interest, and recovery charges to your balance.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Initiate legal proceedings and recover the amount, along with all legal costs, from you.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">• Enforce our rights over any collateral or guarantees securing this loan.</mark></div><div class=\"claria-cmp-line claria-cmp-added\" title=\"Added in redesign\"><mark class=\"cmp-green\">Thank you for your cooperation</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">ABC Commercial Bank Ltd</mark></div><div class=\"claria-cmp-line claria-cmp-modified\" title=\"Modified for clarity\"><mark class=\"cmp-yellow\">Recovery &amp; Collections Department</mark></div><div class=\"claria-cmp-line claria-cmp-unchanged\">ABC Commercial Bank Ltd.</div><div class=\"claria-cmp-removed-box\"><strong>Removed / Missing Items Requiring Review:</strong><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">19 November 2026</mark></div><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">15 September 2026</mark></div><div class=\"claria-cmp-removed\"><mark class=\"cmp-red\">Recovery &amp; Collections Department | 45 Anna Salai, Chennai - 600002 | recovery@abccommercialbank.com Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This i</mark></div></div>",
+            "actionable_issues": [
+              {
+                "issue_id": "ISS-doc-ff648f553b-F001",
+                "fact_id": "doc-ff648f553b-F001",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "19 November 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "Document Overview",
+                "source_evidence": "Date: 19 November 2026 Ref No.: ABC/REC/2026/118347 To: Mr. Rajesh Kumar, 12 Gandhi Street, Tambaram, Chennai - 600045 Subject: FINAL DEMAND: Immediate Repayment of Overdue Loan No. LN-2026-004581 Dear Mr. Kumar, This is your final notice. You have failed to r",
+                "explanation": "Source date deadline '19 November 2026' from Page 1 (Document Overview) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '19 November 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              },
+              {
+                "issue_id": "ISS-doc-ff648f553b-F002",
+                "fact_id": "doc-ff648f553b-F002",
+                "category": "Missing Source Fact",
+                "severity": "Medium",
+                "original_value": "15 September 2026",
+                "output_value": "Not found in redesigned output",
+                "source_page": 1,
+                "source_section": "The facts are as follows:",
+                "source_evidence": "Loan Account No. LN-2026-004581 Original Due Date 15 September 2026 Days Overdue 65 days Outstanding Principal Rs. 4,50,000 Penalty and Interest Accrued Rs. 38,250 TOTAL AMOUNT DUE NOW Rs. 4,88,250 You borrowed this money, you accepted the terms, and you are o",
+                "explanation": "Source date deadline '15 September 2026' from Page 1 (The facts are as follows:) is missing from the redesigned communication.",
+                "recommended_correction": "Restore '15 September 2026' into the corresponding section of the redesigned document.",
+                "review_status": "pending"
+              }
+            ],
+            "correction_prompt": "I identified differences that may affect the accuracy or meaning of your redesigned document. Would you like me to apply the selected corrections and regenerate it?",
+            "coverage": {
+              "status": "Successfully compared",
+              "pages_total": 2,
+              "pages_compared": 2,
+              "checks_performed": [
+                "Content diff",
+                "Financial fact verification",
+                "Mandatory disclosure check",
+                "Structural & semantic comparison"
+              ],
+              "pagination_note": "Best-effort section alignment applied between original and redesigned layouts."
+            }
+          },
+          "downloads": {
+            "clean_pdf": {
+              "filename": "doc-ff648f553b_v3_13bf0_clean.pdf",
+              "stored_name": "doc-ff648f553b_v3_13bf0_clean.pdf",
+              "format": "PDF",
+              "size_bytes": 4504,
+              "page_count": 1,
+              "download_url": "/api/document/doc-ff648f553b_v3_13bf0_clean.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v3_13bf0_clean.pdf/view",
+              "validated": true
+            },
+            "clean_docx": {
+              "filename": "doc-ff648f553b_v3_13bf0_clean.docx",
+              "stored_name": "doc-ff648f553b_v3_13bf0_clean.docx",
+              "format": "DOCX",
+              "size_bytes": 1886,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v3_13bf0_clean.docx",
+              "view_url": "/api/document/doc-ff648f553b_v3_13bf0_clean.docx",
+              "validated": true
+            },
+            "highlighted_pdf": {
+              "filename": "doc-ff648f553b_v3_13bf0_highlighted.pdf",
+              "stored_name": "doc-ff648f553b_v3_13bf0_highlighted.pdf",
+              "format": "PDF",
+              "size_bytes": 6538,
+              "page_count": 2,
+              "download_url": "/api/document/doc-ff648f553b_v3_13bf0_highlighted.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v3_13bf0_highlighted.pdf/view",
+              "validated": true
+            },
+            "highlighted_docx": {
+              "filename": "doc-ff648f553b_v3_13bf0_highlighted.docx",
+              "stored_name": "doc-ff648f553b_v3_13bf0_highlighted.docx",
+              "format": "DOCX",
+              "size_bytes": 2170,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v3_13bf0_highlighted.docx",
+              "view_url": "/api/document/doc-ff648f553b_v3_13bf0_highlighted.docx",
+              "validated": true
+            },
+            "report_pdf": {
+              "filename": "doc-ff648f553b_v3_13bf0_comparison_report.pdf",
+              "stored_name": "doc-ff648f553b_v3_13bf0_comparison_report.pdf",
+              "format": "PDF",
+              "size_bytes": 7968,
+              "page_count": 1,
+              "download_url": "/api/document/doc-ff648f553b_v3_13bf0_comparison_report.pdf",
+              "view_url": "/api/document/doc-ff648f553b_v3_13bf0_comparison_report.pdf/view",
+              "validated": true
+            },
+            "report_docx": {
+              "filename": "doc-ff648f553b_v3_13bf0_comparison_report.docx",
+              "stored_name": "doc-ff648f553b_v3_13bf0_comparison_report.docx",
+              "format": "DOCX",
+              "size_bytes": 2041,
+              "page_count": null,
+              "download_url": "/api/document/doc-ff648f553b_v3_13bf0_comparison_report.docx",
+              "view_url": "/api/document/doc-ff648f553b_v3_13bf0_comparison_report.docx",
+              "validated": true
+            }
+          },
+          "quality_validation": {
+            "clean_pdf": {
+              "valid": true,
+              "size_bytes": 4504,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "clean_docx": {
+              "valid": true,
+              "size_bytes": 1886,
+              "format": "DOCX"
+            },
+            "highlighted_pdf": {
+              "valid": true,
+              "size_bytes": 6538,
+              "page_count": 2,
+              "format": "PDF"
+            },
+            "highlighted_docx": {
+              "valid": true,
+              "size_bytes": 2170,
+              "format": "DOCX"
+            },
+            "report_pdf": {
+              "valid": true,
+              "size_bytes": 7968,
+              "page_count": 1,
+              "format": "PDF"
+            },
+            "report_docx": {
+              "valid": true,
+              "size_bytes": 2041,
+              "format": "DOCX"
+            }
+          },
+          "status": "Issues detected"
+        }
+      ],
+      "audit_trail": [
+        {
+          "event_id": "AUD-67D8B391",
+          "timestamp": "2026-11-25T16:24:27+00:00",
+          "document_id": "doc-ff648f553b",
+          "version_number": 3,
+          "action": "Generated Version 3 — Tone/Redesign (Use a formal executive banking tone whil)",
+          "actor": "Document Creator",
+          "role": "Document Creator",
+          "details": "Fact check: Requires manual review; Changes: 4"
+        },
+        {
+          "event_id": "AUD-D00020D5",
+          "timestamp": "2026-11-25T16:24:08+00:00",
+          "document_id": "doc-ff648f553b",
+          "version_number": 2,
+          "action": "Generated Version 2 — Tone/Redesign (Simplify this communication into plain, )",
+          "actor": "Document Creator",
+          "role": "Document Creator",
+          "details": "Fact check: Requires manual review; Changes: 4"
+        },
+        {
+          "event_id": "AUD-4B56D9FA",
+          "timestamp": "2026-11-25T16:23:52+00:00",
+          "document_id": "doc-ff648f553b",
+          "version_number": 1,
+          "action": "Generated Version 1 — Tone/Redesign (redesign it shortly)",
+          "actor": "Document Creator",
+          "role": "Document Creator",
+          "details": "Fact check: Requires manual review; Changes: 5"
+        }
+      ],
+      "status": "Issues detected",
+      "approval_records": []
     }
   },
   "audit_log": [
+    {
+      "event_id": "AUD-67D8B391",
+      "timestamp": "2026-11-25T16:24:27+00:00",
+      "document_id": "doc-ff648f553b",
+      "version_number": 3,
+      "action": "Generated Version 3 — Tone/Redesign (Use a formal executive banking tone whil)",
+      "actor": "Document Creator",
+      "role": "Document Creator",
+      "details": "Fact check: Requires manual review; Changes: 4"
+    },
+    {
+      "event_id": "AUD-D00020D5",
+      "timestamp": "2026-11-25T16:24:08+00:00",
+      "document_id": "doc-ff648f553b",
+      "version_number": 2,
+      "action": "Generated Version 2 — Tone/Redesign (Simplify this communication into plain, )",
+      "actor": "Document Creator",
+      "role": "Document Creator",
+      "details": "Fact check: Requires manual review; Changes: 4"
+    },
+    {
+      "event_id": "AUD-4B56D9FA",
+      "timestamp": "2026-11-25T16:23:52+00:00",
+      "document_id": "doc-ff648f553b",
+      "version_number": 1,
+      "action": "Generated Version 1 — Tone/Redesign (redesign it shortly)",
+      "actor": "Document Creator",
+      "role": "Document Creator",
+      "details": "Fact check: Requires manual review; Changes: 5"
+    },
     {
       "event_id": "AUD-705B9A4E",
       "timestamp": "2026-11-18T16:04:21+00:00",

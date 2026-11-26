@@ -327,17 +327,28 @@ export default function App() {
   }
 
   const deleteSession = (id) => {
+    const idx = sessionsRef.current.findIndex(s => s.id === id)
     const next = sessionsRef.current.filter(s => s.id !== id)
     sessionsRef.current = next
     saveSessions(next)
     setSessions(next)
 
     if (id === currentSessionId) {
-      setCurrentSessionId(null)
-      setMessages([])
-      setView('chat')
-      setDrawerOpen(false)
-      setEditingTitle(false)
+      if (next.length > 0) {
+        const nextSess = next[idx >= 0 && idx < next.length ? idx : next.length - 1]
+        sessionJustChangedRef.current = true
+        setCurrentSessionId(nextSess.id)
+        setMessages(nextSess.messages || [])
+        setView('chat')
+        setDrawerOpen(false)
+        setEditingTitle(false)
+      } else {
+        setCurrentSessionId(null)
+        setMessages([])
+        setView('chat')
+        setDrawerOpen(false)
+        setEditingTitle(false)
+      }
     }
   }
 
@@ -728,9 +739,9 @@ export default function App() {
 
               {/* Messages feed: Auto-scrolls to the TOP of the AI card! */}
               <div className="messages" aria-live="polite" ref={messagesContainerRef}>
-                {messages.length === 0 && (
-                  <div style={{ textAlign: 'center', margin: 'auto', color: '#849bb4', maxWidth: '520px', padding: '20px' }}>
-                    <div style={{ display: 'inline-flex', padding: '12px', borderRadius: '14px', background: 'rgba(7, 140, 255, 0.1)', border: '1px solid rgba(7, 140, 255, 0.25)', color: '#38bdf8', marginBottom: '14px' }}>
+                {messages.length === 0 && !isThinking && (
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', color: '#849bb4', maxWidth: '520px', margin: '0 auto', padding: '24px' }}>
+                    <div style={{ display: 'inline-flex', padding: '13px', borderRadius: '14px', background: 'rgba(7, 140, 255, 0.1)', border: '1px solid rgba(7, 140, 255, 0.25)', color: '#38bdf8', marginBottom: '14px' }}>
                       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                         <polyline points="14 2 14 8 20 8" />
@@ -738,9 +749,9 @@ export default function App() {
                         <line x1="16" y1="17" x2="8" y2="17" />
                       </svg>
                     </div>
-                    <b style={{ display: 'block', color: '#fff', fontSize: '18px' }}>Ready to redesign customer communications</b>
-                    <p style={{ fontSize: '14.5px', lineHeight: '1.65', marginTop: '10px' }}>
-                      Upload a communication file (PDF, DOCX, HTML, TXT) or paste a customer notice below to transform it into a clear, customer-friendly redesigned document while preserving every fact, deadline, and contractual obligation.
+                    <b style={{ display: 'block', color: '#fff', fontSize: '18px' }}>Start a new clarity redesign with CLARIA</b>
+                    <p style={{ fontSize: '14.5px', lineHeight: '1.65', marginTop: '10px', marginBottom: 0 }}>
+                      Attach a customer letter, overdue notice, or policy update — or paste text below — to rewrite it in an empathetic, plain-English layout while preserving every date, amount, and legal disclosure.
                     </p>
                   </div>
                 )}
